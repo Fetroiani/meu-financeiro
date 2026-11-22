@@ -28,7 +28,10 @@
 :root{color-scheme:light dark;--bg:light-dark(#fff,#050f1f);--ink:light-dark(#0b1a33,#e8f1fb);--mut:light-dark(#55627a,#9db0c8);--line:light-dark(#e2e8f0,#17304d);--card:light-dark(#fff,#0a1a30);--em:#00b4d8;--grad:linear-gradient(135deg,#00B4D8 0%,#00C896 100%);--gink:#04263a;--emd:light-dark(#00738c,#3ddbb4);--pos:light-dark(#007a5c,#2fe0b0);--pink:light-dark(#dff8f1,#0d2e3a);--pinkink:light-dark(#0b3d5c,#b8f3e2);--red:light-dark(#c62845,#ff7b92)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}[hidden]{display:none!important}
-html{overflow-x:clip}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:clip;padding-bottom:calc(84px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+html{overflow-x:clip;touch-action:manipulation}body,button,a,input,select,textarea,label{touch-action:manipulation}
+/* iPhone dá zoom sozinho ao tocar em campo com letra menor que 16px: em telas de toque, todo campo usa 16px */
+@media (pointer:coarse){input,select,textarea{font-size:16px!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:clip;padding-bottom:calc(84px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
 h1,h2,h3{margin:0;line-height:1.1;text-wrap:balance}
 h2{font-size:22px;font-weight:800}
 .wrap{max-width:1100px;margin:0 auto;padding:0 max(4vw,14px)}
@@ -385,7 +388,7 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.22-10';
+const VERSAO='2026.11.22-11';
 const IN={k:'receita',n:'Salário e Entradas',c:'#00a884'};
 const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS.find(c=>c.k==='extra'));
 const $=s=>document.querySelector(s);
