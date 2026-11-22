@@ -19,6 +19,7 @@
     assinaturas: ['ASSINATURA', 'MENSALIDADE', 'NETFLIX', 'SPOTIFY', 'DISNEY', 'HBO', 'MAX ', 'PRIME VIDEO', 'AMAZON PRIME', 'YOUTUBE',
       'DEEZER', 'GLOBOPLAY', 'PARAMOUNT', 'APPLE TV', 'ICLOUD', 'GOOGLE ONE', 'GOOGLE STORAGE', 'MICROSOFT 365', 'OFFICE 365',
       'ACADEMIA', 'SMART FIT', 'SMARTFIT', 'GYMPASS', 'WELLHUB', 'CRUNCHYROLL', 'CHATGPT', 'CLAUDE', 'PLANO MENSAL'],
+    combustivel: ['GASOLINA', 'ETANOL', 'ALCOOL HIDRATADO', 'DIESEL', 'GNV', 'COMBUSTIVEL', 'ABASTECIMENTO', 'ADITIVADA', 'POSTO '],
     contas: ['CONDOMINIO', 'TAXA CONDOMINIAL', 'COTA CONDOMINIAL', 'IPTU', 'CONTA DE AGUA', 'CONTA DE LUZ', 'CONTA DE GAS',
       'ENERGIA ELETRICA', 'FORNECIMENTO DE ENERGIA', 'CONSUMO DE ENERGIA', 'AGUA E ESGOTO', 'CONSUMO DE AGUA', 'SANEAMENTO',
       'GAS ENCANADO', 'GAS NATURAL', 'GAS CANALIZADO', 'BOTIJAO', 'GLP 13', 'RECARGA GAS'],
@@ -38,6 +39,7 @@
   };
   // Pistas pelo nome da loja: valem para os itens que não tiverem palavra-chave própria.
   const LOJA = {
+    combustivel: ['POSTO', 'AUTO POSTO', 'SHELL', 'IPIRANGA', 'PETROBRAS', 'BR DISTRIBUIDORA', 'VIBRA', 'RAIZEN', 'ALE COMBUSTIVEIS', 'COMBUSTIVEIS', 'SIM REDE DE POSTOS'],
     bares: ['BAR ', ' BAR', 'BOTECO', 'CHOPERIA', 'CHOPPERIA', 'RESTAURANTE', 'LANCHONETE', 'PIZZARIA', 'CHURRASCARIA', 'PUB ',
       'CERVEJARIA', 'BISTRO', 'CAFETERIA', 'PADARIA E CONFEITARIA', 'SORVETERIA', 'HAMBURGUERIA', 'SUSHI', 'TEMAKERIA', 'BURGER', 'OUTBACK', 'MC DONALDS', 'MCDONALDS'],
     vestuario: ['RENNER', 'C&A', 'C & A', 'RIACHUELO', 'MARISA', 'HERING', 'ZARA', 'CENTAURO', 'NETSHOES', 'DECATHLON', 'CALCADOS',
@@ -46,7 +48,7 @@
     mercado: ['SUPERMERCADO', 'SUPERMERCADOS', 'MERCADO', 'ATACAD', 'ASSAI', 'CARREFOUR', 'PAO DE ACUCAR', 'EXTRA ', 'DIA ', 'BIG ',
       'MAKRO', 'SAMS CLUB', 'HORTIFRUTI', 'SACOLAO', 'MERCEARIA', 'EMPORIO', 'FARMACIA', 'DROGARIA', 'DROGASIL', 'RAIA', 'PAGUE MENOS', 'PANIFICADORA', 'PADARIA']
   };
-  const ORDEM = ['contas', 'dolar', 'euro', 'investimentos', 'assinaturas', 'presentes', 'vestuario', 'bares', 'mercado'];
+  const ORDEM = ['combustivel', 'contas', 'dolar', 'euro', 'investimentos', 'assinaturas', 'presentes', 'vestuario', 'bares', 'mercado'];
 
   // Linhas que têm valor mas não são itens.
   const NAO_ITEM = /(SUB ?TOTAL|\bTOTAL\b|TROCO|DINHEIRO|CART[AÃ]O DE|CREDITO|CR[EÉ]DITO|D[EÉ]BITO|DEBITO|\bPIX\b|VALOR PAGO|VALOR A PAGAR|VL\.? ?PAGO|FORMA DE PAG|PAGAMENTO|TRIBUTO|IMPOSTO|LEI 12|ICMS|\bPIS\b|\bCOFINS\b|CNPJ|CPF|INSCRI|\bIE\b|\bIM\b|QTD\.? ?TOTAL|QTDE\.? ?TOTAL|ITENS|ACRESC|SALDO|PROTOCOLO|CHAVE|EXTRATO N|N[º°O]\.? ?\d{3,}|SERIE|VIA CONSUM|CONSUMIDOR|TEL[:. ]|FONE|ENDERE|\bRUA\b|\bAV\b)/;
@@ -68,14 +70,15 @@
 
   function lojaCat(loja) {
     const L = ' ' + norm(loja) + ' ';
-    for (const c of ['bares', 'vestuario', 'presentes', 'mercado']) if (LOJA[c].some(k => L.includes(k))) return c;
+    for (const c of ['combustivel', 'bares', 'vestuario', 'presentes', 'mercado']) if (LOJA[c].some(k => L.includes(k))) return c;
     return null;
   }
 
-  function categorizar(desc, loja, aprendido) {
+  function categorizar(desc, loja, aprendido, extra) {
     const chave = norm(desc).trim();
     if (aprendido && aprendido[chave]) return aprendido[chave];
     const n = ' ' + chave.replace(/[^A-Z0-9$€&]+/g, ' ') + ' ';      // palavras separadas por espaço
+    if (extra) for (const c in extra) if (extra[c].some(k => k && n.includes(' ' + norm(k).trim()))) return c;   // palavras-chave criadas por você
     const lc = lojaCat(loja);
     if (lc === 'bares') return 'bares';                   // bar ou restaurante: tudo é consumo fora
     for (const c of ORDEM) {
@@ -164,7 +167,7 @@
     return 0;
   }
 
-  function interpretar(texto, aprendido) {
+  function interpretar(texto, aprendido, extra) {
     const linhas = String(texto || '').replace(/(\d)\s*[\/']\s*,?\s*(\d{2})\b/g, '$1,$2').replace(/(\d)\s?,\s(\d{2})\b/g, '$1,$2').split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
     const loja = lerLoja(linhas);
     const conta = tipoConta(texto);
@@ -192,7 +195,7 @@
       itens.push({ descricao: d, valor: money(m[1]) });
     }
     // Desconto vai para a categoria do maior grupo.
-    itens.forEach(i => { if (!i.desconto) i.categoria = categorizar(i.descricao, loja, aprendido); });
+    itens.forEach(i => { if (!i.desconto) i.categoria = categorizar(i.descricao, loja, aprendido, extra); });
     const g = {}; itens.filter(i => !i.desconto).forEach(i => g[i.categoria] = (g[i.categoria] || 0) + i.valor);
     const maior = Object.keys(g).sort((a, b) => g[b] - g[a])[0] || 'extra';
     itens.forEach(i => { if (i.desconto) i.categoria = maior; delete i.desconto; });

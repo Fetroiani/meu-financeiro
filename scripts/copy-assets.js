@@ -12,3 +12,7 @@ for (const f of ['tesseract-core-lstm.wasm.js', 'tesseract-core-simd-lstm.wasm.j
   cp('tesseract.js-core/' + f, 'core/' + f);
 cp('@tesseract.js-data/por/4.0.0_best_int/por.traineddata.gz', 'lang/por.traineddata.gz');
 cp('jsqr/dist/jsQR.js', 'jsQR.js');
+cp('xlsx/dist/xlsx.full.min.js', 'xlsx.full.min.js');
+fs.mkdirSync(path.join(out, 'pdf'), { recursive: true });
+cp('pdfjs-dist/legacy/build/pdf.min.mjs', 'pdf/pdf.min.mjs');
+cp('pdfjs-dist/legacy/build/pdf.worker.min.mjs', 'pdf/pdf.worker.min.mjs');

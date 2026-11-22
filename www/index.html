@@ -27,7 +27,7 @@ h2{font-size:22px;font-weight:800}
 .wrap{max-width:1100px;margin:0 auto;padding:0 max(4vw,14px)}
 header.top{display:flex;align-items:center;gap:12px;padding:max(14px,env(safe-area-inset-top)) 0 14px;flex-wrap:wrap}
 header.top h1{font-size:22px;font-weight:800;flex:1}
-.sync{font-size:13px;color:var(--mut)}
+.sync{font-size:13px;color:var(--mut)}@media(max-width:430px){.sync{display:none}}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid var(--line);z-index:5;padding-bottom:env(safe-area-inset-bottom)}
 nav.tabs button{background:none;border:0;color:var(--mut);font:600 13px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:10px 4px 14px;min-height:60px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
 nav.tabs button svg{width:22px;height:22px}
@@ -116,6 +116,30 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 .lk-box{display:grid;gap:10px;width:100%}.lk-box input{text-align:center}
 .lk-box .btn{border-color:#fff}.lk-box .btn.ghost{color:#fff}
 .lkbtn{background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;min-height:40px;padding:0 12px;font:600 14px system-ui,sans-serif;cursor:pointer}
+.menu{background:none;border:0;color:var(--ink);width:44px;height:44px;border-radius:12px;display:grid;place-items:center;cursor:pointer;margin-left:-8px}
+.menu svg{width:26px;height:26px}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:min(330px,86vw);background:var(--bg);z-index:21;overflow:auto;padding:max(16px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));box-shadow:4px 0 30px rgba(0,0,0,.25);transform:translateX(-105%);transition:transform .22s ease}
+.drawer.on{transform:none}
+.drawer h3{font-size:13px;color:var(--mut);font-weight:700;margin:18px 4px 6px}
+.dhead{display:flex;align-items:center;gap:10px}.dhead img{width:40px;height:40px;border-radius:10px}.dhead b{font-size:20px;flex:1}
+.ditem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;width:100%;background:none;border:0;color:var(--ink);font:500 16px system-ui,-apple-system,sans-serif;text-align:left;padding:11px 6px;border-radius:10px;cursor:pointer;min-height:44px}
+.ditem:hover{background:var(--card)}.ditem small{color:var(--mut);font-size:13px;white-space:nowrap}
+.ditem.sub{padding-left:30px;font-size:15px}
+.ditem svg{width:20px;height:20px}
+.ver{font-size:12px;color:var(--mut);margin:18px 6px 0}
+.cm{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;background:var(--card)}
+.cm .l1{display:grid;grid-template-columns:48px 1fr auto;gap:8px;align-items:center}
+.cm input[type=color]{width:48px;height:46px;padding:2px;border-radius:10px}
+.subs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.subs .chip{display:inline-flex;gap:6px;align-items:center}
+.ftab{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
+.ftab td{border-bottom:1px solid var(--line);padding:6px 4px;vertical-align:middle}
+.ftab td.v{text-align:right;white-space:nowrap;font-weight:600}
+.ftab select{min-height:40px;padding:6px;font-size:14px}
+.ftab input[type=checkbox]{width:22px;height:22px;min-height:0}
+.ftab tr.off{opacity:.45}
+@media(max-width:600px){.ftab tr{display:grid;grid-template-columns:30px 44px minmax(0,1fr) auto;align-items:center;border-bottom:1px solid var(--line);padding:6px 0}.ftab td{border:0;padding:2px 4px}.ftab td:last-child{grid-column:2/-1}.ftab select{width:100%}}
 .empty{padding:26px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px;margin-top:12px}
 @media(max-width:700px){.box{grid-template-columns:1fr}.fig{min-height:220px}.bar{grid-template-columns:40px 1fr 84px}}
 @media(prefers-reduced-motion:no-preference){.meter i,.bar .t i{transition:width .5s ease}}
@@ -134,8 +158,22 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
     <button class="lk-link" id="lkLink">Esqueci meu PIN</button>
   </div>
 </div>
+<div class="scrim" id="scrim" hidden></div>
+<aside class="drawer" id="drawer" aria-label="Menu">
+  <div class="dhead"><img src="logo.png" alt=""><b>Meu Caixa</b><button class="icon" id="dClose" aria-label="Fechar menu">Fechar</button></div>
+  <h3 id="dMes">Categorias</h3>
+  <div id="dCats"></div>
+  <h3>Ferramentas</h3>
+  <button class="ditem" data-dv="cats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg><span>Personalizar categorias</span><small></small></button>
+  <button class="ditem" data-dv="cupom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg><span>Enviar fatura ou documento</span><small></small></button>
+  <button class="ditem" id="dXlsx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8l8 8M16 8l-8 8"/></svg><span>Baixar planilha Excel (.xlsx)</span><small></small></button>
+  <button class="ditem" data-dv="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Segurança e backup</span><small></small></button>
+  <button class="ditem" id="dLock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v9"/><path d="M6.3 7.5a8 8 0 1 0 11.4 0"/></svg><span>Bloquear agora</span><small></small></button>
+  <p class="ver" id="ver"></p>
+</aside>
 <div class="wrap">
 <header class="top">
+  <button class="menu" id="btnMenu" aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
   <h1>Meu Caixa</h1>
   <span class="sync" id="sync">Protegido com PIN</span><button class="lkbtn" id="btnLock" aria-label="Bloquear o app">Bloquear</button>
   <nav class="tabs" role="tablist">
@@ -168,11 +206,16 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   <input id="busca" type="search" placeholder="Buscar por descrição ou loja" style="margin-top:10px">
   <div class="sum"><span id="exCount"></span><span id="exSum"></span></div>
   <div class="list" id="lista"></div>
-  <details class="bk"><summary>Segurança</summary>
+</div>
+
+<div class="view" id="v-config">
+  <h2>Segurança e backup</h2>
+  <details class="bk" open><summary>Segurança</summary>
     <p class="note">Seus dados ficam só neste celular, criptografados (AES-256). Sem o seu PIN ou a sua biometria ninguém consegue lê-los. O app se bloqueia sozinho 1 minuto depois que você sai dele.</p>
+    <p class="note" id="bioNota"></p>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="secPin">Trocar PIN</button><button class="btn ghost" id="secBio" hidden></button></div>
   </details>
-  <details class="bk"><summary>Backup dos dados</summary>
+  <details class="bk" open><summary>Backup dos dados</summary>
     <p class="note">O backup sai criptografado, protegido pelo seu PIN atual. Guarde o texto (num e-mail ou nota) antes de trocar de celular. Para restaurar, cole o texto, informe o PIN que você usava quando fez o backup e toque em Restaurar.</p>
     <textarea id="bkTxt" aria-label="Texto do backup"></textarea>
     <input id="bkPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN do backup (se for outro)" style="margin-bottom:8px">
@@ -180,17 +223,36 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   </details>
 </div>
 
+<div class="view" id="v-cats">
+  <h2>Personalizar categorias</h2>
+  <p class="note">Mude nome, cor e palavras-chave (separadas por vírgula). As palavras-chave ajudam o app a separar sozinho os itens do cupom e da fatura. Use subpastas para separar, por exemplo, cada cartão de crédito.</p>
+  <div class="items" id="cmList"></div>
+  <h2 style="margin-top:22px;font-size:18px">Nova categoria</h2>
+  <form class="f" id="cmNova"><div class="cm"><div class="l1"><input type="color" id="cnCor" value="#0091ea" aria-label="Cor"><input id="cnNome" placeholder="Nome (ex.: Saúde, Pet, Escola)" required><button class="btn em" type="submit">Criar</button></div></div></form>
+</div>
+
 <div class="view" id="v-cupom">
-  <h2>Ler cupom ou nota fiscal</h2>
+  <h2>Ler cupom, nota, conta ou fatura</h2>
   <p class="note">Fotografe o cupom inteiro, reto, com boa luz e sem dobras. A leitura acontece no próprio celular, sem internet. Quando você troca a categoria de um item, o app aprende para a próxima vez.</p>
   <div class="drop" id="drop">
     <img id="prev" alt="Foto do cupom" hidden>
     <button class="btn" id="tirar">Tirar foto ou escolher imagem</button>
     <input id="foto" type="file" accept="image/*" capture="environment" hidden>
+    <button class="btn ghost" id="btnDoc">Enviar fatura ou documento</button>
+    <input id="doc" type="file" accept=".pdf,.csv,.tsv,.txt,.ofx,.qfx,.xlsx,.xls,.ods,image/*,application/pdf" hidden>
+    <span class="note" style="color:inherit">Aceita PDF, foto, CSV, OFX, Excel (.xlsx, .xls) e TXT</span>
     <button class="btn em" id="ler" disabled>Ler e separar itens</button>
   </div>
   <div id="cupomMsg"></div>
   <details class="bk" id="ocrBox" hidden><summary>Ver o texto que o app leu</summary><pre class="ocr" id="ocrTxt"></pre></details>
+  <div id="fat" hidden>
+    <h2 style="margin-top:20px" id="fatTit">Confira a fatura</h2>
+    <div class="two" style="margin-top:10px"><label>Cartão<select id="fatCartao"></select></label><label>Tipo<select id="fatTipo"><option value="fatura">Fatura de cartão</option><option value="extrato">Extrato do banco</option></select></label></div>
+    <p class="note">Desmarque o que não quer salvar. Pagamentos e estornos já vêm desmarcados. Itens sem categoria clara vão para Cartão de crédito.</p>
+    <div class="scroll"><table class="ftab" id="fatTab"></table></div>
+    <div class="sum"><span id="fatQtd"></span><span id="fatTot"></span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="fatCancel">Cancelar</button><button class="btn em" id="fatSalvar">Salvar no extrato</button></div>
+  </div>
   <div id="revisao" hidden>
     <h2 style="margin-top:20px">Confira antes de salvar</h2>
     <div class="two" style="margin-top:10px"><label>Loja<input id="rLoja"></label><label>Data<input id="rData" type="date"></label></div>
@@ -207,6 +269,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
     <label>Descrição<input id="fDesc" required placeholder="Ex.: Netflix, salário, almoço"></label>
     <div class="two"><label>Valor (R$)<input id="fVal" inputmode="decimal" required placeholder="0,00"></label><label>Data<input id="fData" type="date" required></label></div>
     <label id="fCatL">Categoria<select id="fCat"></select></label>
+    <label id="fSubL" hidden><span id="fSubT">Subpasta</span><select id="fSub"></select></label>
     <div class="two" id="fMoeda" hidden><label id="fMoedaL">Valor em US$<input id="fValM" inputmode="decimal" placeholder="0,00"></label><label>Cotação<input id="fCot" readonly tabindex="-1"></label></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" type="submit">Salvar</button><button class="btn ghost" type="button" id="fCancel" hidden>Cancelar edição</button></div>
   </form>
@@ -218,12 +281,18 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 <script src="vendor/tesseract.min.js"></script>
 <script src="cupom.js"></script>
 <script src="cofre.js"></script>
+<script src="extrato.js"></script>
+<script src="vendor/xlsx.full.min.js" defer></script>
 <script>
 {
-const CATS=[
- {k:'mercado',n:'Mercado',c:'#00a86b'},{k:'contas',n:'Conta de consumo',c:'#8a5a2b'},{k:'bares',n:'Bares',c:'#ff8a3d'},{k:'vestuario',n:'Vestuário',c:'#c2185b'},
+const DEF_CATS=[
+ {k:'mercado',n:'Mercado',c:'#00a86b'},{k:'contas',n:'Conta de consumo',c:'#8a5a2b'},{k:'combustivel',n:'Combustível',c:'#e53935'},
+ {k:'cartao',n:'Cartão de crédito',c:'#455a64',subs:[]},{k:'bares',n:'Bares',c:'#ff8a3d'},{k:'vestuario',n:'Vestuário',c:'#c2185b'},
  {k:'assinaturas',n:'Assinaturas',c:'#6d5bd0'},{k:'presentes',n:'Presentes',c:'#ff5c8a'},{k:'investimentos',n:'Investimentos',c:'#1e88e5'},
  {k:'dolar',n:'Dólar',c:'#2e7d32'},{k:'euro',n:'Euro',c:'#f2b705'},{k:'extra',n:'Extra',c:'#8d8f8e'}];
+const clone=o=>JSON.parse(JSON.stringify(o));
+let CATS=clone(DEF_CATS);
+const VERSAO='2026.11.22-3';
 const IN={k:'receita',n:'Entrada',c:'#00a86b'};
 const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS.find(c=>c.k==='extra'));
 const $=s=>document.querySelector(s);
@@ -233,6 +302,12 @@ const num=s=>{if(typeof s==='number')return s;s=String(s||'').trim().replace(/[^
 const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
 const ym=d=>d.slice(0,7);
 const uid=()=>'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const subNome=t=>{const c=CATS.find(x=>x.k===t.cat);const s=c&&c.subs&&c.subs.find(x=>x.k===t.sub);return s?s.n:''};
+const extraKW=()=>{const o={};CATS.forEach(c=>{if(c.kw&&c.kw.length)o[c.k]=c.kw});return o};
+function garantirCats(o){CATS=o&&Array.isArray(o.cats)&&o.cats.length?o.cats:clone(DEF_CATS);
+ for(const d of DEF_CATS)if(['combustivel','cartao'].includes(d.k)&&!CATS.some(c=>c.k===d.k)&&!(o&&o.semPadrao&&o.semPadrao.includes(d.k)))CATS.splice(Math.max(0,CATS.length-1),0,clone(d));
+ if(!CATS.some(c=>c.k==='extra'))CATS.push(clone(DEF_CATS.find(c=>c.k==='extra')))}
+let SEMPADRAO=[];
 
 /* ---------- armazenamento criptografado (Preferences no app, localStorage no navegador) ---------- */
 const CAP=window.Capacitor&&window.Capacitor.Plugins||{};const NATIVO=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
@@ -243,17 +318,17 @@ async function ler(k){if(Pref){try{return (await Pref.get({key:k})).value}catch(
 async function escrever(k,v){if(Pref){await Pref.set({key:k,value:v})}else{try{localStorage.setItem(k,v)}catch(e){}}}
 async function apagarK(k){if(Pref){try{await Pref.remove({key:k})}catch(e){}}try{localStorage.removeItem(k)}catch(e){}}
 let fila=Promise.resolve();
-function persist(){if(!CHAVE)return;const k=CHAVE,o={tx:TX,aprendido:APR};fila=fila.then(async()=>escrever(K_DADOS,await Cofre.cifrar(k,o))).catch(e=>toast('Erro ao salvar: '+e.message))}
+function persist(){if(!CHAVE)return;const k=CHAVE,o={v:3,tx:TX,aprendido:APR,cats:CATS,semPadrao:SEMPADRAO};fila=fila.then(async()=>escrever(K_DADOS,await Cofre.cifrar(k,o))).catch(e=>toast('Erro ao salvar: '+e.message))}
 async function put(t){const i=TX.findIndex(x=>x.id===t.id);i>=0?TX[i]=t:TX.push(t);render();persist()}
 async function del(id){TX=TX.filter(x=>x.id!==id);render();persist()}
-async function carregarDados(){const d=await ler(K_DADOS);if(d){const o=await Cofre.decifrar(CHAVE,d);TX=o.tx||[];APR=o.aprendido||{}}else{TX=[];APR={}}render()}
+async function carregarDados(){const d=await ler(K_DADOS);let o=null;if(d){o=await Cofre.decifrar(CHAVE,d);TX=o.tx||[];APR=o.aprendido||{};SEMPADRAO=o.semPadrao||[]}else{TX=[];APR={}}garantirCats(o);renderSelects();render()}
 async function migrarLegado(){let mudou=false;for(const k of LEGADO){let v=null;if(Pref)try{v=(await Pref.get({key:k})).value}catch(e){}if(!v)try{v=localStorage.getItem(k)}catch(e){}
  if(v){try{const o=JSON.parse(v);if(k===LEGADO[0]&&Array.isArray(o)){TX=o;mudou=true}else if(k===LEGADO[1]){APR=o;mudou=true}}catch(e){}}await apagarK(k)}if(mudou){persist();render()}}
 
 /* ---------- bloqueio: PIN + biometria ---------- */
 let modo='',buf='',pin1='',falhas=0,ate=0,saiu=0,naCamera=false;
 const lk=$('#lock');
-$('#pad').innerHTML=[1,2,3,4,5,6,7,8,9].map(n=>`<button data-n="${n}">${n}</button>`).join('')+'<button class="sm" id="pBio" aria-label="Entrar com biometria">Biometria</button><button data-n="0">0</button><button class="sm" id="pDel" aria-label="Apagar dígito">Apagar</button>';
+$('#pad').innerHTML=[1,2,3,4,5,6,7,8,9].map(n=>`<button data-n="${n}">${n}</button>`).join('')+'<button class="sm" id="pBio" aria-label="Entrar com Face ID ou digital">Face ID / digital</button><button data-n="0">0</button><button class="sm" id="pDel" aria-label="Apagar dígito">Apagar</button>';
 document.querySelectorAll('#pad [data-n]').forEach(b=>b.onclick=()=>digito(b.dataset.n));
 $('#pDel').onclick=()=>{buf=buf.slice(0,-1);pontos()};
 document.addEventListener('keydown',e=>{if(lk.hidden||!$('#lkBox').hidden)return;if(/^\d$/.test(e.key))digito(e.key);else if(e.key==='Backspace'){buf=buf.slice(0,-1);pontos()}});
@@ -262,9 +337,25 @@ function pontos(){document.querySelectorAll('#dots i').forEach((d,i)=>d.classLis
 function erro(m){lkMsg(m);const d=$('#dots');d.classList.remove('erro');void d.offsetWidth;d.classList.add('erro');buf='';pontos()}
 function telaPin(m,link){$('#lkBox').hidden=true;$('#pad').hidden=false;$('#dots').hidden=false;buf='';pontos();lkMsg(m);$('#lkLink').hidden=!link;$('#lkLink').textContent=link||'';lk.hidden=false}
 function caixa(html){$('#pad').hidden=true;$('#dots').hidden=true;$('#lkBox').innerHTML=html;$('#lkBox').hidden=false}
-async function bioLigada(){return !!BIO&&(await ler(K_BIO))==='1'}
-async function bioDisponivel(){if(!BIO)return false;try{return (await BIO.isAvailable({useFallback:false})).isAvailable}catch(e){return false}}
-async function atualizarBioBtn(){const on=await bioLigada();$('#pBio').disabled=!(modo==='abrir'&&on);const ok=await bioDisponivel();$('#secBio').hidden=!ok;$('#secBio').textContent=on?'Desligar biometria':'Entrar com biometria'}
+const K_WBIO='meucaixa.webbio';
+const wbio=()=>{try{return JSON.parse(localStorage.getItem(K_WBIO)||'null')}catch(e){return null}};
+const WA=!NATIVO&&!!window.PublicKeyCredential&&location.protocol==='https:';
+async function webBioDisponivel(){if(!WA)return false;try{return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()}catch(e){return false}}
+async function prfChave(out){return crypto.subtle.importKey('raw',out,{name:'AES-GCM'},false,['encrypt','decrypt'])}
+async function webBioGet(id,salt){const a=await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,allowCredentials:[{type:'public-key',id:Cofre.unb64(id)}],userVerification:'required',timeout:60000,extensions:{prf:{eval:{first:Cofre.unb64(salt)}}}}});
+ const r=a.getClientExtensionResults().prf;if(!r||!r.results||!r.results.first)throw new Error('sem-prf');return r.results.first}
+async function webBioLigar(){const salt=crypto.getRandomValues(new Uint8Array(32));
+ const cred=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Meu Caixa',id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'Meu Caixa',displayName:'Meu Caixa'},
+  pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},timeout:60000,extensions:{prf:{eval:{first:salt}}}}});
+ const ext=cred.getClientExtensionResults().prf;if(ext&&ext.enabled===false)throw new Error('sem-prf');
+ const id=Cofre.b64(cred.rawId);let out=ext&&ext.results&&ext.results.first;if(!out)out=await webBioGet(id,Cofre.b64(salt));
+ const iv=crypto.getRandomValues(new Uint8Array(12));const emb=await crypto.subtle.encrypt({name:'AES-GCM',iv},await prfChave(out),BRUTA);
+ localStorage.setItem(K_WBIO,JSON.stringify({id,salt:Cofre.b64(salt),iv:Cofre.b64(iv),dek:Cofre.b64(emb)}))}
+async function webBioAbrir(){const w=wbio();const out=await webBioGet(w.id,w.salt);
+ return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:Cofre.unb64(w.iv)},await prfChave(out),Cofre.unb64(w.dek)))}
+async function bioLigada(){if(!NATIVO)return !!wbio();return !!BIO&&(await ler(K_BIO))==='1'}
+async function bioDisponivel(){if(!NATIVO)return webBioDisponivel();if(!BIO)return false;try{return (await BIO.isAvailable({useFallback:false})).isAvailable}catch(e){return false}}
+async function atualizarBioBtn(){const on=await bioLigada();$('#pBio').disabled=!(modo==='abrir'&&on);const ok=await bioDisponivel();$('#secBio').hidden=!ok;$('#secBio').textContent=on?'Desligar Face ID / digital':'Entrar com Face ID / digital';$('#bioNota').textContent=ok?'':'Face ID / digital: este navegador não oferece. No iPhone, use o Safari (iOS 18 ou mais novo). No Android, use o Chrome.'}
 function digito(n){if(buf.length>=6||$('#pad').hidden)return;buf+=n;pontos();if(buf.length===6)setTimeout(processa,120)}
 async function processa(){const p=buf;
  if(modo==='criar'||modo==='novo'){if(Cofre.pinFraco(p))return erro('Esse PIN é fácil de adivinhar. Escolha outro.');pin1=p;modo=modo==='criar'?'confirmar':'novoConf';buf='';pontos();return lkMsg('Digite o PIN de novo para confirmar')}
@@ -276,23 +367,23 @@ async function processa(){const p=buf;
  if(modo==='abrir'){if(Date.now()<ate)return erro(`Muitas tentativas. Espere ${Math.ceil((ate-Date.now())/1000)} segundos.`);
   lkMsg('Abrindo…');try{const r=await Cofre.abrir(COFRE,p);CHAVE=r.chave;BRUTA=r.bruta;falhas=0;await carregarDados();liberar()}
   catch(e){falhas++;if(falhas>=5)ate=Date.now()+30000*2**(falhas-5);erro(falhas>=5?'PIN incorreto. Aguarde '+30*2**(falhas-5)+' segundos.':'PIN incorreto. Tente de novo.')}}}
-function perguntarBio(){lkMsg('Quer entrar com Face ID ou digital da próxima vez?');$('#lkLink').hidden=true;
+function perguntarBio(){lkMsg('Quer abrir o app com Face ID ou digital da próxima vez?');$('#lkLink').hidden=true;
  caixa('<button class="btn" id="bSim">Sim, usar biometria</button><button class="btn ghost" id="bNao">Agora não</button>');
  $('#bSim').onclick=async()=>{await ligarBio();liberar()};$('#bNao').onclick=liberar}
-async function ligarBio(){try{await BIO.setData({key:K_DEK,value:Cofre.b64(BRUTA),accessControl:2,title:'Ativar biometria',negativeButtonText:'Cancelar'});await escrever(K_BIO,'1');toast('Biometria ligada')}catch(e){toast('Não foi possível ligar a biometria')}atualizarBioBtn()}
-async function desligarBio(){try{await BIO.deleteData({key:K_DEK})}catch(e){}await escrever(K_BIO,'0');toast('Biometria desligada');atualizarBioBtn()}
-async function tentarBio(){if(!(await bioLigada()))return;try{const r=await BIO.getSecureData({key:K_DEK,reason:'Abrir o Meu Caixa',title:'Meu Caixa',subtitle:'Confirme que é você',negativeButtonText:'Usar PIN'});
+async function ligarBio(){if(!NATIVO){try{await webBioLigar();toast('Face ID / digital ligado')}catch(e){toast(String(e.message).includes('sem-prf')?'Este celular ainda não permite Face ID / digital em apps de navegador. Continue usando o PIN.':'Biometria não ativada')}atualizarBioBtn();return}try{await BIO.setData({key:K_DEK,value:Cofre.b64(BRUTA),accessControl:2,title:'Ativar biometria',negativeButtonText:'Cancelar'});await escrever(K_BIO,'1');toast('Biometria ligada')}catch(e){toast('Não foi possível ligar a biometria')}atualizarBioBtn()}
+async function desligarBio(){if(!NATIVO){localStorage.removeItem(K_WBIO);toast('Biometria desligada');atualizarBioBtn();return}try{await BIO.deleteData({key:K_DEK})}catch(e){}await escrever(K_BIO,'0');toast('Biometria desligada');atualizarBioBtn()}
+async function tentarBio(){if(!(await bioLigada()))return;if(!NATIVO){try{lkMsg('Confirme com Face ID ou digital…');BRUTA=await webBioAbrir();CHAVE=await Cofre.importar(BRUTA);await carregarDados();liberar()}catch(e){lkMsg(e&&e.name==='NotAllowedError'?'Toque em Biometria ou digite seu PIN':'Digite seu PIN')}return}try{const r=await BIO.getSecureData({key:K_DEK,reason:'Abrir o Meu Caixa',title:'Meu Caixa',subtitle:'Confirme que é você',negativeButtonText:'Usar PIN'});
  BRUTA=Cofre.unb64(r.value);CHAVE=await Cofre.importar(BRUTA);await carregarDados();liberar()}
  catch(e){if(String(e.code)==='21'){await escrever(K_BIO,'0');atualizarBioBtn();lkMsg('A biometria mudou neste celular. Entre com o PIN e ligue de novo em Segurança.')}else lkMsg('Digite seu PIN')}}
 $('#pBio').onclick=tentarBio;
 function liberar(){lk.hidden=true;$('#lkBox').hidden=true;modo='';buf='';pontos();render();atualizarBioBtn()}
-function bloquear(){CHAVE=null;BRUTA=null;TX=[];APR={};render();modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
+function bloquear(){fecharMenu();CHAVE=null;BRUTA=null;TX=[];APR={};CATS=clone(DEF_CATS);render();modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
 $('#btnLock').onclick=bloquear;
 $('#lkLink').onclick=()=>{if(modo==='novo'||modo==='novoConf'){lk.hidden=true;modo='';return}
  lkMsg('Sem o PIN, ninguém consegue abrir os dados, nem nós. Você pode apagar tudo neste celular e começar de novo. Depois, se tiver um backup, é só restaurar.');$('#lkLink').hidden=true;
  caixa('<input id="rsTxt" placeholder="Digite APAGAR para confirmar" autocomplete="off"><button class="btn" id="rsOk">Apagar tudo e recomeçar</button><button class="btn ghost" id="rsNo">Voltar</button>');
  $('#rsNo').onclick=()=>telaPin('Digite seu PIN','Esqueci meu PIN');
- $('#rsOk').onclick=async()=>{if($('#rsTxt').value.trim().toUpperCase()!=='APAGAR')return;for(const k of [K_COFRE,K_DADOS,K_BIO])await apagarK(k);if(BIO)try{await BIO.deleteData({key:K_DEK})}catch(e){}
+ $('#rsOk').onclick=async()=>{if($('#rsTxt').value.trim().toUpperCase()!=='APAGAR')return;try{localStorage.removeItem(K_WBIO)}catch(e){}for(const k of [K_COFRE,K_DADOS,K_BIO])await apagarK(k);if(BIO)try{await BIO.deleteData({key:K_DEK})}catch(e){}
   COFRE=null;modo='criar';telaPin('Crie um PIN de 6 dígitos para proteger seus dados')}};
 $('#secPin').onclick=()=>{modo='novo';telaPin('Digite o novo PIN de 6 dígitos','Cancelar')};
 $('#secBio').onclick=async()=>{(await bioLigada())?desligarBio():ligarBio()};
@@ -303,10 +394,19 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden){saiu=Date.
  else{modo='criar';telaPin('Crie um PIN de 6 dígitos para proteger seus dados');atualizarBioBtn()}})();
 
 /* ---------- navegação ---------- */
-function go(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+function go(v){fecharMenu();document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));
  if(v==='inicio')requestAnimationFrame(drawPie);window.scrollTo(0,0)}
-document.querySelectorAll('[data-v],[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.v||b.dataset.go));
+document.querySelectorAll('[data-v],[data-go],[data-dv]').forEach(b=>b.onclick=()=>go(b.dataset.v||b.dataset.go||b.dataset.dv));
+function abrirMenu(){renderMenu();$('#drawer').classList.add('on');$('#scrim').hidden=false}
+function fecharMenu(){$('#drawer').classList.remove('on');$('#scrim').hidden=true}
+$('#btnMenu').onclick=abrirMenu;$('#dClose').onclick=fecharMenu;$('#scrim').onclick=fecharMenu;$('#dLock').onclick=()=>bloquear();
+$('#ver').textContent='Versão '+VERSAO+' · atualiza sozinho ao abrir';
+function renderMenu(){const pc=porCat(mes);$('#dMes').textContent='Categorias · '+mesNome(mes);
+ $('#dCats').innerHTML=`<button class="ditem" data-mf="todas"><span class="dot" style="background:var(--ink)"></span><span>Extrato completo</span><small>${TX.length}</small></button>`+
+  CATS.map(c=>`<button class="ditem" data-mf="${c.k}"><span class="dot" style="background:${c.c}"></span><span>${esc(c.n)}</span><small>${brl(pc[c.k]||0)}</small></button>`+
+   (c.subs||[]).map(su=>{const v=TX.filter(t=>t.cat===c.k&&t.sub===su.k&&ym(t.data)===mes&&t.tipo!=='receita').reduce((a,t)=>a+t.valor,0);return`<button class="ditem sub" data-mf="${c.k}" data-ms="${su.k}"><span class="dot" style="background:${c.c};opacity:.55"></span><span>${esc(su.n)}</span><small>${brl(v)}</small></button>`}).join('')).join('');
+ document.querySelectorAll('[data-mf]').forEach(b=>b.onclick=()=>{filtro=b.dataset.mf;subFiltro=b.dataset.ms||'';go('extrato');render()})}
 
 /* ---------- início ---------- */
 let mes=ym(today());
@@ -328,16 +428,16 @@ function drawPie(){const s=$('#pie'),W=s.clientWidth,H=s.clientHeight;if(!W)retu
 new ResizeObserver(drawPie).observe($('#pie'));
 
 /* ---------- extrato ---------- */
-let filtro='todas';
-function renderChips(){$('#fchips').innerHTML=[{k:'todas',n:'Todas'},IN,...CATS].map(c=>`<button class="chip" data-f="${c.k}" aria-pressed="${filtro===c.k}">${c.n}</button>`).join('');
- document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;render()})}
+let filtro='todas',subFiltro='';
+function renderChips(){$('#fchips').innerHTML=[{k:'todas',n:'Todas'},IN,...CATS].map(c=>`<button class="chip" data-f="${c.k}" aria-pressed="${filtro===c.k}">${esc(c.n)}${filtro===c.k&&subFiltro?' › '+esc(((c.subs||[]).find(x=>x.k===subFiltro)||{}).n||''):''}</button>`).join('');
+ document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;subFiltro='';render()})}
 $('#busca').oninput=()=>render();
 function renderLista(){const q=$('#busca').value.toLowerCase();
- const l=TX.filter(t=>filtro==='todas'||(filtro==='receita'?t.tipo==='receita':t.cat===filtro&&t.tipo!=='receita')).filter(t=>!q||(t.desc+' '+(t.loja||'')).toLowerCase().includes(q)).sort((a,b)=>b.data.localeCompare(a.data)||(b.ts||0)-(a.ts||0));
+ const l=TX.filter(t=>filtro==='todas'||(filtro==='receita'?t.tipo==='receita':t.cat===filtro&&t.tipo!=='receita'&&(!subFiltro||t.sub===subFiltro))).filter(t=>!q||(t.desc+' '+(t.loja||'')).toLowerCase().includes(q)).sort((a,b)=>b.data.localeCompare(a.data)||(b.ts||0)-(a.ts||0));
  const s=l.reduce((a,t)=>a+(t.tipo==='receita'?t.valor:-t.valor),0);
  $('#exCount').textContent=l.length+(l.length===1?' lançamento':' lançamentos');$('#exSum').textContent='Saldo: '+brl(s);
  $('#lista').innerHTML=l.length?l.map(t=>{const c=cat(t.tipo==='receita'?'receita':t.cat);const dd=t.data.split('-').reverse().join('/');
-  const its=t.itens?.length?t.itens.map(i=>i.d).filter(Boolean).join(', '):'';const extra=[dd,c.n,t.origem==='cupom'?'':t.loja,t.moeda?`${t.moeda} ${t.valorMoeda.toLocaleString('pt-BR',{minimumFractionDigits:2})}`:'',its.length>70?its.slice(0,68)+'…':its].filter(Boolean).map(esc).join(' · ');
+  const its=t.itens?.length?t.itens.map(i=>i.d).filter(Boolean).join(', '):'';const extra=[dd,c.n+(subNome(t)?' › '+subNome(t):''),t.cartao&&t.cat!=='cartao'?'Cartão '+t.cartao:'',t.origem==='cupom'?'':t.loja,t.moeda?`${t.moeda} ${t.valorMoeda.toLocaleString('pt-BR',{minimumFractionDigits:2})}`:'',its.length>70?its.slice(0,68)+'…':its].filter(Boolean).map(esc).join(' · ');
   return`<div class="row"><span class="dot" style="background:${c.c}"></span><span class="d">${esc(t.desc)}</span><span class="v ${t.tipo==='receita'?'in':''}">${t.tipo==='receita'?'+':'−'} ${brl(t.valor)}</span><small>${extra}</small><span class="act"><button class="icon" data-ed="${t.id}">Editar</button><button class="icon" data-del="${t.id}">Apagar</button></span></div>`}).join(''):`<div class="empty">Nada por aqui. Lance um gasto ou leia um cupom.</div>`;
  document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const t=TX.find(x=>x.id===b.dataset.del);del(t.id);toast('Lançamento apagado',()=>put(t))});
  document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>editar(TX.find(x=>x.id===b.dataset.ed)))}
@@ -350,26 +450,38 @@ function render(){const doMes=TX.filter(t=>ym(t.data)===mes);
  $('#saldoTot').textContent='Saldo acumulado: '+brl(tot);
  const pc=porCat(mes),max=Math.max(1,...Object.values(pc)),ant=porCat(shift(mes,-1));
  $('#cats').innerHTML=CATS.map(c=>{const v=pc[c.k]||0,n=doMes.filter(t=>t.cat===c.k&&t.tipo!=='receita').length,d=v-(ant[c.k]||0);
-  return`<button class="cat" data-c="${c.k}"><span class="dot" style="background:${c.c}"></span><b>${c.n}</b><span class="v">${brl(v)}</span><small>${n} lanç.${ant[c.k]||v?` · ${d>=0?'+':'−'}${brl(Math.abs(d))} vs. mês anterior`:''}</small><span class="meter"><i style="width:${v/max*100}%;background:${c.c}"></i></span></button>`}).join('');
- document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{filtro=b.dataset.c;go('extrato');render()});
+  return`<button class="cat" data-c="${c.k}"><span class="dot" style="background:${c.c}"></span><b>${esc(c.n)}</b><span class="v">${brl(v)}</span><small>${n} lanç.${ant[c.k]||v?` · ${d>=0?'+':'−'}${brl(Math.abs(d))} vs. mês anterior`:''}</small><span class="meter"><i style="width:${v/max*100}%;background:${c.c}"></i></span></button>`}).join('');
+ document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{filtro=b.dataset.c;subFiltro='';go('extrato');render()});
  const ms=[...Array(6)].map((_,i)=>shift(mes,i-5)),vals=ms.map(m=>porCat(m)),mx=Math.max(1,...vals.map(o=>Object.values(o).reduce((a,b)=>a+b,0)));
  $('#bars').innerHTML=ms.map((m,i)=>{const o=vals[i],s=Object.values(o).reduce((a,b)=>a+b,0);return`<div class="bar"><span>${new Date(m+'-15T12:00').toLocaleDateString('pt-BR',{month:'short'}).replace('.','')}</span><span class="t">${CATS.filter(c=>o[c.k]).map(c=>`<i title="${c.n}: ${brl(o[c.k])}" style="width:${o[c.k]/mx*100}%;background:${c.c}"></i>`).join('')}</span><span class="n">${brl(s)}</span></div>`}).join('');
- renderChips();renderLista();drawPie()}
+ renderChips();renderLista();drawPie();if($('#drawer').classList.contains('on'))renderMenu()}
 
 /* ---------- lançamento manual ---------- */
 let tipo='despesa',editId=null;const COT={dolar:['USD','US$'],euro:['EUR','€']};
-$('#fCat').innerHTML=CATS.map(c=>`<option value="${c.k}">${c.n}</option>`).join('');
+function opcoesCat(sel){return CATS.map(c=>`<option value="${c.k}" ${c.k===sel?'selected':''}>${esc(c.n)}</option>`).join('')}
+function renderSelects(){const v=$('#fCat').value;$('#fCat').innerHTML=opcoesCat(v||'mercado');subUI()}
+function subUI(sel){const c=CATS.find(x=>x.k===$('#fCat').value);const on=tipo==='despesa'&&c&&(c.subs&&c.subs.length||c.k==='cartao');$('#fSubL').hidden=!on;if(!on)return;
+ $('#fSubT').textContent=c.k==='cartao'?'Qual cartão':'Subpasta';
+ $('#fSub').innerHTML=(c.k==='cartao'?'':'<option value="">Nenhuma</option>')+(c.subs||[]).map(su=>`<option value="${su.k}" ${su.k===sel?'selected':''}>${esc(su.n)}</option>`).join('')+'<option value="+">+ Criar nova…</option>';
+ if(c.k==='cartao'&&!(c.subs||[]).length)$('#fSub').value='+'}
+function novaSub(catK,nome){const c=CATS.find(x=>x.k===catK);if(!c||!nome)return null;c.subs=c.subs||[];const ex=c.subs.find(x=>x.n.toLowerCase()===nome.toLowerCase());if(ex)return ex.k;const k='s'+Date.now().toString(36);c.subs.push({k,n:nome});persist();return k}
+$('#fSub').onchange=()=>{if($('#fSub').value!=='+')return;const c=CATS.find(x=>x.k===$('#fCat').value);
+ caixaTexto(c.k==='cartao'?'Nome do cartão (ex.: Nubank, Itaú Visa)':'Nome da subpasta',nome=>{const k=novaSub(c.k,nome);subUI(k||'')})}
+function caixaTexto(rot,ok){const d=document.createElement('div');d.className='cm';d.style.marginTop='8px';d.innerHTML=`<label>${esc(rot)}<input id="ctx"></label><div style="display:flex;gap:8px"><button type="button" class="btn em" id="ctxOk">Criar</button><button type="button" class="btn ghost" id="ctxNo">Cancelar</button></div>`;
+ $('#fSubL').after(d);$('#ctx').focus();$('#ctxOk').onclick=()=>{const v=$('#ctx').value.trim();d.remove();ok(v)};$('#ctxNo').onclick=()=>{d.remove();ok('')}}
+renderSelects();
 document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>setTipo(b.dataset.t));
-function setTipo(t){tipo=t;document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));$('#fCatL').hidden=t==='receita';moedaUI()}
+function setTipo(t){tipo=t;document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));$('#fCatL').hidden=t==='receita';moedaUI();subUI()}
 function moedaUI(){const m=COT[$('#fCat').value];const on=tipo==='despesa'&&!!m;$('#fMoeda').hidden=!on;if(on){$('#fMoedaL').firstChild.textContent='Valor em '+m[1];calcCot()}}
 function calcCot(){const r=num($('#fVal').value),f=num($('#fValM').value);$('#fCot').value=r&&f?'R$ '+(r/f).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4}):'—'}
-$('#fCat').onchange=moedaUI;$('#fVal').oninput=calcCot;$('#fValM').oninput=calcCot;
+$('#fCat').onchange=()=>{moedaUI();subUI()};$('#fVal').oninput=calcCot;$('#fValM').oninput=calcCot;
 function limpar(){editId=null;$('#form').reset();$('#fData').value=today();$('#fTitle').textContent='Novo lançamento';$('#fCancel').hidden=true;setTipo('despesa')}
-function editar(t){limpar();editId=t.id;setTipo(t.tipo);$('#fDesc').value=t.desc;$('#fVal').value=t.valor.toFixed(2).replace('.',',');$('#fData').value=t.data;if(t.cat)$('#fCat').value=t.cat;if(t.valorMoeda)$('#fValM').value=String(t.valorMoeda).replace('.',',');moedaUI();$('#fTitle').textContent='Editar lançamento';$('#fCancel').hidden=false;go('novo')}
+function editar(t){limpar();editId=t.id;setTipo(t.tipo);$('#fDesc').value=t.desc;$('#fVal').value=t.valor.toFixed(2).replace('.',',');$('#fData').value=t.data;if(t.cat)$('#fCat').value=t.cat;subUI(t.sub);if(t.valorMoeda)$('#fValM').value=String(t.valorMoeda).replace('.',',');moedaUI();$('#fTitle').textContent='Editar lançamento';$('#fCancel').hidden=false;go('novo')}
 $('#fCancel').onclick=()=>{limpar();go('extrato')};
 $('#form').onsubmit=e=>{e.preventDefault();const v=num($('#fVal').value);if(v<=0){flash('Informe um valor maior que zero.');return}
  const old=TX.find(x=>x.id===editId)||{};const c=tipo==='receita'?null:$('#fCat').value;
  const t={...old,id:editId||uid(),ts:old.ts||Date.now(),tipo,desc:$('#fDesc').value.trim(),valor:v,data:$('#fData').value,cat:c,origem:old.origem||'manual'};
+ const sv=$('#fSubL').hidden?'':$('#fSub').value;if(sv&&sv!=='+')t.sub=sv;else delete t.sub;if(c==='cartao'&&t.sub)t.cartao=subNome(t);
  if(c&&COT[c]&&num($('#fValM').value)){t.moeda=COT[c][0];t.valorMoeda=num($('#fValM').value)}else{delete t.moeda;delete t.valorMoeda}
  put(t);const wasEdit=!!editId;limpar();if(wasEdit)go('extrato');toast(wasEdit?'Alterado':'Salvo: '+t.desc+' '+brl(v))};
 limpar();
@@ -405,7 +517,7 @@ $('#ler').onclick=async()=>{if(!foto)return;const b=$('#ler');b.disabled=true;b.
  progresso=m=>{if(m.status==='recognizing text')b.textContent='Lendo o cupom… '+Math.round(m.progress*100)+'%';else if(/load|init/.test(m.status))b.textContent='Preparando a leitura…'};
  cupomMsg('Lendo os itens no próprio celular. Na primeira vez leva um pouco mais.');
  try{const texto=await ocr(foto);$('#ocrTxt').textContent=texto;$('#ocrBox').hidden=false;
-  const j=Cupom.interpretar(texto,APR);
+  const j=Cupom.interpretar(texto,APR,extraKW());
   if(!j.itens.length){cupomMsg('Não encontrei itens com valor nesta foto. Tente outra foto mais perto e com mais luz, ou preencha abaixo.',true);j.itens=[{descricao:'',valor:0,categoria:'mercado'}];revisar(j,true);return}
   revisar(j)}
  catch(e){cupomMsg('Não consegui ler este cupom ('+esc(e.message||e)+'). Tente de novo ou lance à mão.',true)}
@@ -415,7 +527,7 @@ function revisar(j,manual){rev=(j.itens||[]).map(i=>({d:String(i.descricao||''),
  if(!manual){const s=rev.reduce((a,i)=>a+i.v,0);const dif=j.total&&Math.abs(s-j.total)>.05;const ch=Cupom.lerQR(qr);
   cupomMsg(j.conta?`Identifiquei uma <b>conta de ${esc(j.conta.toLowerCase())}</b>${j.total?' de '+brl(num(j.total)):''}${j.data?', vencimento '+j.data.split('-').reverse().join('/'):''}. Confira o valor antes de salvar.`:`Encontrei ${rev.length} itens${j.total?' · total do cupom '+brl(num(j.total)):''}.${dif?' <b>A soma dos itens ('+brl(s)+') difere do total</b>: confira os valores, a foto pode ter cortado alguma linha.':''} Toque na categoria para trocar.${ch?'<br>QR da NFC-e lido. Chave: '+ch.replace(/(\d{4})/g,'$1 '):''}`)}
  $('#revisao').hidden=false;renderRev()}
-function renderRev(){$('#rItens').innerHTML=rev.map((i,n)=>`<div class="item"><input class="desc" data-i="${n}" data-k="d" value="${esc(i.d)}" placeholder="Item" aria-label="Descrição"><select data-i="${n}" data-k="c" aria-label="Categoria">${CATS.map(c=>`<option value="${c.k}" ${c.k===i.c?'selected':''}>${c.n}</option>`).join('')}</select><input class="val" data-i="${n}" data-k="v" inputmode="decimal" value="${i.v.toFixed(2).replace('.',',')}" aria-label="Valor"></div>`).join('');
+function renderRev(){$('#rItens').innerHTML=rev.map((i,n)=>`<div class="item"><input class="desc" data-i="${n}" data-k="d" value="${esc(i.d)}" placeholder="Item" aria-label="Descrição"><select data-i="${n}" data-k="c" aria-label="Categoria">${opcoesCat(i.c)}</select><input class="val" data-i="${n}" data-k="v" inputmode="decimal" value="${i.v.toFixed(2).replace('.',',')}" aria-label="Valor"></div>`).join('');
  document.querySelectorAll('#rItens [data-i]').forEach(el=>el.onchange=()=>{const i=rev[el.dataset.i];i[el.dataset.k]=el.dataset.k==='v'?num(el.value):el.value;resumoRev()});resumoRev()}
 function resumoRev(){const g={};rev.forEach(i=>g[i.c]=(g[i.c]||0)+i.v);$('#rTot').textContent='Total '+brl(rev.reduce((a,i)=>a+i.v,0));
  $('#rTotCats').textContent=Object.entries(g).map(([k,v])=>cat(k).n+' '+brl(v)).join(' · ')}
@@ -426,13 +538,110 @@ $('#rSalvar').onclick=()=>{const g={};rev.filter(i=>i.v).forEach(i=>(g[i.c]=g[i.
  toast('Cupom salvo em '+ks.length+(ks.length>1?' categorias':' categoria'));rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');mes=ym(data);go('inicio');render()};
 
 /* ---------- backup ---------- */
-$('#bkCopy').onclick=async()=>{if(!CHAVE)return;const t=JSON.stringify({app:'meucaixa',v:2,cofre:COFRE,dados:await Cofre.cifrar(CHAVE,{tx:TX,aprendido:APR})});$('#bkTxt').value=t;try{await navigator.clipboard.writeText(t);toast('Backup criptografado copiado')}catch(e){$('#bkTxt').select();toast('Selecione o texto e copie')}};
+$('#bkCopy').onclick=async()=>{if(!CHAVE)return;const t=JSON.stringify({app:'meucaixa',v:2,cofre:COFRE,dados:await Cofre.cifrar(CHAVE,{tx:TX,aprendido:APR,cats:CATS})});$('#bkTxt').value=t;try{await navigator.clipboard.writeText(t);toast('Backup criptografado copiado')}catch(e){$('#bkTxt').select();toast('Selecione o texto e copie')}};
 $('#bkLoad').onclick=async()=>{let o;try{const j=JSON.parse($('#bkTxt').value);
   if(j.v===2){try{o=await Cofre.decifrar(CHAVE,j.dados)}catch(e){const p=$('#bkPin').value.trim();if(!p){toast('Informe o PIN usado quando o backup foi feito');return}
    try{const r=await Cofre.abrir(j.cofre,p);o=await Cofre.decifrar(r.chave,j.dados)}catch(e){toast('PIN do backup incorreto');return}}}
   else o={tx:j.tx,aprendido:j.aprendido};
   if(!Array.isArray(o.tx))throw 0}catch(e){toast('Texto de backup inválido');return}
- const antes=TX,antesA=APR;TX=o.tx;APR=o.aprendido||APR;persist();render();$('#bkPin').value='';toast(TX.length+' lançamentos restaurados',()=>{TX=antes;APR=antesA;persist();render()})};
+ const antes=TX,antesA=APR,antesC=CATS;TX=o.tx;APR=o.aprendido||APR;if(o.cats)garantirCats(o);renderSelects();persist();render();$('#bkPin').value='';toast(TX.length+' lançamentos restaurados',()=>{TX=antes;APR=antesA;CATS=antesC;renderSelects();persist();render()})};
+
+/* ---------- personalizar categorias ---------- */
+const PAL=['#0091ea','#7cb342','#ff7043','#ab47bc','#26a69a','#ec407a','#5c6bc0','#ffa000','#8d6e63','#00acc1'];
+function renderCM(){$('#cmList').innerHTML=CATS.map((c,i)=>`<div class="cm" data-ci="${i}">
+ <div class="l1"><input type="color" data-f="c" value="${c.c}" aria-label="Cor de ${esc(c.n)}"><input data-f="n" value="${esc(c.n)}" aria-label="Nome"><span style="display:flex;gap:2px"><button class="icon" data-up="${i}" aria-label="Subir">↑</button>${c.k==='extra'?'':`<button class="icon" data-rm="${i}">Apagar</button>`}</span></div>
+ <input data-f="kw" value="${esc((c.kw||[]).join(', '))}" placeholder="Palavras-chave (ex.: drogaria, farmácia)" aria-label="Palavras-chave">
+ <div class="subs">${(c.subs||[]).map((su,j)=>`<span class="chip">${esc(su.n)}<button class="icon" style="min-width:28px;min-height:28px" data-rs="${i}:${j}" aria-label="Remover ${esc(su.n)}">×</button></span>`).join('')}<button class="chip" data-as="${i}">+ ${c.k==='cartao'?'Cartão':'Subpasta'}</button></div></div>`).join('');
+ document.querySelectorAll('#cmList [data-f]').forEach(el=>el.onchange=()=>{const c=CATS[el.closest('[data-ci]').dataset.ci];const f=el.dataset.f;
+  if(f==='kw')c.kw=el.value.split(',').map(x=>x.trim()).filter(Boolean);else if(f==='n'){if(!el.value.trim())return renderCM();c.n=el.value.trim()}else c[f]=el.value;salvarCats()});
+ document.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const i=+b.dataset.up;if(i<1)return;[CATS[i-1],CATS[i]]=[CATS[i],CATS[i-1]];salvarCats();renderCM()});
+ document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const i=+b.dataset.rm,c=CATS[i];const afet=TX.filter(t=>t.cat===c.k);const antesT=clone(TX),antesC=clone(CATS),antesS=SEMPADRAO.slice();
+  afet.forEach(t=>{t.cat='extra';delete t.sub});CATS.splice(i,1);if(DEF_CATS.some(d=>d.k===c.k))SEMPADRAO.push(c.k);salvarCats();renderCM();
+  toast(`"${c.n}" apagada${afet.length?'; '+afet.length+' lançamento(s) foram para Extra':''}`,()=>{TX=antesT;CATS=antesC;SEMPADRAO=antesS;salvarCats();renderCM()})});
+ document.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{const [i,j]=b.dataset.rs.split(':').map(Number);const c=CATS[i],su=c.subs[j];c.subs.splice(j,1);TX.forEach(t=>{if(t.cat===c.k&&t.sub===su.k)delete t.sub});salvarCats();renderCM();toast(`Subpasta "${su.n}" removida`)});
+ document.querySelectorAll('[data-as]').forEach(b=>b.onclick=()=>{const c=CATS[+b.dataset.as];const inp=document.createElement('input');inp.placeholder=c.k==='cartao'?'Nome do cartão e Enter':'Nome da subpasta e Enter';inp.style.maxWidth='240px';b.replaceWith(inp);inp.focus();
+  const ok=()=>{const v=inp.value.trim();if(v)novaSub(c.k,v);salvarCats();renderCM()};inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok()}};inp.onblur=ok})}
+function salvarCats(){persist();renderSelects();render()}
+$('#cmNova').onsubmit=e=>{e.preventDefault();const n=$('#cnNome').value.trim();if(!n)return;CATS.splice(CATS.length-1,0,{k:'c'+Date.now().toString(36),n,c:$('#cnCor').value,kw:[],subs:[]});
+ $('#cnNome').value='';$('#cnCor').value=PAL[CATS.length%PAL.length];salvarCats();renderCM();toast('Categoria "'+n+'" criada')};
+document.querySelector('[data-dv="cats"]').addEventListener('click',renderCM);
+
+/* ---------- enviar fatura ou documento ---------- */
+let FAT=[];
+$('#btnDoc').onclick=()=>$('#doc').click();
+$('#doc').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(f)await abrirDocumento(f)};
+const ext=n=>(String(n).toLowerCase().match(/\.([a-z0-9]+)$/)||[])[1]||'';
+let pdfjs=null;
+async function textoPDF(f){if(!pdfjs){pdfjs=await import(new URL('vendor/pdf/pdf.min.mjs',location.href).href);pdfjs.GlobalWorkerOptions.workerSrc=new URL('vendor/pdf/pdf.worker.min.mjs',location.href).href}
+ const doc=await pdfjs.getDocument({data:new Uint8Array(await f.arrayBuffer()),isEvalSupported:false}).promise;let out='';
+ for(let p=1;p<=Math.min(doc.numPages,30);p++){const pg=await doc.getPage(p);const tc=await pg.getTextContent();const linhas={};
+  tc.items.forEach(it=>{const y=Math.round(it.transform[5]/3);(linhas[y]=linhas[y]||[]).push(it)});
+  out+=Object.keys(linhas).sort((a,b)=>b-a).map(y=>linhas[y].sort((a,b)=>a.transform[4]-b.transform[4]).map(i=>i.str).join(' ')).join('\n')+'\n'}
+ if(out.replace(/\s/g,'').length>40)return out;
+ // PDF escaneado (só imagem): desenha as páginas e lê com OCR
+ let t='';for(let p=1;p<=Math.min(doc.numPages,4);p++){const pg=await doc.getPage(p);const vp=pg.getViewport({scale:2});const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
+  await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;const b=await new Promise(r=>c.toBlob(r,'image/png'));t+=await ocr(b)+'\n'}return t}
+async function textoPlanilha(f){if(!window.XLSX)throw new Error('leitor de planilhas não carregou');const wb=XLSX.read(new Uint8Array(await f.arrayBuffer()),{type:'array',cellDates:true,dateNF:'dd/mm/yyyy'});
+ return wb.SheetNames.map(n=>XLSX.utils.sheet_to_csv(wb.Sheets[n],{FS:';',dateNF:'dd/mm/yyyy'})).join('\n')}
+async function abrirDocumento(f){const x=ext(f.name);$('#fat').hidden=true;$('#revisao').hidden=true;
+ if(/^image\//.test(f.type)||/^(jpe?g|png|heic|heif|webp|gif|bmp)$/.test(x)){await usarFoto(f);cupomMsg('Imagem carregada. Toque em <b>Ler e separar itens</b>.');return}
+ cupomMsg('Lendo <b>'+esc(f.name)+'</b>…');
+ try{let texto,r;
+  if(x==='pdf'||f.type==='application/pdf'){texto=await textoPDF(f)}
+  else if(/^(xlsx|xls|ods)$/.test(x)){texto=await textoPlanilha(f);r={tipo:'csv',itens:Extrato.csv(texto)}}
+  else texto=await f.text();
+  $('#ocrTxt').textContent=(texto||'').slice(0,20000);$('#ocrBox').hidden=false;
+  if(!r)r=Extrato.detectar(f.name,texto);
+  if(r.itens.length>=2)return revisarFatura(r,f.name);
+  const j=Cupom.interpretar(texto,APR,extraKW());
+  if(j.itens.length){revisar(j);return}
+  cupomMsg('Não encontrei lançamentos neste arquivo. Veja abaixo o texto que o app conseguiu ler.',true)}
+ catch(e){cupomMsg('Não consegui abrir este arquivo ('+esc(e.message||e)+').',true)}}
+function cartaoOpts(sel){const c=CATS.find(x=>x.k==='cartao');return '<option value="">Nenhum</option>'+(c&&c.subs||[]).map(su=>`<option value="${su.k}" ${su.k===sel?'selected':''}>${esc(su.n)}</option>`).join('')+(c?'<option value="+">+ Novo cartão…</option>':'')}
+function revisarFatura(r,nome){const banco=r.tipo==='ofx'||(r.tipo==='csv'&&r.itens.some(i=>i.valor<0)&&r.itens.filter(i=>i.valor<0).length>r.itens.length*.2&&!/fatura|cart/i.test(nome));
+ $('#fatTipo').value=banco?'extrato':'fatura';const cc=CATS.find(x=>x.k==='cartao');$('#fatCartao').innerHTML=cartaoOpts(cc&&cc.subs&&cc.subs[0]&&cc.subs[0].k);
+ FAT=r.itens.map(i=>{const credito=i.valor<0;const nd=Cupom.norm(i.descricao);let c=/MERCADO ?LIVRE|MERCADOPAGO|MERCADO PAGO|AMAZON|SHOPEE|ALIEXPRESS|MAGALU|SHEIN|PAYPAL|\bPIX\b|TRANSF|\bTED\b|\bDOC\b/.test(nd)?null:Cupom.categorizar(i.descricao,i.descricao,APR,extraKW());if(c==='extra')c=null;return{...i,on:!credito||banco,c,o:c}});
+ $('#fat').hidden=false;renderFat();cupomMsg(`Encontrei <b>${FAT.length} lançamentos</b> em ${esc(nome)}. Confira as categorias e toque em Salvar.`);$('#fat').scrollIntoView({behavior:'smooth'})}
+function renderFat(){const banco=$('#fatTipo').value==='extrato';const padrao=banco?'extra':'cartao';
+ $('#fatTab').innerHTML=FAT.map((i,n)=>{const ent=banco&&i.valor<0;return`<tr class="${i.on?'':'off'}"><td><input type="checkbox" data-fo="${n}" ${i.on?'checked':''} aria-label="Salvar este lançamento"></td><td style="white-space:nowrap">${i.data.slice(8)}/${i.data.slice(5,7)}</td><td>${esc(i.descricao)}</td><td class="v">${ent?'+ ':''}${brl(Math.abs(i.valor))}</td><td>${ent?'<span class="note">Entrada</span>':`<select data-fc="${n}">${opcoesCat(i.c||padrao)}</select>`}</td></tr>`}).join('');
+ document.querySelectorAll('[data-fo]').forEach(b=>b.onchange=()=>{FAT[b.dataset.fo].on=b.checked;renderFat()});
+ document.querySelectorAll('[data-fc]').forEach(b=>b.onchange=()=>{FAT[b.dataset.fc].c=b.value});
+ const sel=FAT.filter(i=>i.on);$('#fatQtd').textContent=sel.length+' de '+FAT.length+' selecionados';$('#fatTot').textContent='Gastos: '+brl(sel.filter(i=>!(banco&&i.valor<0)).reduce((a,i)=>a+Math.abs(i.valor),0))}
+$('#fatTipo').onchange=()=>{const banco=$('#fatTipo').value==='extrato';FAT.forEach(i=>{i.on=banco||i.valor>0});renderFat()};
+$('#fatCartao').onchange=()=>{if($('#fatCartao').value!=='+')return;
+ const d=document.createElement('div');d.className='cm';d.innerHTML='<label>Nome do cartão<input id="ncNome" placeholder="Ex.: Nubank, Itaú Visa"></label><button class="btn em" id="ncOk">Criar cartão</button>';$('#fatCartao').closest('.two').after(d);$('#ncNome').focus();
+ $('#ncOk').onclick=()=>{const k=novaSub('cartao',$('#ncNome').value.trim());d.remove();$('#fatCartao').innerHTML=cartaoOpts(k||'')}};
+$('#fatCancel').onclick=()=>{FAT=[];$('#fat').hidden=true;cupomMsg('')};
+$('#fatSalvar').onclick=()=>{const banco=$('#fatTipo').value==='extrato';const ck=$('#fatCartao').value&&$('#fatCartao').value!=='+'?$('#fatCartao').value:'';
+ const cn=ck?subNome({cat:'cartao',sub:ck}):'';let n=0;const ultimo=[];
+ FAT.filter(i=>i.on).forEach(i=>{const ent=banco&&i.valor<0;const c=ent?null:(i.c||(banco?'extra':'cartao'));
+  if(!ent&&i.o!==c&&c!=='cartao')APR[Cupom.norm(i.descricao).trim()]=c;
+  const t={id:uid(),ts:Date.now(),tipo:ent?'receita':'despesa',desc:i.descricao,valor:Math.abs(i.valor),data:i.data,cat:c,origem:banco?'extrato':'fatura'};
+  if(cn){t.cartao=cn;if(c==='cartao')t.sub=ck}TX.push(t);ultimo.push(t.id);n++});
+ persist();FAT=[];$('#fat').hidden=true;cupomMsg('');$('#ocrBox').hidden=true;render();go('extrato');
+ toast(n+' lançamentos salvos',()=>{TX=TX.filter(t=>!ultimo.includes(t.id));persist();render()})};
+
+/* ---------- planilha Excel ---------- */
+$('#dXlsx').onclick=async()=>{if(!window.XLSX){toast('A planilha ainda está carregando, tente de novo');return}
+ const linhas=TX.slice().sort((a,b)=>a.data.localeCompare(b.data)).map(t=>({'Data':new Date(t.data+'T12:00'),'Tipo':t.tipo==='receita'?'Entrada':'Saída','Categoria':t.tipo==='receita'?'Entrada':cat(t.cat).n,'Subpasta':subNome(t),'Cartão':t.cartao||'',
+  'Descrição':t.desc,'Loja':t.loja||'','Valor (R$)':t.tipo==='receita'?t.valor:-t.valor,'Moeda':t.moeda||'','Valor na moeda':t.valorMoeda||'','Itens':(t.itens||[]).map(i=>i.d+' '+String(i.v).replace('.',',')).join(' | ')}));
+ const wb=XLSX.utils.book_new();const ws=XLSX.utils.json_to_sheet(linhas,{cellDates:true,dateNF:'dd/mm/yyyy'});ws['!cols']=[{wch:11},{wch:8},{wch:18},{wch:14},{wch:12},{wch:36},{wch:22},{wch:12},{wch:7},{wch:12},{wch:50}];
+ XLSX.utils.book_append_sheet(wb,ws,'Lançamentos');
+ const meses=[...new Set(TX.map(t=>ym(t.data)))].sort();const res=meses.map(m=>{const r={'Mês':m.slice(5)+'/'+m.slice(0,4)};const doM=TX.filter(t=>ym(t.data)===m);
+  r['Entradas']=doM.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);CATS.forEach(c=>r[c.n]=doM.filter(t=>t.tipo!=='receita'&&t.cat===c.k).reduce((a,t)=>a+t.valor,0));
+  r['Total de saídas']=doM.filter(t=>t.tipo!=='receita').reduce((a,t)=>a+t.valor,0);r['Saldo']=r['Entradas']-r['Total de saídas'];for(const k in r)if(typeof r[k]==='number')r[k]=Math.round(r[k]*100)/100;return r});
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(res),'Resumo por mês');
+ const nome='meu-caixa-'+today()+'.xlsx';const blob=new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+ const file=new File([blob],nome,{type:blob.type});
+ if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/.test(navigator.userAgent)){try{await navigator.share({files:[file],title:'Meu Caixa'});return}catch(e){if(e.name==='AbortError')return}}
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Planilha baixada: '+nome)};
+
+/* ---------- atualização automática ---------- */
+if(!NATIVO&&'serviceWorker' in navigator&&location.protocol==='https:'){
+ let recarregar=false;const tinha=!!navigator.serviceWorker.controller;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!tinha)return;if(!CHAVE)location.reload();else{recarregar=true;toast('App atualizado. A nova versão abre quando você bloquear ou reabrir.')}});
+ navigator.serviceWorker.register('sw.js').then(reg=>{reg.update();document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update()})}).catch(()=>{});
+ const bq=bloquear;$('#btnLock').onclick=$('#dLock').onclick=()=>{if(recarregar)location.reload();else bq()}}
 
 /* ---------- avisos ---------- */
 let tt;function toast(m,undo){$('#tMsg').textContent=m;$('#tUndo').hidden=!undo;$('#tUndo').onclick=()=>{undo&&undo();$('#toast').style.display='none'};$('#toast').style.display='flex';clearTimeout(tt);tt=setTimeout(()=>$('#toast').style.display='none',5000)}
@@ -454,7 +663,6 @@ const flash=m=>toast(m);
  window.addEventListener('appinstalled',()=>{box.hidden=true});}
 
 render();
-if(!NATIVO&&'serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 </script>
 </body>
