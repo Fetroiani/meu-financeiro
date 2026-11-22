@@ -1,4 +1,4 @@
-name: Banco (Supabase) e modelos Dart
+name: Testes do banco (Supabase) e modelos Dart
 
 on:
   push:
@@ -61,33 +61,3 @@ jobs:
       - run: dart analyze --fatal-infos
       - run: dart test
 
-  deploy:
-    name: Aplicar migrações no Supabase
-    needs: [testar-schema, testar-modelos]
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    environment: producao
-    env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
-      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
-      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Conferir segredos
-        id: seg
-        run: |
-          if [ -z "$SUPABASE_ACCESS_TOKEN" ] || [ -z "$SUPABASE_DB_PASSWORD" ] || [ -z "$SUPABASE_PROJECT_ID" ]; then
-            echo "::notice::Segredos do Supabase ainda não cadastrados; deploy pulado."
-            echo "ok=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "ok=true" >> "$GITHUB_OUTPUT"
-          fi
-      - uses: supabase/setup-cli@v1
-        if: steps.seg.outputs.ok == 'true'
-        with:
-          version: latest
-      - name: Vincular projeto e aplicar migrações
-        if: steps.seg.outputs.ok == 'true'
-        run: |
-          supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
-          supabase db push --password "$SUPABASE_DB_PASSWORD"
