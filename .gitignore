@@ -2,3 +2,16 @@ node_modules/
 www/vendor/
 android/app/build/
 .DS_Store
+
+# Segredos e arquivos locais (nunca vão para o GitHub)
+.env
+.env.*
+*.pem
+*.key
+supabase/.temp/
+supabase/.branches/
+supabase/.env
+# Dart
+.dart_tool/
+packages/**/pubspec.lock
+packages/**/build/
