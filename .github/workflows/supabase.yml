@@ -44,11 +44,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Migração e schema.sql são idênticos
         run: cmp supabase/schema.sql supabase/migrations/20261122000001_init_anotei_ja.sql
-      - name: Aplicar schema (duas vezes, para provar que é idempotente) e testar RLS
+      - name: Aplicar schema e migrações (duas vezes, para provar que são idempotentes) e testar RLS
         run: |
           psql -v ON_ERROR_STOP=1 -f supabase/tests/auth_stub.sql
           psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
           psql -v ON_ERROR_STOP=1 -f supabase/schema.sql
+          psql -v ON_ERROR_STOP=1 -f supabase/tests/supabase_grants.sql
+          for f in $(ls supabase/migrations/*.sql | sort | tail -n +2); do
+            psql -v ON_ERROR_STOP=1 -f "$f"
+            psql -v ON_ERROR_STOP=1 -f "$f"
+          done
           psql -v ON_ERROR_STOP=1 -f supabase/tests/rls_test.sql
 
   testar-modelos:

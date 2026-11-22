@@ -8,7 +8,7 @@ class CategoriaRepository extends RepositorioBase {
   const CategoriaRepository(super.client);
 
   Future<List<CategoriaModel>> listar({TipoLancamento? tipo}) async {
-    var q = client.from(tabela).select();
+    var q = client.from(tabela).select().eq('deleted', false);
     if (tipo != null) q = q.eq('tipo', tipo.name);
     final linhas = await q.order('created_at');
     return linhas.map(CategoriaModel.fromJson).toList();
@@ -34,6 +34,6 @@ class CategoriaRepository extends RepositorioBase {
 
   /// Os lançamentos e vencimentos da categoria ficam sem categoria (on delete set null).
   Future<void> excluir(String id) async {
-    await client.from(tabela).delete().eq('id', id);
+    await client.from(tabela).update({'deleted': true}).eq('id', id);
   }
 }

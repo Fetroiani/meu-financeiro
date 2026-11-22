@@ -16,6 +16,7 @@ class TransacaoRepository extends RepositorioBase {
     final linhas = await client
         .from(tabela)
         .select()
+        .eq('deleted', false)
         .gte('data_transacao', dataDb(inicio))
         .lt('data_transacao', dataDb(fim))
         .order('data_transacao', ascending: false)
@@ -78,12 +79,12 @@ class TransacaoRepository extends RepositorioBase {
   }
 
   Future<void> excluir(String id) async {
-    await client.from(tabela).delete().eq('id', id);
+    await client.from(tabela).update({'deleted': true}).eq('id', id);
   }
 
   /// Apaga todas as parcelas de uma compra.
   Future<void> excluirParcelamento(String grupoParcelamentoId) async {
-    await client.from(tabela).delete().eq('grupo_parcelamento_id', grupoParcelamentoId);
+    await client.from(tabela).update({'deleted': true}).eq('grupo_parcelamento_id', grupoParcelamentoId);
   }
 }
 

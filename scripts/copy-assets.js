@@ -16,3 +16,4 @@ cp('xlsx/dist/xlsx.full.min.js', 'xlsx.full.min.js');
 fs.mkdirSync(path.join(out, 'pdf'), { recursive: true });
 cp('pdfjs-dist/legacy/build/pdf.min.mjs', 'pdf/pdf.min.mjs');
 cp('pdfjs-dist/legacy/build/pdf.worker.min.mjs', 'pdf/pdf.worker.min.mjs');
+cp('@supabase/supabase-js/dist/umd/supabase.js', 'supabase.js');

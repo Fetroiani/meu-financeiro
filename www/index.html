@@ -268,6 +268,22 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
     <p class="note" id="bioNota"></p>
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="secPin">Trocar PIN</button><button class="btn ghost" id="secBio" hidden></button></div>
   </details>
+  <details class="bk" open id="nuvem"><summary>Sincronizar entre aparelhos</summary>
+    <p class="note" id="nvNota">Entre com uma conta para ver os mesmos dados no celular, no computador e em outros aparelhos. Os dados continuam guardados neste aparelho e também vão para o servidor, protegidos pelo seu login.</p>
+    <div id="nvOff" hidden>
+      <form class="f" id="nvForm" style="margin-top:8px">
+        <label>E-mail<input id="nvEmail" type="email" autocomplete="username" required></label>
+        <label>Senha<input id="nvSenha" type="password" autocomplete="current-password" minlength="8" placeholder="Pelo menos 8 caracteres"></label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" type="submit" id="nvEntrar">Entrar</button><button class="btn ghost" type="button" id="nvCriar">Criar conta</button><button class="icon" type="button" id="nvEsqueci">Esqueci a senha</button></div>
+      </form>
+    </div>
+    <div id="nvNova" hidden><form class="f" id="nvNovaForm"><label>Nova senha<input id="nvNovaSenha" type="password" autocomplete="new-password" minlength="8" required></label><button class="btn em" type="submit">Salvar nova senha</button></form></div>
+    <div id="nvOn" hidden>
+      <p style="margin:8px 0"><b id="nvConta"></b><br><span class="note" id="nvStatus"></span></p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" id="nvAgora">Sincronizar agora</button><button class="btn ghost" id="nvSair">Sair da conta</button></div>
+    </div>
+    <p class="msg" id="nvMsg" hidden></p>
+  </details>
   <details class="bk" open><summary>Backup dos dados</summary>
     <p class="note dica" id="hBk" hidden>O backup sai criptografado, protegido pelo seu PIN atual. Guarde o texto (num e-mail ou nota) antes de trocar de celular. Para restaurar, cole o texto, informe o PIN que você usava quando fez o backup e toque em Restaurar.</p>
     <textarea id="bkTxt" aria-label="Texto do backup"></textarea>
@@ -339,6 +355,9 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 <script src="cupom.js"></script>
 <script src="cofre.js"></script>
 <script src="extrato.js"></script>
+<script src="config.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="sync.js"></script>
 <script src="vendor/xlsx.full.min.js" defer></script>
 <script>
 {
@@ -363,7 +382,7 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.22-8';
+const VERSAO='2026.11.22-9';
 const IN={k:'receita',n:'Salário e Entradas',c:'#00a884'};
 const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS.find(c=>c.k==='extra'));
 const $=s=>document.querySelector(s);
@@ -390,7 +409,7 @@ function garantirCats(o){if(o&&Array.isArray(o.cats)&&o.cats.length){CATS=o.cats
  ENTKW=o&&Array.isArray(o.entKw)?o.entKw:ENT_PADRAO.slice();
  if(PACOTE<2)for(const d of DEF_CATS)if(['combustivel','cartao'].includes(d.k)&&!CATS.some(c=>c.k===d.k)&&!(o&&o.semPadrao&&o.semPadrao.includes(d.k)))CATS.splice(Math.max(0,CATS.length-1),0,clone(d));
  if(!CATS.some(c=>c.k==='extra'))CATS.push(clone((PACOTE<2?DEF_CATS:NOVAS).find(c=>c.k==='extra')))}
-let SEMPADRAO=[],ALERTAS=[];
+let SEMPADRAO=[],ALERTAS=[],SYNC={},VER=0,SYNC_COMMIT=false;
 
 /* ---------- armazenamento criptografado (Preferences no app, localStorage no navegador) ---------- */
 const CAP=window.Capacitor&&window.Capacitor.Plugins||{};const NATIVO=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
@@ -401,10 +420,10 @@ async function ler(k){if(Pref){try{return (await Pref.get({key:k})).value}catch(
 async function escrever(k,v){if(Pref){await Pref.set({key:k,value:v})}else{try{localStorage.setItem(k,v)}catch(e){}}}
 async function apagarK(k){if(Pref){try{await Pref.remove({key:k})}catch(e){}}try{localStorage.removeItem(k)}catch(e){}}
 let fila=Promise.resolve();
-function persist(){if(!CHAVE)return;const k=CHAVE,o={v:4,tx:TX,aprendido:APR,cats:CATS,semPadrao:SEMPADRAO,alertas:ALERTAS,pacote:PACOTE,entKw:ENTKW};fila=fila.then(async()=>escrever(K_DADOS,await Cofre.cifrar(k,o))).catch(e=>toast('Erro ao salvar: '+e.message))}
+function persist(){if(!CHAVE)return;VER++;if(!SYNC_COMMIT)nuvemDepois();const k=CHAVE,o={v:4,tx:TX,aprendido:APR,cats:CATS,semPadrao:SEMPADRAO,alertas:ALERTAS,pacote:PACOTE,entKw:ENTKW,sync:SYNC};fila=fila.then(async()=>escrever(K_DADOS,await Cofre.cifrar(k,o))).catch(e=>toast('Erro ao salvar: '+e.message))}
 async function put(t){const i=TX.findIndex(x=>x.id===t.id);i>=0?TX[i]=t:TX.push(t);render();persist()}
 async function del(id){TX=TX.filter(x=>x.id!==id);render();persist()}
-async function carregarDados(){const d=await ler(K_DADOS);let o=null;if(d){o=await Cofre.decifrar(CHAVE,d);TX=o.tx||[];APR=o.aprendido||{};SEMPADRAO=o.semPadrao||[];ALERTAS=o.alertas||[]}else{TX=[];APR={};ALERTAS=[];SEMPADRAO=[]}garantirCats(o);renderSelects();render()}
+async function carregarDados(){const d=await ler(K_DADOS);let o=null;if(d){o=await Cofre.decifrar(CHAVE,d);TX=o.tx||[];APR=o.aprendido||{};SEMPADRAO=o.semPadrao||[];ALERTAS=o.alertas||[];SYNC=o.sync||{}}else{TX=[];APR={};ALERTAS=[];SEMPADRAO=[];SYNC={}}garantirCats(o);renderSelects();render()}
 async function migrarLegado(){let mudou=false;for(const k of LEGADO){let v=null;if(Pref)try{v=(await Pref.get({key:k})).value}catch(e){}if(!v)try{v=localStorage.getItem(k)}catch(e){}
  if(v){try{const o=JSON.parse(v);if(k===LEGADO[0]&&Array.isArray(o)){TX=o;mudou=true}else if(k===LEGADO[1]){APR=o;mudou=true}}catch(e){}}await apagarK(k)}if(mudou){persist();render()}}
 
@@ -459,8 +478,8 @@ async function tentarBio(){if(!(await bioLigada()))return;if(!NATIVO){try{lkMsg(
  BRUTA=Cofre.unb64(r.value);CHAVE=await Cofre.importar(BRUTA);await carregarDados();liberar()}
  catch(e){if(String(e.code)==='21'){await escrever(K_BIO,'0');atualizarBioBtn();lkMsg('A biometria mudou neste celular. Entre com o PIN e ligue de novo em Segurança.')}else lkMsg('Digite seu PIN')}}
 $('#pBio').onclick=tentarBio;
-function liberar(){lk.hidden=true;$('#lkBox').hidden=true;modo='';buf='';pontos();render();atualizarBioBtn();if(PRIMEIRO&&!lsG(K_TOUR)){PRIMEIRO=false;abrirTour()}}
-function bloquear(){fecharMenu();CHAVE=null;BRUTA=null;TX=[];APR={};ALERTAS=[];CATS=clone(NOVAS);render();modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
+function liberar(){lk.hidden=true;$('#lkBox').hidden=true;modo='';buf='';pontos();render();atualizarBioBtn();if(PRIMEIRO&&!lsG(K_TOUR)){PRIMEIRO=false;abrirTour()}nuvemSync()}
+function bloquear(){fecharMenu();CHAVE=null;BRUTA=null;TX=[];APR={};ALERTAS=[];SYNC={};CATS=clone(NOVAS);render();modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
 $('#btnLock').onclick=bloquear;
 $('#lkLink').onclick=()=>{if(modo==='novo'||modo==='novoConf'){lk.hidden=true;modo='';return}
  lkMsg('Sem o PIN, ninguém consegue abrir os dados, nem nós. Você pode apagar tudo neste celular e começar de novo. Depois, se tiver um backup, é só restaurar.');$('#lkLink').hidden=true;
@@ -848,6 +867,54 @@ function bkLembrete(){const ult=+lsG(K_ULTBK)||0,adia=+lsG(K_BKADIA)||0,agora=Da
  const precisa=CHAVE&&TX.length>0&&(ult?agora-ult>15*D:TX.length>=5)&&agora>adia;
  $('#bkBanner').hidden=!precisa;if(precisa)$('#bkBanner span').textContent=ult?`💾 Seu último backup foi há ${Math.floor((agora-ult)/D)} dias. Que tal salvar uma cópia nova?`:'💾 Você ainda não fez backup. Se o celular quebrar ou for trocado, é o backup que salva seus dados.'}
 $('#bkIr').onclick=()=>go('config');$('#bkAdiar').onclick=()=>{lsS(K_BKADIA,String(Date.now()+3*864e5));bkLembrete()};
+/* ---------- sincronização com o Supabase ---------- */
+const CFG=window.ANOTEI_CONFIG||{};
+let SB=null,SESSAO=null,sincronizando=false,tNuvem=null,ultimoOk=0,erroNuvem='';
+try{if(CFG.supabaseUrl&&CFG.supabaseKey&&window.supabase&&window.Sync)SB=supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey,{auth:{storageKey:'anoteija.auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){SB=null}
+const voltaUrl=()=>location.href.split('#')[0].split('?')[0];
+function nvMsg(t,erro){const m=$('#nvMsg');m.hidden=!t;m.textContent=t||'';m.className='msg'+(erro?' err':'')}
+function traduz(e){const m=String(e&&(e.message||e.error_description)||e||'');
+ if(/Invalid login credentials/i.test(m))return 'E-mail ou senha incorretos.';
+ if(/Email not confirmed/i.test(m))return 'Confirme o seu e-mail pelo link que enviamos antes de entrar.';
+ if(/already registered|already been registered/i.test(m))return 'Este e-mail já tem conta. Toque em Entrar.';
+ if(/Password should be|at least/i.test(m))return 'A senha precisa ter pelo menos 8 caracteres.';
+ if(/rate limit|too many/i.test(m))return 'Muitas tentativas. Espere alguns minutos e tente de novo.';
+ if(/Failed to fetch|NetworkError|network/i.test(m))return 'Sem conexão com o servidor. Os dados continuam salvos neste aparelho.';
+ return m||'Algo deu errado.'}
+function nuvemUI(){const on=!!(SB&&SESSAO);$('#nvOff').hidden=!SB||on||!$('#nvNova').hidden;$('#nvOn').hidden=!on;
+ if(!SB){$('#nvNota').textContent='A sincronização entre aparelhos ainda não foi configurada neste app.';$('#sync').textContent='Protegido com PIN';return}
+ if(on){$('#nvConta').textContent='Conectado como '+(SESSAO.user.email||'');
+  const st=sincronizando?'Sincronizando…':erroNuvem?erroNuvem:ultimoOk?'Sincronizado às '+new Date(ultimoOk).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'Aguardando a primeira sincronização';
+  $('#nvStatus').textContent=st;$('#sync').textContent=sincronizando?'⟳ Sincronizando':erroNuvem?'⚠ Não sincronizado':'☁ Sincronizado'}
+ else $('#sync').textContent='Protegido com PIN'}
+function nuvemDepois(ms){if(!SB||!SESSAO)return;clearTimeout(tNuvem);tNuvem=setTimeout(nuvemSync,ms||4000)}
+async function nuvemSync(){if(!SB||!SESSAO||!CHAVE||sincronizando)return;if(!navigator.onLine){erroNuvem='Sem internet: sincroniza quando voltar.';nuvemUI();return}
+ sincronizando=true;nuvemUI();const v0=VER;
+ const e=clone({TX,CATS,ALERTAS,APR,ENTKW,SEMPADRAO,PACOTE,SYNC});
+ try{const r=await Sync.sincronizar(SB,e,SESSAO.user.id);erroNuvem='';ultimoOk=Date.now();
+  if(VER!==v0){sincronizando=false;nuvemDepois(1500);return}       // você mexeu durante a sincronização: roda de novo
+  TX=e.TX;CATS=e.CATS;ALERTAS=e.ALERTAS;APR=e.APR;ENTKW=e.ENTKW;SEMPADRAO=e.SEMPADRAO;SYNC=e.SYNC;
+  if(!CATS.some(c=>c.k==='extra'))CATS.push(clone(NOVAS.find(c=>c.k==='extra')));
+  SYNC_COMMIT=true;persist();SYNC_COMMIT=false;if(r.recebeu){renderSelects();render()}}
+ catch(err){erroNuvem=traduz(err)}
+ finally{sincronizando=false;nuvemUI()}}
+if(SB){
+ SB.auth.onAuthStateChange((ev,s)=>{SESSAO=s;if(ev==='PASSWORD_RECOVERY'){$('#nvNova').hidden=false;nvMsg('Crie a nova senha da sua conta.');go('config')}nuvemUI();if(s&&(ev==='SIGNED_IN'||ev==='INITIAL_SESSION'))nuvemDepois(500)});
+ $('#nvForm').onsubmit=async ev=>{ev.preventDefault();nvMsg('');const email=$('#nvEmail').value.trim(),password=$('#nvSenha').value;if(!password){nvMsg('Digite a senha.',true);return}
+  const {error}=await SB.auth.signInWithPassword({email,password});if(error)nvMsg(traduz(error),true);else{$('#nvSenha').value='';nvMsg('');toast('Conectado. Sincronizando seus dados…')}};
+ $('#nvCriar').onclick=async()=>{nvMsg('');const email=$('#nvEmail').value.trim(),password=$('#nvSenha').value;if(!/^\S+@\S+\.\S+$/.test(email)){nvMsg('Digite um e-mail válido.',true);return}if(password.length<8){nvMsg('A senha precisa ter pelo menos 8 caracteres.',true);return}
+  const {data,error}=await SB.auth.signUp({email,password,options:{emailRedirectTo:voltaUrl()}});if(error){nvMsg(traduz(error),true);return}
+  $('#nvSenha').value='';if(data.session)nvMsg('Conta criada. Sincronizando seus dados…');else nvMsg('Conta criada. Enviamos um link de confirmação para '+email+'. Abra o e-mail, toque no link e depois entre aqui com o e-mail e a senha.')};
+ $('#nvEsqueci').onclick=async()=>{const email=$('#nvEmail').value.trim();if(!email){nvMsg('Digite o seu e-mail acima e toque de novo em Esqueci a senha.',true);return}
+  const {error}=await SB.auth.resetPasswordForEmail(email,{redirectTo:voltaUrl()});nvMsg(error?traduz(error):'Se houver conta com esse e-mail, enviamos um link para criar uma nova senha.',!!error)};
+ $('#nvNovaForm').onsubmit=async ev=>{ev.preventDefault();const {error}=await SB.auth.updateUser({password:$('#nvNovaSenha').value});if(error){nvMsg(traduz(error),true);return}$('#nvNova').hidden=true;$('#nvNovaSenha').value='';nvMsg('Senha alterada.');nuvemUI()};
+ $('#nvAgora').onclick=()=>nuvemSync();
+ $('#nvSair').onclick=async()=>{await SB.auth.signOut();SESSAO=null;erroNuvem='';ultimoOk=0;nuvemUI();nvMsg('Você saiu da conta. Os dados continuam neste aparelho.')};
+ window.addEventListener('online',()=>nuvemDepois(500));
+ document.addEventListener('visibilitychange',()=>{if(!document.hidden)nuvemDepois(800)});
+ setInterval(()=>{if(!document.hidden)nuvemSync()},60000);
+}
+nuvemUI();
 let tt;function toast(m,undo){$('#tMsg').textContent=m;$('#tUndo').hidden=!undo;$('#tUndo').onclick=()=>{undo&&undo();$('#toast').style.display='none'};$('#toast').style.display='flex';clearTimeout(tt);tt=setTimeout(()=>$('#toast').style.display='none',5000)}
 const flash=m=>toast(m);
 /* ---------- ajuda para criar o atalho na tela ---------- */

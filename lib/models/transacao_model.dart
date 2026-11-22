@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'comum.dart';
 
 /// Tabela `public.transacoes`: entradas, gastos, parcelas e moeda estrangeira.
@@ -18,6 +20,12 @@ class TransacaoModel {
   final String? grupoParcelamentoId;
   final String? observacao;
   final DateTime? createdAt;
+  /// Atualizado pelo banco a cada alteração (usado na sincronização).
+  final DateTime? updatedAt;
+  /// Exclusão lógica: o registro some do app, mas os outros aparelhos ficam sabendo.
+  final bool deleted;
+  /// Campos próprios do app web (itens do cupom, loja, cartão, moeda €…).
+  final Map<String, dynamic> extra;
 
   const TransacaoModel({
     this.id,
@@ -36,6 +44,9 @@ class TransacaoModel {
     this.grupoParcelamentoId,
     this.observacao,
     this.createdAt,
+    this.updatedAt,
+    this.deleted = false,
+    this.extra = const {},
   });
 
   bool get parcelada => totalParcelas > 1;
@@ -58,6 +69,9 @@ class TransacaoModel {
         grupoParcelamentoId: grupoParcelamentoId,
         observacao: observacao,
         createdAt: createdAt,
+        updatedAt: updatedAt,
+        deleted: deleted,
+        extra: extra,
       );
 
   factory TransacaoModel.fromJson(Map<String, dynamic> j) => TransacaoModel(
@@ -77,6 +91,9 @@ class TransacaoModel {
         grupoParcelamentoId: j['grupo_parcelamento_id'] as String?,
         observacao: j['observacao'] as String?,
         createdAt: j['created_at'] == null ? null : DateTime.parse(j['created_at'] as String),
+        updatedAt: j['updated_at'] == null ? null : DateTime.parse(j['updated_at'] as String),
+        deleted: (j['deleted'] as bool?) ?? false,
+        extra: Map<String, dynamic>.from((j['extra'] as Map?) ?? const {}),
       );
 
   Map<String, dynamic> toJson() => {
@@ -95,6 +112,8 @@ class TransacaoModel {
         'total_parcelas': totalParcelas,
         'grupo_parcelamento_id': grupoParcelamentoId,
         'observacao': observacao,
+        'deleted': deleted,
+        'extra': extra,
       };
 
   List<String> validar() => [
@@ -107,6 +126,7 @@ class TransacaoModel {
         if (totalParcelas < 1 || totalParcelas > 120) 'O parcelamento vai de 1 a 120 vezes.',
         if (parcelaAtual > totalParcelas) 'A parcela atual não pode passar do total.',
         if (observacao != null && tamanho(observacao!) > 500) 'A observação deve ter até 500 caracteres.',
+        if (utf8.encode(jsonEncode(extra)).length > 16000) 'Dados extras grandes demais (limite de 16 KB).',
       ];
 
   /// Divide uma compra em [vezes] parcelas mensais, como o app faz hoje:

@@ -9,7 +9,7 @@ class VencimentoRepository extends RepositorioBase {
 
   /// Contas ainda não pagas, da mais próxima para a mais distante.
   Future<List<VencimentoModel>> pendentes() async {
-    final linhas = await client.from(tabela).select().eq('pago', false).order('data_vencimento');
+    final linhas = await client.from(tabela).select().eq('deleted', false).eq('pago', false).order('data_vencimento');
     return linhas.map(VencimentoModel.fromJson).toList();
   }
 
@@ -17,6 +17,7 @@ class VencimentoRepository extends RepositorioBase {
     final linhas = await client
         .from(tabela)
         .select()
+        .eq('deleted', false)
         .gte('data_vencimento', dataDb(DateTime(mes.year, mes.month, 1)))
         .lt('data_vencimento', dataDb(DateTime(mes.year, mes.month + 1, 1)))
         .order('data_vencimento');
@@ -50,6 +51,6 @@ class VencimentoRepository extends RepositorioBase {
   }
 
   Future<void> excluir(String id) async {
-    await client.from(tabela).delete().eq('id', id);
+    await client.from(tabela).update({'deleted': true}).eq('id', id);
   }
 }

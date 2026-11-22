@@ -85,4 +85,32 @@ void main() {
       expect(VencimentoModel.fromJson(v.toJson()).recorrencia, Recorrencia.mensal);
     });
   });
+
+  group('Sincronização', () {
+    test('lê updated_at, deleted e extra e devolve extra/deleted no JSON', () {
+      final t = TransacaoModel.fromJson({
+        'user_id': u,
+        'descricao': 'Jantar em Paris',
+        'valor_brl': 300,
+        'tipo': 'gasto',
+        'data_transacao': '2026-11-10',
+        'updated_at': '2026-11-22T22:00:00+00:00',
+        'deleted': false,
+        'extra': {'moeda': 'EUR', 'valorMoeda': 50},
+      });
+      expect(t.extra['moeda'], 'EUR');
+      expect(t.updatedAt, isNotNull);
+      expect(t.toJson()['extra'], {'moeda': 'EUR', 'valorMoeda': 50});
+      expect(t.toJson()['deleted'], isFalse);
+      expect(t.toJson().containsKey('updated_at'), isFalse);
+    });
+    test('extra grande demais é barrado', () {
+      final v = VencimentoModel(userId: u, conta: 'X', dataVencimento: DateTime(2026), extra: {'x': 'a' * 17000});
+      expect(v.validar(), isNotEmpty);
+    });
+    test('preferências', () {
+      final p = PreferenciasModel.fromJson({'user_id': u, 'dados': {'aprendido': {'CERVEJA': 'alimentacao'}}});
+      expect(p.aprendido['CERVEJA'], 'alimentacao');
+    });
+  });
 }

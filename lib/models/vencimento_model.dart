@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'comum.dart';
 
 /// Igual ao CHECK `recorrencia in ('mensal', 'anual', 'unica')`.
@@ -24,6 +26,12 @@ class VencimentoModel {
   final int diasAviso;
   final bool pago;
   final DateTime? createdAt;
+  /// Atualizado pelo banco a cada alteração (usado na sincronização).
+  final DateTime? updatedAt;
+  /// Exclusão lógica: o registro some do app, mas os outros aparelhos ficam sabendo.
+  final bool deleted;
+  /// Campos próprios do app web (itens do cupom, loja, cartão, moeda €…).
+  final Map<String, dynamic> extra;
 
   const VencimentoModel({
     this.id,
@@ -36,6 +44,9 @@ class VencimentoModel {
     this.diasAviso = 1,
     this.pago = false,
     this.createdAt,
+    this.updatedAt,
+    this.deleted = false,
+    this.extra = const {},
   });
 
   /// Cópia com o dono definido pela sessão (o RLS exige user_id = auth.uid()).
@@ -50,6 +61,9 @@ class VencimentoModel {
         diasAviso: diasAviso,
         pago: pago,
         createdAt: createdAt,
+        updatedAt: updatedAt,
+        deleted: deleted,
+        extra: extra,
       );
 
   factory VencimentoModel.fromJson(Map<String, dynamic> j) => VencimentoModel(
@@ -63,6 +77,9 @@ class VencimentoModel {
         diasAviso: (j['dias_aviso'] as num?)?.toInt() ?? 1,
         pago: (j['pago'] as bool?) ?? false,
         createdAt: j['created_at'] == null ? null : DateTime.parse(j['created_at'] as String),
+        updatedAt: j['updated_at'] == null ? null : DateTime.parse(j['updated_at'] as String),
+        deleted: (j['deleted'] as bool?) ?? false,
+        extra: Map<String, dynamic>.from((j['extra'] as Map?) ?? const {}),
       );
 
   Map<String, dynamic> toJson() => {
@@ -75,12 +92,15 @@ class VencimentoModel {
         'recorrencia': recorrencia.name,
         'dias_aviso': diasAviso,
         'pago': pago,
+        'deleted': deleted,
+        'extra': extra,
       };
 
   List<String> validar() => [
         if (tamanho(conta.trim()) < 1 || tamanho(conta.trim()) > 120) 'O nome da conta deve ter de 1 a 120 caracteres.',
         if (valorEstimado != null && centavos(valorEstimado!) <= 0) 'O valor estimado deve ser maior que zero.',
         if (diasAviso < 0 || diasAviso > 30) 'O aviso vai de 0 a 30 dias antes.',
+        if (utf8.encode(jsonEncode(extra)).length > 16000) 'Dados extras grandes demais (limite de 16 KB).',
       ];
 
   /// Dias até o vencimento (negativo = atrasado).

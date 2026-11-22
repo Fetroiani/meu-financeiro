@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'comum.dart';
 
 /// Tabela `public.categorias`.
@@ -12,6 +14,12 @@ class CategoriaModel {
   final double? metaMensal;
   final List<String> subpastas;
   final DateTime? createdAt;
+  /// Atualizado pelo banco a cada alteração (usado na sincronização).
+  final DateTime? updatedAt;
+  /// Exclusão lógica: o registro some do app, mas os outros aparelhos ficam sabendo.
+  final bool deleted;
+  /// Campos próprios do app web (itens do cupom, loja, cartão, moeda €…).
+  final Map<String, dynamic> extra;
 
   const CategoriaModel({
     this.id,
@@ -24,6 +32,9 @@ class CategoriaModel {
     this.metaMensal,
     this.subpastas = const [],
     this.createdAt,
+    this.updatedAt,
+    this.deleted = false,
+    this.extra = const {},
   });
 
   static final _cor = RegExp(r'^#[0-9a-f]{6}$', caseSensitive: false);
@@ -40,6 +51,9 @@ class CategoriaModel {
         metaMensal: metaMensal,
         subpastas: subpastas,
         createdAt: createdAt,
+        updatedAt: updatedAt,
+        deleted: deleted,
+        extra: extra,
       );
 
   factory CategoriaModel.fromJson(Map<String, dynamic> j) => CategoriaModel(
@@ -53,6 +67,9 @@ class CategoriaModel {
         metaMensal: lerNumero(j['meta_mensal']),
         subpastas: lerLista(j['subpastas']),
         createdAt: j['created_at'] == null ? null : DateTime.parse(j['created_at'] as String),
+        updatedAt: j['updated_at'] == null ? null : DateTime.parse(j['updated_at'] as String),
+        deleted: (j['deleted'] as bool?) ?? false,
+        extra: Map<String, dynamic>.from((j['extra'] as Map?) ?? const {}),
       );
 
   /// Para insert/update: `id` e `created_at` ficam com o banco.
@@ -66,6 +83,8 @@ class CategoriaModel {
         'palavras_chave': palavrasChave,
         'meta_mensal': metaMensal == null ? null : centavos(metaMensal!),
         'subpastas': subpastas,
+        'deleted': deleted,
+        'extra': extra,
       };
 
   /// Mesmas regras dos CHECK da tabela. Lista vazia = válido.
@@ -74,6 +93,7 @@ class CategoriaModel {
         if (!_cor.hasMatch(cor)) 'A cor deve estar no formato #RRGGBB.',
         if (icone != null && tamanho(icone!) > 40) 'O ícone deve ter até 40 caracteres.',
         if (metaMensal != null && metaMensal! <= 0) 'A meta mensal deve ser maior que zero.',
+        if (utf8.encode(jsonEncode(extra)).length > 16000) 'Dados extras grandes demais (limite de 16 KB).',
       ];
 
   /// Usada pelo leitor de cupom: a descrição contém alguma palavra-chave inteira?
@@ -113,5 +133,8 @@ class CategoriaModel {
         metaMensal: limparMeta ? null : (metaMensal ?? this.metaMensal),
         subpastas: subpastas ?? this.subpastas,
         createdAt: createdAt,
+        updatedAt: updatedAt,
+        deleted: deleted,
+        extra: extra,
       );
 }
