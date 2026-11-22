@@ -177,6 +177,10 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 .empty{padding:26px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px;margin-top:12px}
 @media(max-width:700px){.box{grid-template-columns:1fr}.fig{min-height:220px}.bar{grid-template-columns:40px 1fr 84px}}
 @media(prefers-reduced-motion:no-preference){.meter i,.bar .t i{transition:width .5s ease}}
+.langs{display:flex;gap:6px;padding:4px 6px}.langs button{flex:1;min-height:40px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:600 14px system-ui,-apple-system,sans-serif;cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--grad);color:var(--gink);border-color:transparent}
+.langs.lk{justify-content:center;margin-top:14px}.langs.lk button{flex:0 0 auto;min-width:52px;min-height:36px;background:transparent;color:inherit;border-color:currentColor;opacity:.8}
+.langs.lk button[aria-pressed="true"]{opacity:1;background:rgba(255,255,255,.25);color:inherit}
 </style>
 </head>
 <body>
@@ -190,6 +194,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
     <div class="pad" id="pad"></div>
     <div class="lk-box" id="lkBox" hidden></div>
     <button class="lk-link" id="lkLink">Esqueci meu PIN</button>
+    <div class="langs lk" translate="no"><button data-lang="pt">PT</button><button data-lang="es">ES</button><button data-lang="en">EN</button></div>
   </div>
 </div>
 <div class="scrim" id="scrim" hidden></div>
@@ -206,6 +211,8 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   <button class="ditem" id="dLock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v9"/><path d="M6.3 7.5a8 8 0 1 0 11.4 0"/></svg><span>Bloquear agora</span><small></small></button>
   <button class="ditem" id="dTour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg><span>Como usar o app</span><small></small></button>
   <p class="ver" id="ver"></p>
+  <h3>Idioma</h3>
+  <div class="langs" translate="no"><button data-lang="pt">Português</button><button data-lang="es">Español</button><button data-lang="en">English</button></div>
   <button class="btn ghost" data-atualizar style="margin:10px 6px 0;width:calc(100% - 12px)">⟳ Atualizar app</button>
 </aside>
 <div class="wrap">
@@ -358,6 +365,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 <div class="toast" id="toast"><span id="tMsg"></span><button id="tUndo">Desfazer</button></div>
 <script src="vendor/jsQR.js"></script>
 <script src="vendor/tesseract.min.js"></script>
+<script src="i18n.js"></script>
 <script src="cupom.js"></script>
 <script src="cofre.js"></script>
 <script src="extrato.js"></script>
@@ -388,8 +396,10 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.22-11';
-const IN={k:'receita',n:'Salário e Entradas',c:'#00a884'};
+const VERSAO='2026.11.22-12';
+const T=window.I18N?I18N.T:(s=>s),LOC=window.I18N?I18N.loc:'pt-BR',nomeCat=(k,n)=>window.I18N?I18N.nomeCat(k,n):n;
+NOVAS.forEach(c=>c.n=nomeCat(c.k,c.n));DEF_CATS.forEach(c=>c.n=nomeCat(c.k,c.n));CATS=clone(NOVAS);
+const IN={k:'receita',n:nomeCat('receita','Salário e Entradas'),c:'#00a884'};
 const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS.find(c=>c.k==='extra'));
 const $=s=>document.querySelector(s);
 const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
@@ -414,7 +424,8 @@ const sugerirCat=d=>mapCat(Cupom.categorizar(d,'',APR,extraKW(),padraoKW()));
 function garantirCats(o){if(o&&Array.isArray(o.cats)&&o.cats.length){CATS=o.cats;PACOTE=o.pacote||1}else{CATS=clone(NOVAS);PACOTE=2}
  ENTKW=o&&Array.isArray(o.entKw)?o.entKw:ENT_PADRAO.slice();
  if(PACOTE<2)for(const d of DEF_CATS)if(['combustivel','cartao'].includes(d.k)&&!CATS.some(c=>c.k===d.k)&&!(o&&o.semPadrao&&o.semPadrao.includes(d.k)))CATS.splice(Math.max(0,CATS.length-1),0,clone(d));
- if(!CATS.some(c=>c.k==='extra'))CATS.push(clone((PACOTE<2?DEF_CATS:NOVAS).find(c=>c.k==='extra')))}
+ if(!CATS.some(c=>c.k==='extra'))CATS.push(clone((PACOTE<2?DEF_CATS:NOVAS).find(c=>c.k==='extra')));
+ CATS.forEach(c=>{c.n=nomeCat(c.k,c.n)})}
 let SEMPADRAO=[],ALERTAS=[],SYNC={},VER=0,SYNC_COMMIT=false;
 
 /* ---------- armazenamento criptografado (Preferences no app, localStorage no navegador) ---------- */
@@ -519,7 +530,7 @@ function renderMenu(){const pc=porCat(mes);$('#dMes').textContent='Categorias ·
 /* ---------- início ---------- */
 let mes=ym(today());
 const shift=(m,n)=>{let [y,mm]=m.split('-').map(Number);mm+=n;while(mm<1){mm+=12;y--}while(mm>12){mm-=12;y++}return y+'-'+String(mm).padStart(2,'0')};
-const mesNome=m=>{const s=new Date(m+'-15T12:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});return s[0].toUpperCase()+s.slice(1)};
+const mesNome=m=>{const s=new Date(m+'-15T12:00').toLocaleDateString(LOC,{month:'long',year:'numeric'});return s[0].toUpperCase()+s.slice(1)};
 $('#mPrev').onclick=()=>{mes=shift(mes,-1);render()};$('#olho').onclick=()=>{OCULTO=!OCULTO;lsS(K_OCULTO,OCULTO?'1':'0');render()};$('#mNext').onclick=()=>{mes=shift(mes,1);render()};
 function porCat(m){const o={};TX.filter(t=>t.tipo!=='receita'&&ym(t.data)===m).forEach(t=>o[t.cat]=(o[t.cat]||0)+t.valor);return o}
 function drawPie(){const s=$('#pie'),W=s.clientWidth,H=s.clientHeight;if(!W)return;
@@ -565,13 +576,13 @@ function render(){const doMes=TX.filter(t=>ym(t.data)===mes);
  $('#saldoTot').textContent='Saldo acumulado: '+brlH(tot);
  $('#olho').innerHTML=OCULTO?OLHO_OFF:OLHO_ON;$('#olho').setAttribute('aria-pressed',OCULTO);$('#olho').setAttribute('aria-label',OCULTO?'Mostrar valores':'Esconder valores');
  const pc=porCat(mes),max=Math.max(1,...Object.values(pc)),ant=porCat(shift(mes,-1));
- $('#cats').innerHTML=!sai?VAZIO('Nenhum gasto em '+mesNome(mes).toLowerCase(),'Lance um gasto ou fotografe um cupom: o app separa cada item na categoria certa.'):CATS.map(c=>{const v=pc[c.k]||0,n=doMes.filter(t=>t.cat===c.k&&t.tipo!=='receita').length,d=v-(ant[c.k]||0);
+ $('#cats').innerHTML=!sai?VAZIO('Nenhum gasto em '+(LOC==='en-US'?mesNome(mes):mesNome(mes).toLowerCase()),'Lance um gasto ou fotografe um cupom: o app separa cada item na categoria certa.'):CATS.map(c=>{const v=pc[c.k]||0,n=doMes.filter(t=>t.cat===c.k&&t.tipo!=='receita').length,d=v-(ant[c.k]||0);
   const meta=c.meta>0?c.meta:0,pm=meta?v/meta:0;
   return`<button class="cat" data-c="${c.k}"><span class="dot" style="background:${c.c}"></span><b>${esc(c.n)}</b><span class="v">${brlH(v)}</span><small>${n} lanç.${!OCULTO&&(ant[c.k]||v)?` · ${d>=0?'+':'−'}${brl(Math.abs(d))} vs. mês anterior`:''}</small><span class="meter"${meta?` role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pm*100)}"`:''}><i style="width:${Math.min(100,meta?pm*100:v/max*100)}%;background:${meta?corMeta(pm):c.c}"></i></span>${meta?`<span class="meta">${OCULTO?Math.round(pm*100)+'% da meta':`${brl(v)} de ${brl(meta)} (${Math.round(pm*100)}%)`}${pm>=1?' · meta estourada':pm>=.75?' · perto da meta':''}</span>`:''}</button>`}).join('');
  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{filtro=b.dataset.c;subFiltro='';go('extrato');render()});
  const ms=[...Array(6)].map((_,i)=>shift(mes,i-5)),vals=ms.map(m=>porCat(m)),mx=Math.max(1,...vals.map(o=>Object.values(o).reduce((a,b)=>a+b,0)));
  const algum=vals.some(o=>Object.values(o).some(v=>v));
- $('#bars').innerHTML=!algum?VAZIO('Sem histórico ainda','Conforme você lança, aqui aparece quanto gastou em cada um dos últimos 6 meses.'):ms.map((m,i)=>{const o=vals[i],s=Object.values(o).reduce((a,b)=>a+b,0);return`<div class="bar"><span>${new Date(m+'-15T12:00').toLocaleDateString('pt-BR',{month:'short'}).replace('.','')}</span><span class="t">${CATS.filter(c=>o[c.k]).map(c=>`<i title="${c.n}: ${brlH(o[c.k])}" style="width:${o[c.k]/mx*100}%;background:${c.c}"></i>`).join('')}</span><span class="n">${brlH(s)}</span></div>`}).join('');
+ $('#bars').innerHTML=!algum?VAZIO('Sem histórico ainda','Conforme você lança, aqui aparece quanto gastou em cada um dos últimos 6 meses.'):ms.map((m,i)=>{const o=vals[i],s=Object.values(o).reduce((a,b)=>a+b,0);return`<div class="bar"><span>${new Date(m+'-15T12:00').toLocaleDateString(LOC,{month:'short'}).replace('.','')}</span><span class="t">${CATS.filter(c=>o[c.k]).map(c=>`<i title="${c.n}: ${brlH(o[c.k])}" style="width:${o[c.k]/mx*100}%;background:${c.c}"></i>`).join('')}</span><span class="n">${brlH(s)}</span></div>`}).join('');
  bkLembrete();
  renderChips();renderLista();drawPie();renderAlertas();if($('#drawer').classList.contains('on'))renderMenu()}
 
@@ -785,7 +796,7 @@ function pendentes(){return ALERTAS.filter(a=>!a.pago).sort((a,b)=>a.venc.locale
 function avisando(){return pendentes().filter(a=>dias(a.venc)<=(a.avisar??3))}
 function renderAlertas(){const av=avisando(),atr=av.filter(a=>dias(a.venc)<=0);
  const bn=$('#alBanner');if(av.length&&CHAVE){bn.hidden=false;bn.className='alerta'+(atr.length?' atr':'');
-  const a=av[0];bn.innerHTML=`<span><b>${esc(a.nome)}</b> · ${statusAl(a)[1].toLowerCase()}${a.valor?' · '+brlH(a.valor):''}${av.length>1?`<br>e mais ${av.length-1} conta(s) para pagar`:''}</span><strong>Ver vencimentos ›</strong>`}else bn.hidden=true;
+  const a=av[0];bn.innerHTML=`<span><b>${esc(a.nome)}</b> · ${T(statusAl(a)[1]).toLowerCase()}${a.valor?' · '+brlH(a.valor):''}${av.length>1?`<br>e mais ${av.length-1} conta(s) para pagar`:''}</span><strong>Ver vencimentos ›</strong>`}else bn.hidden=true;
  $('#dVenc').textContent=av.length?av.length+' a pagar':(pendentes().length?pendentes().length+' agendados':'');
  try{if(navigator.setAppBadge){av.length?navigator.setAppBadge(av.length):navigator.clearAppBadge()}}catch(e){}
  if(!$('#v-venc').classList.contains('on'))return;
@@ -820,10 +831,10 @@ $('#alBanner').onclick=()=>{go('venc');limparAl();renderAlertas()};
 function baixarICS(lista){lista=lista.filter(a=>a&&!a.pago);if(!lista.length){toast('Nenhum alerta pendente');return}
  const st=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
  const ev=lista.map(a=>{const d=a.venc.replace(/-/g,'');const d2=somaMes(a.venc,0).replace(/-/g,'');const fim=new Date(a.venc+'T12:00');fim.setDate(fim.getDate()+1);const df=fim.toISOString().slice(0,10).replace(/-/g,'');
-  return['BEGIN:VEVENT','UID:'+a.id+'@meucaixa','DTSTAMP:'+st,'DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+df,'SUMMARY:Vence: '+a.nome.replace(/[,;]/g,' ')+(a.valor?' (R$ '+a.valor.toFixed(2).replace('.',',')+')':''),
-   'DESCRIPTION:Lembrete do Anotei Já',...(a.rep==='mensal'?['RRULE:FREQ=MONTHLY']:a.rep==='anual'?['RRULE:FREQ=YEARLY']:[]),
-   'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+a.nome.replace(/[,;]/g,' ')+' vence hoje','TRIGGER;RELATED=START:PT9H','END:VALARM',
-   ...((a.avisar??3)>0?['BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+a.nome.replace(/[,;]/g,' ')+' vence em '+(a.avisar??3)+' dia(s)','TRIGGER:-'+((a.avisar??3)>1?'P'+((a.avisar??3)-1)+'DT15H':'PT15H'),'END:VALARM']:[]),'END:VEVENT'].join('\r\n')});
+  return['BEGIN:VEVENT','UID:'+a.id+'@meucaixa','DTSTAMP:'+st,'DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+df,'SUMMARY:'+T('Vence:')+' '+a.nome.replace(/[,;]/g,' ')+(a.valor?' (R$ '+a.valor.toFixed(2).replace('.',',')+')':''),
+   T('DESCRIPTION:Lembrete do Anotei Já'),...(a.rep==='mensal'?['RRULE:FREQ=MONTHLY']:a.rep==='anual'?['RRULE:FREQ=YEARLY']:[]),
+   'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+T(a.nome.replace(/[,;]/g,' ')+' vence hoje'),'TRIGGER;RELATED=START:PT9H','END:VALARM',
+   ...((a.avisar??3)>0?['BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+T(a.nome.replace(/[,;]/g,' ')+' vence em '+(a.avisar??3)+' dia(s)'),'TRIGGER:-'+((a.avisar??3)>1?'P'+((a.avisar??3)-1)+'DT15H':'PT15H'),'END:VALARM']:[]),'END:VEVENT'].join('\r\n')});
  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Anotei Já//PT-BR','CALSCALE:GREGORIAN',...ev,'END:VCALENDAR'].join('\r\n');
  const blob=new Blob([ics],{type:'text/calendar'});const nome=(lista.length>1?'vencimentos':Cupom.norm(lista[0].nome).replace(/[^A-Z0-9]+/g,'-').toLowerCase())+'.ics';
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000);toast('Abra o arquivo para adicionar à agenda')}
@@ -831,15 +842,15 @@ $('#alIcsTodos').onclick=()=>baixarICS(pendentes());
 
 /* ---------- planilha Excel ---------- */
 $('#dXlsx').onclick=async()=>{if(!window.XLSX){toast('A planilha ainda está carregando, tente de novo');return}
- const linhas=TX.slice().sort((a,b)=>a.data.localeCompare(b.data)).map(t=>({'Data':new Date(t.data+'T12:00'),'Tipo':t.tipo==='receita'?'Entrada':'Saída','Categoria':t.tipo==='receita'?'Entrada':cat(t.cat).n,'Subpasta':subNome(t),'Cartão':t.cartao||'',
-  'Descrição':t.desc,'Loja':t.loja||'','Valor (R$)':t.tipo==='receita'?t.valor:-t.valor,'Moeda':t.moeda||'','Valor na moeda':t.valorMoeda||'','Itens':(t.itens||[]).map(i=>i.d+' '+String(i.v).replace('.',',')).join(' | ')}));
+ const linhas=TX.slice().sort((a,b)=>a.data.localeCompare(b.data)).map(t=>({[T('Data')]:new Date(t.data+'T12:00'),[T('Tipo')]:t.tipo==='receita'?T('Entrada'):T('Saída'),[T('Categoria')]:t.tipo==='receita'?T('Entrada'):cat(t.cat).n,[T('Subpasta')]:subNome(t),[T('Cartão')]:t.cartao||'',
+  [T('Descrição')]:t.desc,[T('Loja')]:t.loja||'',[T('Valor (R$)')]:t.tipo==='receita'?t.valor:-t.valor,[T('Moeda')]:t.moeda||'',[T('Valor na moeda')]:t.valorMoeda||'',[T('Itens')]:(t.itens||[]).map(i=>i.d+' '+String(i.v).replace('.',',')).join(' | ')}));
  const wb=XLSX.utils.book_new();const ws=XLSX.utils.json_to_sheet(linhas,{cellDates:true,dateNF:'dd/mm/yyyy'});ws['!cols']=[{wch:11},{wch:8},{wch:18},{wch:14},{wch:12},{wch:36},{wch:22},{wch:12},{wch:7},{wch:12},{wch:50}];
- XLSX.utils.book_append_sheet(wb,ws,'Lançamentos');
- const meses=[...new Set(TX.map(t=>ym(t.data)))].sort();const res=meses.map(m=>{const r={'Mês':m.slice(5)+'/'+m.slice(0,4)};const doM=TX.filter(t=>ym(t.data)===m);
-  r['Entradas']=doM.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);CATS.forEach(c=>r[c.n]=doM.filter(t=>t.tipo!=='receita'&&t.cat===c.k).reduce((a,t)=>a+t.valor,0));
-  r['Total de saídas']=doM.filter(t=>t.tipo!=='receita').reduce((a,t)=>a+t.valor,0);r['Saldo']=r['Entradas']-r['Total de saídas'];for(const k in r)if(typeof r[k]==='number')r[k]=Math.round(r[k]*100)/100;return r});
- XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(res),'Resumo por mês');
- if(ALERTAS.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ALERTAS.slice().sort((a,b)=>a.venc.localeCompare(b.venc)).map(a=>({'Conta':a.nome,'Vencimento':new Date(a.venc+'T12:00'),'Valor (R$)':a.valor||'','Situação':a.pago?'Paga':statusAl(a)[1],'Repetir':a.rep==='mensal'?'Todo mês':a.rep==='anual'?'Todo ano':'Uma vez','Categoria':cat(a.cat||'extra').n}))),'Vencimentos');
+ XLSX.utils.book_append_sheet(wb,ws,T('Lançamentos'));
+ const meses=[...new Set(TX.map(t=>ym(t.data)))].sort();const res=meses.map(m=>{const r={[T('Mês')]:m.slice(5)+'/'+m.slice(0,4)};const doM=TX.filter(t=>ym(t.data)===m);
+  r[T('Entradas')]=doM.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);CATS.forEach(c=>r[c.n]=doM.filter(t=>t.tipo!=='receita'&&t.cat===c.k).reduce((a,t)=>a+t.valor,0));
+  r[T('Total de saídas')]=doM.filter(t=>t.tipo!=='receita').reduce((a,t)=>a+t.valor,0);r[T('Saldo')]=r[T('Entradas')]-r[T('Total de saídas')];for(const k in r)if(typeof r[k]==='number')r[k]=Math.round(r[k]*100)/100;return r});
+ XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(res),T('Resumo por mês'));
+ if(ALERTAS.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ALERTAS.slice().sort((a,b)=>a.venc.localeCompare(b.venc)).map(a=>({[T('Conta')]:a.nome,[T('Vencimento')]:new Date(a.venc+'T12:00'),[T('Valor (R$)')]:a.valor||'',[T('Situação')]:a.pago?T('Paga'):statusAl(a)[1],[T('Repetir')]:a.rep==='mensal'?T('Todo mês'):a.rep==='anual'?T('Todo ano'):T('Uma vez'),[T('Categoria')]:cat(a.cat||'extra').n}))),T('Vencimentos'));
  const nome='anotei-ja-'+today()+'.xlsx';const blob=new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
  const file=new File([blob],nome,{type:blob.type});
  if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/.test(navigator.userAgent)){try{await navigator.share({files:[file],title:'Anotei Já'});return}catch(e){if(e.name==='AbortError')return}}
@@ -890,7 +901,7 @@ function traduz(e){const m=String(e&&(e.message||e.error_description)||e||'');
 function nuvemUI(){const on=!!(SB&&SESSAO);$('#nvOff').hidden=!SB||on||!$('#nvNova').hidden;$('#nvOn').hidden=!on;
  if(!SB){$('#nvNota').textContent='A sincronização entre aparelhos ainda não foi configurada neste app.';$('#sync').textContent='Protegido com PIN';return}
  if(on){$('#nvConta').textContent='Conectado como '+(SESSAO.user.email||'');
-  const st=sincronizando?'Sincronizando…':erroNuvem?erroNuvem:ultimoOk?'Sincronizado às '+new Date(ultimoOk).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'Aguardando a primeira sincronização';
+  const st=sincronizando?'Sincronizando…':erroNuvem?erroNuvem:ultimoOk?'Sincronizado às '+new Date(ultimoOk).toLocaleTimeString(LOC,{hour:'2-digit',minute:'2-digit'}):'Aguardando a primeira sincronização';
   $('#nvStatus').textContent=st;$('#sync').textContent=sincronizando?'⟳ Sincronizando':erroNuvem?'⚠ Não sincronizado':'☁ Sincronizado'}
  else $('#sync').textContent='Protegido com PIN'}
 function nuvemDepois(ms){if(!SB||!SESSAO)return;clearTimeout(tNuvem);tNuvem=setTimeout(nuvemSync,ms||4000)}
@@ -932,6 +943,7 @@ async function atualizarApp(btn){const bs=document.querySelectorAll('[data-atual
  try{if(window.caches)for(const k of await caches.keys())await caches.delete(k)}catch(e){}   // só arquivos do app; seus dados ficam
  location.reload()}
 document.querySelectorAll('[data-atualizar]').forEach(b=>b.onclick=()=>atualizarApp(b));
+document.querySelectorAll('[data-lang]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.lang===(window.I18N?I18N.lang:'pt')));b.onclick=()=>{if(window.I18N&&b.dataset.lang!==I18N.lang)I18N.setLang(b.dataset.lang)}});
 let tt;function toast(m,undo){$('#tMsg').textContent=m;$('#tUndo').hidden=!undo;$('#tUndo').onclick=()=>{undo&&undo();$('#toast').style.display='none'};$('#toast').style.display='flex';clearTimeout(tt);tt=setTimeout(()=>$('#toast').style.display='none',5000)}
 const flash=m=>toast(m);
 /* ---------- ajuda para criar o atalho na tela ---------- */

@@ -1,6 +1,6 @@
 // Guarda o app no celular para abrir rápido e funcionar sem internet.
-const V = 'meucaixa-v11';
-const ARQ = ['./', 'index.html', 'cupom.js', 'cofre.js', 'extrato.js', 'sync.js', 'config.js', 'vendor/supabase.js', 'vendor/xlsx.full.min.js', 'logo.png', 'manifest.webmanifest', 'icons/v3/icon-192.png',
+const V = 'meucaixa-v12';
+const ARQ = ['./', 'index.html', 'cupom.js', 'cofre.js', 'extrato.js', 'i18n.js','sync.js', 'config.js', 'vendor/supabase.js', 'vendor/xlsx.full.min.js', 'logo.png', 'manifest.webmanifest', 'icons/v3/icon-192.png',
   'vendor/jsQR.js', 'vendor/tesseract.min.js', 'vendor/worker.min.js', 'vendor/lang/por.traineddata.gz',
   'vendor/core/tesseract-core-lstm.wasm.js', 'vendor/core/tesseract-core-simd-lstm.wasm.js', 'vendor/core/tesseract-core-relaxedsimd-lstm.wasm.js'];
 self.addEventListener('install', e => { self.skipWaiting(); e.waitUntil(caches.open(V).then(c => c.addAll(ARQ)).catch(() => {})); });
