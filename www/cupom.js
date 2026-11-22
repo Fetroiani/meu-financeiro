@@ -1,4 +1,4 @@
-/* Meu Caixa: transforma o texto lido de um cupom fiscal em itens com categoria.
+/* Anotei Já: transforma o texto lido de um cupom fiscal em itens com categoria.
    Tudo roda no aparelho, sem internet. */
 (function (root) {
   const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase();

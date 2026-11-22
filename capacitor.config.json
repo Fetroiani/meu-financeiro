@@ -1,6 +1,6 @@
 {
   "appId": "br.meucaixa.app",
-  "appName": "Meu Caixa",
+  "appName": "Anotei Já",
   "webDir": "www",
   "android": { "allowMixedContent": false },
   "plugins": {}

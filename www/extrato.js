@@ -1,4 +1,4 @@
-/* Meu Caixa: lê faturas de cartão e extratos (PDF já convertido em texto, CSV, planilha, OFX)
+/* Anotei Já: lê faturas de cartão e extratos (PDF já convertido em texto, CSV, planilha, OFX)
    e devolve uma lista de lançamentos { data: 'AAAA-MM-DD', descricao, valor }.
    valor > 0 = gasto/débito; valor < 0 = crédito (pagamento, estorno, entrada). */
 (function (root) {

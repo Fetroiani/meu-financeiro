@@ -1,4 +1,4 @@
-/* Meu Caixa: cofre dos dados.
+/* Anotei Já: cofre dos dados.
    - Uma chave aleatória de 256 bits (DEK) criptografa todos os dados com AES-GCM.
    - A DEK fica guardada "embrulhada" por uma chave derivada do PIN (PBKDF2-SHA256, 310 mil iterações).
    - Com biometria ligada, uma cópia da DEK vai para o Keychain (iOS) / Keystore (Android),

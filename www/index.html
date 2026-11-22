@@ -3,22 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f2a45">
+<meta name="theme-color" content="#0c2a5b">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icons/v2/icon-192.png">
-<link rel="apple-touch-icon" href="icons/v2/icon-180.png">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="icons/v3/favicon-64.png">
+<meta name="description" content="Anotei Já: controle financeiro pessoal. Fotografe o cupom e o app separa os gastos por categoria.">
+<meta property="og:title" content="Anotei Já">
+<meta property="og:description" content="Controle financeiro pessoal, simples e seguro.">
+<meta property="og:image" content="https://fetroiani.github.io/meu-financeiro/icons/v3/og-1200x630.png">
+<meta name="msapplication-TileColor" content="#1d4fd8">
+<meta name="msapplication-TileImage" content="icons/v3/icon-256.png">
+<link rel="apple-touch-icon" href="icons/v3/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Meu Caixa">
+<meta name="apple-mobile-web-app-title" content="Anotei Já">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Meu Caixa</title>
+<title>Anotei Já</title>
 <style>
 /* VOICE: calm, direct personal money tool, Portuguese, no jargon.
    IDEA: a pharmacy-style label box: the month's balance printed on a green block, categories as a dosage table.
    PICTURE: the live donut of spending by category beside the big balance figure.
-   COLOUR and TYPE: white, emerald #00a86b block, pale pink #ffd6e0 block, black; night #04140d. Schibsted Grotesk.
+   COLOUR and TYPE: white, logo gradient green #22d39a > cyan #16b4d0 > blue #1d4fd8, pale aqua block, navy ink #0b1a33; night #050f1f.
    LAYOUT: rectangles like a medicine box; bottom tab bar on phones, top tabs on wide screens. */
-:root{color-scheme:light dark;--bg:light-dark(#fff,#04140d);--ink:light-dark(#0b0b0b,#eaf6ef);--mut:light-dark(#5b5f5c,#9fb8aa);--line:light-dark(#e5e7e5,#173527);--card:light-dark(#fff,#08201a);--em:#00a86b;--emd:light-dark(#007a4e,#2fd197);--pink:light-dark(#ffd6e0,#3a1f28);--pinkink:light-dark(#4a0f20,#ffd6e0);--red:light-dark(#c62845,#ff7b92)}
+:root{color-scheme:light dark;--bg:light-dark(#fff,#050f1f);--ink:light-dark(#0b1a33,#e8f1fb);--mut:light-dark(#55627a,#9db0c8);--line:light-dark(#e2e8f0,#17304d);--card:light-dark(#fff,#0a1a30);--em:#1d6fe0;--grad:linear-gradient(135deg,#22d39a 0%,#16b4d0 48%,#1d4fd8 100%);--emd:light-dark(#1550b8,#4fd8c4);--pink:light-dark(#dff8f1,#0d2e3a);--pinkink:light-dark(#0b3d5c,#b8f3e2);--red:light-dark(#c62845,#ff7b92)}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
 *{box-sizing:border-box;min-width:0}[hidden]{display:none!important}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:clip;padding-bottom:calc(84px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
@@ -26,16 +33,16 @@ h1,h2,h3{margin:0;line-height:1.1;text-wrap:balance}
 h2{font-size:22px;font-weight:800}
 .wrap{max-width:1100px;margin:0 auto;padding:0 max(4vw,14px)}
 header.top{display:flex;align-items:center;gap:12px;padding:max(14px,env(safe-area-inset-top)) 0 14px;flex-wrap:wrap}
-header.top h1{font-size:22px;font-weight:800;flex:1}
+header.top h1{font-size:22px;font-weight:800;flex:1;display:flex;align-items:center;gap:8px}header.top h1 img{width:34px;height:34px}
 .sync{font-size:13px;color:var(--mut)}@media(max-width:430px){.sync{display:none}}
 nav.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid var(--line);z-index:5;padding-bottom:env(safe-area-inset-bottom)}
 nav.tabs button{background:none;border:0;color:var(--mut);font:600 13px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:10px 4px 14px;min-height:60px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
 nav.tabs button svg{width:22px;height:22px}
 nav.tabs button[aria-selected=true]{color:var(--emd)}
-@media(min-width:800px){body{padding-bottom:30px}nav.tabs{position:static;display:flex;border:0;gap:6px;background:none}nav.tabs button{flex-direction:row;min-height:44px;padding:8px 14px;border-radius:999px;font-size:15px}nav.tabs button[aria-selected=true]{background:var(--em);color:#fff}}
+@media(min-width:800px){body{padding-bottom:30px}nav.tabs{position:static;display:flex;border:0;gap:6px;background:none}nav.tabs button{flex-direction:row;min-height:44px;padding:8px 14px;border-radius:999px;font-size:15px}nav.tabs button[aria-selected=true]{background:var(--grad);color:#fff}}
 .view{display:none}.view.on{display:block}
 .box{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);border:2px solid var(--ink);border-radius:14px;overflow:hidden;margin-top:6px}
-.green{background:var(--em);color:#fff;padding:22px;display:flex;flex-direction:column;gap:14px}
+.green{background:var(--grad);color:#fff;padding:22px;display:flex;flex-direction:column;gap:14px}
 .green .lbl{font-size:15px;opacity:.9}
 .big{font-size:clamp(36px,7vw,54px);font-weight:800;line-height:1;white-space:nowrap}
 .mini{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -51,7 +58,7 @@ nav.tabs button[aria-selected=true]{color:var(--emd)}
 .pinkband p{margin:0;flex:1;min-width:200px}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:12px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);font:700 16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer;text-decoration:none}
 .btn.ghost{background:transparent;color:var(--ink)}
-.btn.em{background:var(--em);border-color:var(--em);color:#fff}
+.btn.em{background:var(--grad);border-color:#1d6fe0;color:#fff}
 .btn:disabled{opacity:.5;cursor:default}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--emd);outline-offset:2px}
 section.blk{margin-top:26px}
@@ -99,7 +106,7 @@ input,select{font:16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padd
 .toast button{background:none;border:0;color:var(--em);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer;min-height:36px}
 .bk{margin-top:22px;border:1px solid var(--line);border-radius:12px;padding:12px 14px}.bk summary{cursor:pointer;font-weight:700;min-height:28px}.bk textarea{width:100%;min-height:110px;font:13px ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--card);color:var(--ink);margin:8px 0}
 pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
-.lock{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#1a6f8a 0%,#123e63 45%,#081a2e 100%);color:#fff;display:flex;align-items:flex-start;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));overflow:auto}
+.lock{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#16a88a 0%,#1556b8 50%,#0a1f4a 100%);color:#fff;display:flex;align-items:flex-start;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));overflow:auto}
 .lock[hidden]{display:none}
 .lk-in{margin:auto 0;width:min(340px,100%);display:grid;justify-items:center;gap:14px;text-align:center}
 .lk-in img{width:84px;height:84px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
@@ -154,8 +161,8 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 <body>
 <div class="lock" id="lock">
   <div class="lk-in">
-    <img src="logo.png" alt="">
-    <h1>Meu Caixa</h1>
+    <img src="icons/v3/icon-192.png" alt="">
+    <h1>Anotei Já</h1>
     <div class="inst" id="inst" hidden></div>
     <p id="lkMsg">Carregando…</p>
     <div class="dots" id="dots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -166,7 +173,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" aria-label="Menu">
-  <div class="dhead"><img src="logo.png" alt=""><b>Meu Caixa</b><button class="icon" id="dClose" aria-label="Fechar menu">Fechar</button></div>
+  <div class="dhead"><img src="logo.png" alt=""><b>Anotei Já</b><button class="icon" id="dClose" aria-label="Fechar menu">Fechar</button></div>
   <h3 id="dMes">Categorias</h3>
   <div id="dCats"></div>
   <h3>Ferramentas</h3>
@@ -181,7 +188,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 <div class="wrap">
 <header class="top">
   <button class="menu" id="btnMenu" aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  <h1>Meu Caixa</h1>
+  <h1 class="marca"><img src="logo.png" alt="">Anotei Já</h1>
   <span class="sync" id="sync">Protegido com PIN</span><button class="lkbtn" id="btnLock" aria-label="Bloquear o app">Bloquear</button>
   <nav class="tabs" role="tablist">
     <button role="tab" data-v="inicio" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 4"/></svg>Início</button>
@@ -318,7 +325,7 @@ const DEF_CATS=[
  {k:'dolar',n:'Dólar',c:'#2e7d32'},{k:'euro',n:'Euro',c:'#f2b705'},{k:'extra',n:'Extra',c:'#8d8f8e'}];
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(DEF_CATS);
-const VERSAO='2026.11.22-6';
+const VERSAO='2026.11.22-7';
 const IN={k:'receita',n:'Entrada',c:'#00a86b'};
 const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS.find(c=>c.k==='extra'));
 const $=s=>document.querySelector(s);
@@ -371,7 +378,7 @@ async function prfChave(out){return crypto.subtle.importKey('raw',out,{name:'AES
 async function webBioGet(id,salt){const a=await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,allowCredentials:[{type:'public-key',id:Cofre.unb64(id)}],userVerification:'required',timeout:60000,extensions:{prf:{eval:{first:Cofre.unb64(salt)}}}}});
  const r=a.getClientExtensionResults().prf;if(!r||!r.results||!r.results.first)throw new Error('sem-prf');return r.results.first}
 async function webBioLigar(){const salt=crypto.getRandomValues(new Uint8Array(32));
- const cred=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Meu Caixa',id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'Meu Caixa',displayName:'Meu Caixa'},
+ const cred=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Anotei Já',id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'Anotei Já',displayName:'Anotei Já'},
   pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},timeout:60000,extensions:{prf:{eval:{first:salt}}}}});
  const ext=cred.getClientExtensionResults().prf;if(ext&&ext.enabled===false)throw new Error('sem-prf');
  const id=Cofre.b64(cred.rawId);let out=ext&&ext.results&&ext.results.first;if(!out)out=await webBioGet(id,Cofre.b64(salt));
@@ -398,7 +405,7 @@ function perguntarBio(){lkMsg('Quer abrir o app com Face ID ou digital da próxi
  $('#bSim').onclick=async()=>{await ligarBio();liberar()};$('#bNao').onclick=liberar}
 async function ligarBio(){if(!NATIVO){try{await webBioLigar();toast('Face ID / digital ligado')}catch(e){toast(String(e.message).includes('sem-prf')?'Este celular ainda não permite Face ID / digital em apps de navegador. Continue usando o PIN.':'Biometria não ativada')}atualizarBioBtn();return}try{await BIO.setData({key:K_DEK,value:Cofre.b64(BRUTA),accessControl:2,title:'Ativar biometria',negativeButtonText:'Cancelar'});await escrever(K_BIO,'1');toast('Biometria ligada')}catch(e){toast('Não foi possível ligar a biometria')}atualizarBioBtn()}
 async function desligarBio(){if(!NATIVO){localStorage.removeItem(K_WBIO);toast('Biometria desligada');atualizarBioBtn();return}try{await BIO.deleteData({key:K_DEK})}catch(e){}await escrever(K_BIO,'0');toast('Biometria desligada');atualizarBioBtn()}
-async function tentarBio(){if(!(await bioLigada()))return;if(!NATIVO){try{lkMsg('Confirme com Face ID ou digital…');BRUTA=await webBioAbrir();CHAVE=await Cofre.importar(BRUTA);await carregarDados();liberar()}catch(e){lkMsg(e&&e.name==='NotAllowedError'?'Toque em Biometria ou digite seu PIN':'Digite seu PIN')}return}try{const r=await BIO.getSecureData({key:K_DEK,reason:'Abrir o Meu Caixa',title:'Meu Caixa',subtitle:'Confirme que é você',negativeButtonText:'Usar PIN'});
+async function tentarBio(){if(!(await bioLigada()))return;if(!NATIVO){try{lkMsg('Confirme com Face ID ou digital…');BRUTA=await webBioAbrir();CHAVE=await Cofre.importar(BRUTA);await carregarDados();liberar()}catch(e){lkMsg(e&&e.name==='NotAllowedError'?'Toque em Biometria ou digite seu PIN':'Digite seu PIN')}return}try{const r=await BIO.getSecureData({key:K_DEK,reason:'Abrir o Anotei Já',title:'Anotei Já',subtitle:'Confirme que é você',negativeButtonText:'Usar PIN'});
  BRUTA=Cofre.unb64(r.value);CHAVE=await Cofre.importar(BRUTA);await carregarDados();liberar()}
  catch(e){if(String(e.code)==='21'){await escrever(K_BIO,'0');atualizarBioBtn();lkMsg('A biometria mudou neste celular. Entre com o PIN e ligue de novo em Segurança.')}else lkMsg('Digite seu PIN')}}
 $('#pBio').onclick=tentarBio;
@@ -708,10 +715,10 @@ function baixarICS(lista){lista=lista.filter(a=>a&&!a.pago);if(!lista.length){to
  const st=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
  const ev=lista.map(a=>{const d=a.venc.replace(/-/g,'');const d2=somaMes(a.venc,0).replace(/-/g,'');const fim=new Date(a.venc+'T12:00');fim.setDate(fim.getDate()+1);const df=fim.toISOString().slice(0,10).replace(/-/g,'');
   return['BEGIN:VEVENT','UID:'+a.id+'@meucaixa','DTSTAMP:'+st,'DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+df,'SUMMARY:Vence: '+a.nome.replace(/[,;]/g,' ')+(a.valor?' (R$ '+a.valor.toFixed(2).replace('.',',')+')':''),
-   'DESCRIPTION:Lembrete do Meu Caixa',...(a.rep==='mensal'?['RRULE:FREQ=MONTHLY']:a.rep==='anual'?['RRULE:FREQ=YEARLY']:[]),
+   'DESCRIPTION:Lembrete do Anotei Já',...(a.rep==='mensal'?['RRULE:FREQ=MONTHLY']:a.rep==='anual'?['RRULE:FREQ=YEARLY']:[]),
    'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+a.nome.replace(/[,;]/g,' ')+' vence hoje','TRIGGER;RELATED=START:PT9H','END:VALARM',
    ...((a.avisar??3)>0?['BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+a.nome.replace(/[,;]/g,' ')+' vence em '+(a.avisar??3)+' dia(s)','TRIGGER:-'+((a.avisar??3)>1?'P'+((a.avisar??3)-1)+'DT15H':'PT15H'),'END:VALARM']:[]),'END:VEVENT'].join('\r\n')});
- const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Meu Caixa//PT-BR','CALSCALE:GREGORIAN',...ev,'END:VCALENDAR'].join('\r\n');
+ const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Anotei Já//PT-BR','CALSCALE:GREGORIAN',...ev,'END:VCALENDAR'].join('\r\n');
  const blob=new Blob([ics],{type:'text/calendar'});const nome=(lista.length>1?'vencimentos':Cupom.norm(lista[0].nome).replace(/[^A-Z0-9]+/g,'-').toLowerCase())+'.ics';
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000);toast('Abra o arquivo para adicionar à agenda')}
 $('#alIcsTodos').onclick=()=>baixarICS(pendentes());
@@ -729,7 +736,7 @@ $('#dXlsx').onclick=async()=>{if(!window.XLSX){toast('A planilha ainda está car
  if(ALERTAS.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ALERTAS.slice().sort((a,b)=>a.venc.localeCompare(b.venc)).map(a=>({'Conta':a.nome,'Vencimento':new Date(a.venc+'T12:00'),'Valor (R$)':a.valor||'','Situação':a.pago?'Paga':statusAl(a)[1],'Repetir':a.rep==='mensal'?'Todo mês':a.rep==='anual'?'Todo ano':'Uma vez','Categoria':cat(a.cat||'extra').n}))),'Vencimentos');
  const nome='meu-caixa-'+today()+'.xlsx';const blob=new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
  const file=new File([blob],nome,{type:blob.type});
- if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/.test(navigator.userAgent)){try{await navigator.share({files:[file],title:'Meu Caixa'});return}catch(e){if(e.name==='AbortError')return}}
+ if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/.test(navigator.userAgent)){try{await navigator.share({files:[file],title:'Anotei Já'});return}catch(e){if(e.name==='AbortError')return}}
  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Planilha baixada: '+nome)};
 
 /* ---------- atualização automática ---------- */
@@ -754,7 +761,7 @@ const flash=m=>toast(m);
   else if(inApp)show('<span class=\"t\">Para instalar, abra no Chrome</span>Você abriu o link dentro de outro app. Toque nos ⋮ e escolha <b>Abrir no Chrome</b> (ou no navegador).');
   else show('<span class=\"t\">Criar o atalho na tela</span>Toque nos ⋮ do Chrome, no canto de cima, e depois em <b>Adicionar à tela inicial</b> e <b>Instalar</b>.');
  }
- window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();evt=e;if(!NATIVO&&!inst){show('<span class=\"t\">Instale o Meu Caixa no celular</span>O atalho abre em tela cheia, como um app.<button class="btn" id="instBtn">Instalar app</button>');
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();evt=e;if(!NATIVO&&!inst){show('<span class=\"t\">Instale o Anotei Já no celular</span>O atalho abre em tela cheia, como um app.<button class="btn" id="instBtn">Instalar app</button>');
   $('#instBtn').onclick=async()=>{evt.prompt();const r=await evt.userChoice;if(r.outcome==='accepted')box.hidden=true}}});
  window.addEventListener('appinstalled',()=>{box.hidden=true});}
 
