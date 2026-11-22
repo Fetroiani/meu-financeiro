@@ -181,6 +181,11 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 .langs button[aria-pressed="true"]{background:var(--grad);color:var(--gink);border-color:transparent}
 .langs.lk{justify-content:center;margin-top:14px}.langs.lk button{flex:0 0 auto;min-width:52px;min-height:36px;background:transparent;color:inherit;border-color:currentColor;opacity:.8}
 .langs.lk button[aria-pressed="true"]{opacity:1;background:rgba(255,255,255,.25);color:inherit}
+.scan{position:fixed;inset:0;z-index:60;background:#000;color:#fff}.scan video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.scMira{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}.scMira i{width:min(78vw,420px);height:min(52vw,280px);border:3px solid #00C896;border-radius:16px;box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
+.scTop{position:absolute;top:0;left:0;right:0;padding:max(18px,env(safe-area-inset-top)) 18px 12px;text-align:center;display:grid;gap:4px}.scTop b{font-size:18px}.scTop span{font-size:14px;opacity:.85}
+.scBot{position:absolute;bottom:0;left:0;right:0;padding:12px 16px max(18px,env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.scBot .btn.ghost{color:#fff;border-color:#fff;background:rgba(0,0,0,.35)}
+.msg span.ln{display:block;margin-top:4px}.msg span.ln:first-child{margin-top:0}.msg .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
 </style>
 </head>
 <body>
@@ -196,6 +201,12 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
     <button class="lk-link" id="lkLink">Esqueci meu PIN</button>
     <div class="langs lk" translate="no"><button data-lang="pt">PT</button><button data-lang="es">ES</button><button data-lang="en">EN</button></div>
   </div>
+</div>
+<div class="scan" id="scan" hidden>
+  <video id="scVid" playsinline muted autoplay></video>
+  <div class="scMira"><i></i></div>
+  <div class="scTop"><b>Aponte para o QR Code ou o código de barras</b><span>Para o código de barras de boletos e contas, deite o celular.</span></div>
+  <div class="scBot"><button class="btn ghost" id="scLuz" hidden>Lanterna</button><button class="btn ghost" id="scDig">Digitar código</button><button class="btn" id="scFechar">Cancelar</button></div>
 </div>
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" aria-label="Menu">
@@ -316,15 +327,18 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 
 <div class="view" id="v-cupom">
   <h2>Ler cupom, nota, conta ou fatura<button class="ajuda" aria-expanded="false" aria-controls="hCupom" aria-label="Ajuda">?</button></h2>
-  <p class="note dica" id="hCupom" hidden>Fotografe o cupom inteiro, reto, com boa luz e sem dobras. A leitura acontece no próprio celular, sem internet. Quando você troca a categoria de um item, o app aprende para a próxima vez.</p>
+  <p class="note dica" id="hCupom" hidden>Fotografe o cupom inteiro, reto, com boa luz e sem dobras. A leitura acontece no próprio celular, sem internet. Quando você troca a categoria de um item, o app aprende para a próxima vez.<br><br>Para contas e boletos, escaneie o código de barras: o app pega o valor e o vencimento certinhos e cria o alerta. O QR Code do cupom ou da nota fiscal traz a loja, a data e, em algumas notas, o total.</p>
   <div class="drop" id="drop">
     <img id="prev" alt="Foto do cupom" hidden>
-    <button class="btn" id="tirar">Tirar foto ou escolher imagem</button>
+    <button class="btn" id="tirar">📷 Tirar foto ou escolher imagem</button>
+    <button class="btn" id="btnScan">▦ Escanear QR Code ou código de barras</button>
     <input id="foto" type="file" accept="image/*" capture="environment" hidden>
     <button class="btn ghost" id="btnDoc">Enviar fatura ou documento</button>
     <input id="doc" type="file" accept=".pdf,.csv,.tsv,.txt,.ofx,.qfx,.xlsx,.xls,.ods,image/*,application/pdf" hidden>
     <span class="note" style="color:inherit">Aceita PDF, foto, CSV, OFX, Excel (.xlsx, .xls) e TXT</span>
     <button class="btn em" id="ler" disabled>Ler e separar itens</button>
+    <button class="lk-link" id="btnDig" type="button" style="color:inherit">⌨ Digitar código de barras ou chave da nota</button>
+    <form id="digBox" hidden style="display:grid;gap:8px;width:100%"><input id="digTxt" inputmode="numeric" autocomplete="off" placeholder="Linha digitável do boleto ou chave de 44 dígitos" aria-label="Código"><button class="btn em" type="submit">Usar código</button></form>
   </div>
   <div id="cupomMsg"></div>
   <details class="bk" id="ocrBox" hidden><summary>Ver o texto que o app leu</summary><pre class="ocr" id="ocrTxt"></pre></details>
@@ -366,6 +380,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 <script src="vendor/jsQR.js"></script>
 <script src="vendor/tesseract.min.js"></script>
 <script src="i18n.js"></script>
+<script src="codigos.js"></script>
 <script src="cupom.js"></script>
 <script src="cofre.js"></script>
 <script src="extrato.js"></script>
@@ -396,7 +411,7 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.22-12';
+const VERSAO='2026.11.22-13';
 const T=window.I18N?I18N.T:(s=>s),LOC=window.I18N?I18N.loc:'pt-BR',nomeCat=(k,n)=>window.I18N?I18N.nomeCat(k,n):n;
 NOVAS.forEach(c=>c.n=nomeCat(c.k,c.n));DEF_CATS.forEach(c=>c.n=nomeCat(c.k,c.n));CATS=clone(NOVAS);
 const IN={k:'receita',n:nomeCat('receita','Salário e Entradas'),c:'#00a884'};
@@ -641,13 +656,64 @@ async function escolher(){
  else $('#foto').click()}
 $('#tirar').onclick=escolher;
 $('#foto').onchange=e=>{const f=e.target.files[0];if(f)usarFoto(f)};
-async function usarFoto(f){foto=f;$('#prev').src=URL.createObjectURL(f);$('#prev').hidden=false;$('#ler').disabled=false;$('#revisao').hidden=true;$('#ocrBox').hidden=true;cupomMsg('');qr=await lerQR(f)}
+async function usarFoto(f){foto=f;$('#prev').src=URL.createObjectURL(f);$('#prev').hidden=false;$('#ler').disabled=false;$('#revisao').hidden=true;$('#ocrBox').hidden=true;cupomMsg('');qr=null;
+ const raw=await lerCodigoImagem(f);if(!raw||foto!==f)return;const c=Codigos.interpretar(raw);
+ if(c&&c.tipo==='nfce'){qr=raw;cupomMsg(`<span class="ln"><b>QR Code da nota lido.</b></span><span class="ln">Toque em Ler e separar itens para separar os produtos, ou lance só o total.</span><span class="acts"><button class="btn ghost" type="button" id="soTotal">Lançar só o total</button></span>`);$('#soTotal').onclick=()=>revisarCodigo(c,raw)}
+ else if(c&&['conta','boleto','pix'].includes(c.tipo))revisarCodigo(c,raw)}
 function carregar(f){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=no;im.src=URL.createObjectURL(f)})}
 async function preparar(f,max,cinza){const im=await carregar(f);const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,c.width,c.height);
  if(cinza){const d=x.getImageData(0,0,c.width,c.height),p=d.data;let lo=255,hi=0;const g=new Uint8ClampedArray(p.length/4);
   for(let i=0;i<g.length;i++){const v=.299*p[i*4]+.587*p[i*4+1]+.114*p[i*4+2];g[i]=v;if(v<lo)lo=v;if(v>hi)hi=v}
   const r=Math.max(1,hi-lo);for(let i=0;i<g.length;i++){const v=(g[i]-lo)*255/r;p[i*4]=p[i*4+1]=p[i*4+2]=v}x.putImageData(d,0,0)}
  return c}
+/* ---------- QR Code e código de barras ---------- */
+let ZXR=null;
+function carregarZX(){if(window.ZXing)return Promise.resolve();return new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='vendor/zxing.min.js';sc.onload=ok;sc.onerror=()=>no(new Error('leitor de códigos não carregou'));document.head.appendChild(sc)})}
+let ZXH=null;function leitorZX(){if(ZXR)return ZXR;const Z=ZXing,F=Z.BarcodeFormat;ZXH=new Map();ZXH.set(Z.DecodeHintType.POSSIBLE_FORMATS,[F.QR_CODE,F.ITF,F.CODE_128,F.EAN_13,F.EAN_8]);ZXH.set(Z.DecodeHintType.TRY_HARDER,true);ZXR=new Z.MultiFormatReader();return ZXR}
+function zxCanvas(c){try{const Z=ZXing;const rd=leitorZX();const r=rd.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(c))),ZXH);return r&&r.getText()}catch(e){return null}finally{try{ZXR&&ZXR.reset()}catch(e){}}}
+let BD=null;async function detector(){if(BD!==null)return BD;BD=false;try{if('BarcodeDetector' in window){const sup=await BarcodeDetector.getSupportedFormats();const fs=['qr_code','itf','code_128','ean_13','ean_8'].filter(x=>sup.includes(x));if(fs.includes('qr_code')&&fs.includes('itf'))BD=new BarcodeDetector({formats:fs})}}catch(e){}return BD}
+const melhor=l=>{const v=l.filter(Boolean);return v.find(x=>{const c=Codigos.interpretar(x);return c&&['nfce','conta','boleto','pix'].includes(c.tipo)})||v[0]||null};
+async function lerCodigoImagem(f){const achados=[];try{const bd=await detector();if(bd){const r=await bd.detect(await createImageBitmap(f));r.forEach(x=>achados.push(x.rawValue))}}catch(e){}
+ if(!melhor(achados))try{const q=await lerQR(f);if(q)achados.push(q)}catch(e){}
+ if(!melhor(achados))try{await carregarZX();for(const mx of [1600,2400]){const c=await preparar(f,mx,false);const t=zxCanvas(c);if(t){achados.push(t);break}}}catch(e){}
+ return melhor(achados)}
+// leitor ao vivo pela câmera
+let scStream=null,scVivo=false,scTimer=null;
+async function abrirScanner(){cupomMsg('');const ov=$('#scan'),v=$('#scVid');
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){cupomMsg(T('Este navegador não deixa usar a câmera ao vivo. Use Tirar foto: o app também lê o código pela foto.'),true);return}
+ try{scStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false})}
+ catch(e){cupomMsg(/NotAllowed|Permission/i.test(e&&e.name||'')?T('Sem permissão para usar a câmera. Libere a câmera para este site nas configurações do navegador, ou use Tirar foto.'):T('Não consegui abrir a câmera: ')+esc(e.message||e),true);return}
+ v.srcObject=scStream;ov.hidden=false;scVivo=true;try{await v.play()}catch(e){}
+ const tr=scStream.getVideoTracks()[0];let luz=false;try{const cp=tr.getCapabilities&&tr.getCapabilities();$('#scLuz').hidden=!(cp&&cp.torch);$('#scLuz').onclick=async()=>{luz=!luz;try{await tr.applyConstraints({advanced:[{torch:luz}]})}catch(e){}}}catch(e){$('#scLuz').hidden=true}
+ const bd=await detector();if(!bd)try{await carregarZX()}catch(e){fecharScanner();cupomMsg(T('O leitor de códigos não carregou. Tente de novo com internet uma vez.'),true);return}
+ const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});let n=0,q=0;
+ const passo=async()=>{if(!scVivo)return;let raw=null;
+  try{if(v.readyState>=2&&v.videoWidth){if(bd){const r=await bd.detect(v);raw=melhor(r.map(x=>x.rawValue))}
+   else{const W=v.videoWidth,H=v.videoHeight;if(++q%2){const k=Math.min(1,1280/Math.max(W,H));cv.width=Math.round(W*k);cv.height=Math.round(H*k);cx.drawImage(v,0,0,cv.width,cv.height)}else{const cw=Math.round(W*.9),ch=Math.round(H*.6);cv.width=cw;cv.height=ch;cx.drawImage(v,(W-cw)/2,(H-ch)/2,cw,ch,0,0,cw,ch)}raw=zxCanvas(cv)}}}catch(e){}
+  if(raw){const c=Codigos.interpretar(raw);if(c&&(c.tipo!=='invalido'||++n>3)){fecharScanner();if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}revisarCodigo(c,raw);return}}
+  scTimer=setTimeout(passo,bd?120:180)};passo()}
+function fecharScanner(){scVivo=false;clearTimeout(scTimer);if(scStream)scStream.getTracks().forEach(t=>t.stop());scStream=null;$('#scVid').srcObject=null;$('#scan').hidden=true}
+$('#btnScan').onclick=abrirScanner;$('#scFechar').onclick=fecharScanner;
+$('#scDig').onclick=()=>{fecharScanner();$('#digBox').hidden=false;$('#digTxt').focus()};
+$('#btnDig').onclick=()=>{const b=$('#digBox');b.hidden=!b.hidden;if(!b.hidden)$('#digTxt').focus()};
+$('#digBox').onsubmit=ev=>{ev.preventDefault();const raw=$('#digTxt').value.trim();if(!raw)return;const c=Codigos.interpretar(raw);revisarCodigo(c,raw);if(c&&['nfce','conta','boleto','pix'].includes(c.tipo)){$('#digTxt').value='';$('#digBox').hidden=true}};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&scVivo)fecharScanner()});
+const ln=t=>`<span class="ln">${t}</span>`;
+function revisarCodigo(c,raw){if(!c){cupomMsg(T('Não reconheci este código.'),true);return}
+ const fd=d=>d?d.split('-').reverse().join('/'):'';
+ if(c.tipo==='nfce'){qr=raw;const ck=APR['cnpj:'+c.cnpj],cn=ck&&CATS.some(x=>x.k===ck)?ck:'mercado',lj=APR['loja:'+c.cnpj]||'';const mm=`${c.ano}-${String(c.mes).padStart(2,'0')}`;
+  const data=c.data||(ym(today())===mm?today():mm+'-01');
+  revisar({loja:lj||'CNPJ '+c.cnpjFmt,data,total:c.valor,cnpj:c.cnpj,itens:[{descricao:c.nome,valor:c.valor,categoria:cn}],
+   msg:ln(`<b>${c.nome==='Nota fiscal'?'Nota fiscal lida pelo QR Code':'Cupom fiscal lido pelo QR Code'}</b>`)+ln('Emitente: CNPJ '+c.cnpjFmt+(c.uf?' ('+c.uf+')':''))+(c.valor?ln('Total '+brl(c.valor)):ln('Esta nota não traz o valor no QR Code: digite o total abaixo.'))+(lj?'':ln('Digite o nome da loja: nas próximas notas desse CNPJ o app já preenche.'))+ln('O QR Code não traz a lista de produtos. Para separar cada item por categoria, fotografe o cupom.')+(c.url?`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener">Abrir a nota no site da Sefaz</a></span>`:'')});return}
+ if(c.tipo==='conta'||c.tipo==='boleto'){const nome=c.tipo==='boleto'?'Boleto '+c.bancoNome:'Conta de '+c.nome.toLowerCase();
+  revisar({conta:c.nome,nomeConta:nome,barras:c.barras,loja:c.tipo==='boleto'?c.bancoNome:c.nome,data:c.venc||today(),total:c.valor,itens:[{descricao:nome,valor:c.valor,categoria:'contas'}],
+   msg:ln('<b>Código de barras lido</b>')+ln(nome)+(c.valor?ln('Valor: '+brl(c.valor)):ln('O código não traz o valor: digite abaixo.'))+(c.venc?ln('Vencimento: '+fd(c.venc)):ln('Confira a data de vencimento no campo Data.'))+ln('Ao salvar, vira um alerta de vencimento. Quando pagar, toque em Paguei.')});return}
+ if(c.tipo==='pix'){revisar({loja:c.recebedor||'Pix',data:today(),total:c.valor,itens:[{descricao:'Pix'+(c.recebedor?' '+c.recebedor:''),valor:c.valor,categoria:'extra'}],
+   msg:ln('<b>QR Code Pix lido</b>')+(c.recebedor?ln('Recebedor: '+esc(c.recebedor)):'')+(c.valor?ln('Valor: '+brl(c.valor)):ln('Este Pix não traz o valor: digite abaixo.'))+ln('Escolha a categoria e toque em Salvar no extrato.')});return}
+ if(c.tipo==='produto'){cupomMsg(T('Esse é o código de barras de um produto, não de uma nota ou conta. Aponte para o QR Code do cupom ou para o código de barras do boleto.'),true);return}
+ if(c.tipo==='invalido'){cupomMsg(T('O código parece de um boleto, mas os números não conferem. Leia de novo ou digite a linha digitável.'),true);return}
+ if(c.tipo==='link'){cupomMsg(ln(T('Este QR Code não é de nota fiscal nem de Pix.'))+`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.url.slice(0,60))}</a></span>`,true);return}
+ cupomMsg(T('Não reconheci este código.'),true)}
 async function lerQR(f){try{
  if('BarcodeDetector' in window){const bd=new BarcodeDetector({formats:['qr_code']});const r=await bd.detect(await createImageBitmap(f));if(r[0])return r[0].rawValue}
  if(window.jsQR){const c=await preparar(f,1200,false),x=c.getContext('2d');const r=jsQR(x.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r)return r.data}
@@ -672,7 +738,7 @@ $('#ler').onclick=async()=>{if(!foto)return;const b=$('#ler');b.disabled=true;b.
 let ULTJ=null;
 function revisar(j,manual){ULTJ=manual?null:j;rev=(j.itens||[]).map(i=>({d:String(i.descricao||''),v:num(i.valor),c:mapCat(i.categoria)}));rev.forEach(i=>i.o=i.c);
  $('#rLoja').value=j.loja||'';$('#rData').value=/^\d{4}-\d\d-\d\d$/.test(j.data||'')?j.data:today();
- if(!manual){const s=rev.reduce((a,i)=>a+i.v,0);const dif=j.total&&Math.abs(s-j.total)>.05;const ch=Cupom.lerQR(qr);
+ if(!manual&&j.msg){cupomMsg(j.msg);setTimeout(()=>{try{$('#cupomMsg').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){}},50)}else if(!manual){const s=rev.reduce((a,i)=>a+i.v,0);const dif=j.total&&Math.abs(s-j.total)>.05;const ch=Cupom.lerQR(qr);
   cupomMsg(j.conta?`Identifiquei uma <b>conta de ${esc(j.conta.toLowerCase())}</b>${j.total?' de '+brl(num(j.total)):''}${j.data?', vencimento '+j.data.split('-').reverse().join('/'):''}. ${j.data&&dias(j.data)>=0?' Ao salvar, vira um <b>alerta de vencimento</b>; quando pagar, toque em Paguei.':' Já venceu: vai direto para o extrato e o próximo mês fica agendado.'} Confira o valor antes de salvar.`:`Encontrei ${rev.length} itens${j.total?' · total do cupom '+brl(num(j.total)):''}.${dif?' <b>A soma dos itens ('+brl(s)+') difere do total</b>: confira os valores, a foto pode ter cortado alguma linha.':''} Toque na categoria para trocar.${ch?'<br>QR da NFC-e lido. Chave: '+ch.replace(/(\d{4})/g,'$1 '):''}`)}
  $('#revisao').hidden=false;renderRev()}
 function renderRev(){$('#rItens').innerHTML=rev.map((i,n)=>`<div class="item"><input class="desc" data-i="${n}" data-k="d" value="${esc(i.d)}" placeholder="Item" aria-label="Descrição"><select data-i="${n}" data-k="c" aria-label="Categoria">${opcoesCat(i.c)}</select><input class="val" data-i="${n}" data-k="v" inputmode="decimal" value="${i.v.toFixed(2).replace('.',',')}" aria-label="Valor"></div>`).join('');
@@ -680,11 +746,12 @@ function renderRev(){$('#rItens').innerHTML=rev.map((i,n)=>`<div class="item"><i
 function resumoRev(){const g={};rev.forEach(i=>g[i.c]=(g[i.c]||0)+i.v);$('#rTot').textContent='Total '+brl(rev.reduce((a,i)=>a+i.v,0));
  $('#rTotCats').textContent=Object.entries(g).map(([k,v])=>cat(k).n+' '+brl(v)).join(' · ')}
 $('#rAdd').onclick=()=>{rev.push({d:'',v:0,c:'extra',o:'extra'});renderRev()};
-$('#rSalvar').onclick=()=>{if(ULTJ&&ULTJ.conta){const v=Math.round(rev.reduce((a,i)=>a+i.v,0)*100)/100,venc=$('#rData').value;const nome='Conta de '+ULTJ.conta.toLowerCase()+(($('#rLoja').value.trim()&&$('#rLoja').value.trim()!==ULTJ.conta)?' · '+$('#rLoja').value.trim():'');
-  if(venc&&dias(venc)>=0){criarAlertaAuto({nome,venc,valor:v,cat:'contas',rep:'mensal',pago:false});ULTJ=null;rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');go('venc');render();return}
+$('#rSalvar').onclick=()=>{if(ULTJ&&ULTJ.conta){const v=Math.round(rev.reduce((a,i)=>a+i.v,0)*100)/100,venc=$('#rData').value;const nome=ULTJ.nomeConta||('Conta de '+ULTJ.conta.toLowerCase()+(($('#rLoja').value.trim()&&$('#rLoja').value.trim()!==ULTJ.conta)?' · '+$('#rLoja').value.trim():''));
+  if(venc&&dias(venc)>=0){criarAlertaAuto({nome,venc,valor:v,cat:'contas',rep:ULTJ.barras?(/^(Água|Luz|Telefone)/.test(ULTJ.conta)?'mensal':''):'mensal',pago:false,...(ULTJ.barras?{codigo:ULTJ.barras}:{})});ULTJ=null;rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');go('venc');render();return}
   criarAlertaAuto({nome,venc,valor:v,cat:'contas',rep:'mensal',pago:true})}
  const g={};rev.filter(i=>i.v).forEach(i=>(g[i.c]=g[i.c]||[]).push({d:i.d,v:i.v}));const loja=$('#rLoja').value.trim()||'Cupom',data=$('#rData').value||today();
  const ks=Object.keys(g);if(!ks.length){flash('Nenhum item com valor.');return}
+ if(ULTJ&&ULTJ.cnpj){const lj=$('#rLoja').value.trim();if(lj&&!/^CNPJ /.test(lj))APR['loja:'+ULTJ.cnpj]=lj;if(ks.length===1)APR['cnpj:'+ULTJ.cnpj]=ks[0]}
  rev.forEach(i=>{if(i.d&&i.c!==i.o)APR[Cupom.norm(i.d).trim()]=i.c});  ks.forEach(k=>put({id:uid(),ts:Date.now(),tipo:'despesa',desc:loja+' · '+cat(k).n,loja,valor:Math.round(g[k].reduce((a,i)=>a+i.v,0)*100)/100,data,cat:k,origem:'cupom',itens:g[k],...(qr?{qr:String(qr).slice(0,400)}:{})}));
  toast('Cupom salvo em '+ks.length+(ks.length>1?' categorias':' categoria'));rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');mes=ym(data);go('inicio');render()};
 
@@ -785,11 +852,11 @@ function somaMes(d,n,anual){const [y,m,dd]=d.split('-').map(Number);const t=new 
 function statusAl(a){if(a.pago)return['pago','Paga'];const n=dias(a.venc);if(n<0)return['atr',n===-1?'Venceu ontem':'Venceu há '+(-n)+' dias'];if(n===0)return['atr','Vence hoje'];if(n<=(a.avisar??3))return['perto',n===1?'Vence amanhã':'Vence em '+n+' dias'];return['ok','Em '+n+' dias']}
 // Alerta criado sozinho ao ler conta/fatura. Se a conta lida já foi lançada (pago), agenda o próximo mês.
 function criarAlertaAuto(o){if(!o.venc)return;const chave=Cupom.norm(o.nome);
- let a=ALERTAS.find(x=>Cupom.norm(x.nome)===chave&&!x.pago);
+ let a=o.codigo&&!o.rep?ALERTAS.find(x=>x.codigo===o.codigo&&!x.pago):ALERTAS.find(x=>Cupom.norm(x.nome)===chave&&!x.pago);
  if(o.pago){if(a&&a.venc.slice(0,7)===o.venc.slice(0,7)){a.pago=true;a.pagoEm=today()}
   const prox=somaMes(o.venc,1);if(!ALERTAS.some(x=>Cupom.norm(x.nome)===chave&&x.venc===prox))ALERTAS.push({id:uid(),nome:o.nome,venc:prox,valor:o.valor,estimado:true,cat:o.cat,sub:o.sub||'',rep:o.rep,avisar:3,auto:true});
   toast('Alerta criado: '+o.nome+' vence '+fmtD(prox)+' (valor estimado)')}
- else{if(a){a.venc=o.venc;a.valor=o.valor;a.estimado=false}else ALERTAS.push({id:uid(),nome:o.nome,venc:o.venc,valor:o.valor,cat:o.cat,sub:o.sub||'',rep:o.rep,avisar:3,auto:true,fatura:!!o.fatura});
+ else{if(a){a.venc=o.venc;a.valor=o.valor;a.estimado=false;if(o.codigo)a.codigo=o.codigo}else ALERTAS.push({id:uid(),nome:o.nome,venc:o.venc,valor:o.valor,cat:o.cat,sub:o.sub||'',rep:o.rep,avisar:3,auto:true,fatura:!!o.fatura,...(o.codigo?{codigo:o.codigo}:{})});
   setTimeout(()=>toast('Alerta criado: '+o.nome+' vence '+fmtD(o.venc)),1200)}
  persist()}
 function pendentes(){return ALERTAS.filter(a=>!a.pago).sort((a,b)=>a.venc.localeCompare(b.venc))}
@@ -804,9 +871,10 @@ function renderAlertas(){const av=avisando(),atr=av.filter(a=>dias(a.venc)<=0);
  $('#alLista').innerHTML=(pend.length||pagos.length)?[...pend,...pagos].map(a=>{const [k,t]=statusAl(a);const c=cat(a.cat||'extra');const sn=a.sub?subNome({cat:a.cat,sub:a.sub}):'';
   return`<div class="al"><span class="dot" style="background:${c.c}"></span><span class="d"><b>${esc(a.nome)}</b></span><span class="st ${k}">${t}</span>
   <small>${fmtD(a.venc)} · ${a.valor?brl(a.valor)+(a.estimado?' (estimado)':''):'valor a definir'} · ${esc(c.n)}${sn?' › '+esc(sn):''}${a.rep==='mensal'?' · todo mês':a.rep==='anual'?' · todo ano':''}</small>
-  <span class="q">${a.pago?`<button class="btn ghost" data-ad="${a.id}">Apagar</button>`:`<button class="btn em" data-ap="${a.id}">Paguei</button><button class="btn ghost" data-ae="${a.id}">Editar</button><button class="btn ghost" data-ai="${a.id}">Calendário</button><button class="btn ghost" data-ad="${a.id}">Apagar</button>`}</span></div>`}).join(''):'<div class="empty">Nenhum vencimento ainda. Leia uma conta de consumo ou uma fatura, ou cadastre abaixo.</div>';
+  <span class="q">${a.pago?`<button class="btn ghost" data-ad="${a.id}">Apagar</button>`:`<button class="btn em" data-ap="${a.id}">Paguei</button>${a.codigo?`<button class="btn ghost" data-ac="${a.id}">Copiar código</button>`:''}<button class="btn ghost" data-ae="${a.id}">Editar</button><button class="btn ghost" data-ai="${a.id}">Calendário</button><button class="btn ghost" data-ad="${a.id}">Apagar</button>`}</span></div>`}).join(''):'<div class="empty">Nenhum vencimento ainda. Leia uma conta de consumo ou uma fatura, ou cadastre abaixo.</div>';
  document.querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>pagarAlerta(b.dataset.ap));
  document.querySelectorAll('[data-ae]').forEach(b=>b.onclick=()=>editarAlerta(b.dataset.ae));
+ document.querySelectorAll('[data-ac]').forEach(b=>b.onclick=async()=>{const al=ALERTAS.find(x=>x.id===b.dataset.ac);if(!al)return;const t=Codigos.barrasParaLinha(al.codigo);try{await navigator.clipboard.writeText(t.replace(/\D/g,''));toast(T('Código copiado. Cole no app do banco para pagar.'))}catch(e){toast(t)}});
  document.querySelectorAll('[data-ai]').forEach(b=>b.onclick=()=>baixarICS([ALERTAS.find(a=>a.id===b.dataset.ai)]));
  document.querySelectorAll('[data-ad]').forEach(b=>b.onclick=()=>{const antes=clone(ALERTAS);ALERTAS=ALERTAS.filter(a=>a.id!==b.dataset.ad);persist();render();toast('Alerta apagado',()=>{ALERTAS=antes;persist();render()})})}
 function pagarAlerta(id){const a=ALERTAS.find(x=>x.id===id);if(!a)return;
@@ -816,7 +884,7 @@ function pagarAlerta(id){const a=ALERTAS.find(x=>x.id===id);if(!a)return;
   // a fatura do cartão já tem os gastos lançados um a um: marcar como paga não lança de novo
   if(v>0&&!a.fatura)TX.push({id:uid(),ts:Date.now(),tipo:'despesa',desc:a.nome,valor:v,data:$('#pgD').value||today(),cat:a.cat||'extra',...(a.sub?{sub:a.sub}:{}),origem:'vencimento'});
   a.pago=true;a.pagoEm=$('#pgD').value||today();if(v)a.valor=v;
-  if(a.rep){const prox=somaMes(a.venc,1,a.rep==='anual');ALERTAS.push({...clone(a),id:uid(),venc:prox,pago:false,pagoEm:null,estimado:!!a.valor})}
+  if(a.rep){const prox=somaMes(a.venc,1,a.rep==='anual');{const n={...clone(a),id:uid(),venc:prox,pago:false,pagoEm:null,estimado:!!a.valor};delete n.codigo;ALERTAS.push(n)}}
   caixa.remove();persist();render();toast(a.fatura?'Fatura marcada como paga':'Pago e lançado no extrato',()=>{ALERTAS=antesA;TX=TX.slice(0,antesT);persist();render()})}}
 let alEdit=null;
 function editarAlerta(id){const a=ALERTAS.find(x=>x.id===id);alEdit=id;$('#alNome').value=a.nome;$('#alData').value=a.venc;$('#alValor').value=a.valor?a.valor.toFixed(2).replace('.',','):'';$('#alCat').innerHTML=opcoesCat(a.cat||'contas');$('#alRep').value=a.rep||'';$('#alDias').value=String(a.avisar??3);$('#alFTit').textContent='Editar alerta';$('#alCancel').hidden=false;$('#alForm').scrollIntoView({behavior:'smooth'})}

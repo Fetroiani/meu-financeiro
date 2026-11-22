@@ -9,7 +9,7 @@
     "sync": "npm run build && npx cap sync",
     "android": "npm run sync && npx cap open android",
     "ios": "npm run sync && npx cap open ios",
-    "test": "node scripts/test-parser.js && node scripts/test-extrato.js && node scripts/test-sync.js"
+    "test": "node scripts/test-parser.js && node scripts/test-extrato.js && node scripts/test-sync.js && node scripts/test-codigos.js"
   },
   "dependencies": {
     "@capacitor/android": "8.6.2",
@@ -21,6 +21,7 @@
     "@capgo/capacitor-native-biometric": "^8.9.3",
     "@supabase/supabase-js": "^2.119.2",
     "@tesseract.js-data/por": "1.0.0",
+    "@zxing/library": "0.21.3",
     "jsqr": "1.4.0",
     "pdfjs-dist": "^4.10.38",
     "tesseract.js": "7.0.0",
