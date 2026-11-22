@@ -318,7 +318,7 @@ const DEF_CATS=[
  {k:'dolar',n:'Dólar',c:'#2e7d32'},{k:'euro',n:'Euro',c:'#f2b705'},{k:'extra',n:'Extra',c:'#8d8f8e'}];
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(DEF_CATS);
-const VERSAO='2026.11.22-5';
+const VERSAO='2026.11.22-6';
 const IN={k:'receita',n:'Entrada',c:'#00a86b'};
 const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS.find(c=>c.k==='extra'));
 const $=s=>document.querySelector(s);
@@ -568,13 +568,13 @@ $('#rSalvar').onclick=()=>{if(ULTJ&&ULTJ.conta){const v=Math.round(rev.reduce((a
  toast('Cupom salvo em '+ks.length+(ks.length>1?' categorias':' categoria'));rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');mes=ym(data);go('inicio');render()};
 
 /* ---------- backup ---------- */
-$('#bkCopy').onclick=async()=>{if(!CHAVE)return;const t=JSON.stringify({app:'meucaixa',v:2,cofre:COFRE,dados:await Cofre.cifrar(CHAVE,{tx:TX,aprendido:APR,cats:CATS})});$('#bkTxt').value=t;try{await navigator.clipboard.writeText(t);toast('Backup criptografado copiado')}catch(e){$('#bkTxt').select();toast('Selecione o texto e copie')}};
+$('#bkCopy').onclick=async()=>{if(!CHAVE)return;const t=JSON.stringify({app:'meucaixa',v:2,cofre:COFRE,dados:await Cofre.cifrar(CHAVE,{tx:TX,aprendido:APR,cats:CATS,semPadrao:SEMPADRAO,alertas:ALERTAS})});$('#bkTxt').value=t;try{await navigator.clipboard.writeText(t);toast('Backup criptografado copiado')}catch(e){$('#bkTxt').select();toast('Selecione o texto e copie')}};
 $('#bkLoad').onclick=async()=>{let o;try{const j=JSON.parse($('#bkTxt').value);
   if(j.v===2){try{o=await Cofre.decifrar(CHAVE,j.dados)}catch(e){const p=$('#bkPin').value.trim();if(!p){toast('Informe o PIN usado quando o backup foi feito');return}
    try{const r=await Cofre.abrir(j.cofre,p);o=await Cofre.decifrar(r.chave,j.dados)}catch(e){toast('PIN do backup incorreto');return}}}
   else o={tx:j.tx,aprendido:j.aprendido};
   if(!Array.isArray(o.tx))throw 0}catch(e){toast('Texto de backup inválido');return}
- const antes=TX,antesA=APR,antesC=CATS;TX=o.tx;APR=o.aprendido||APR;if(o.cats)garantirCats(o);renderSelects();persist();render();$('#bkPin').value='';toast(TX.length+' lançamentos restaurados',()=>{TX=antes;APR=antesA;CATS=antesC;renderSelects();persist();render()})};
+ const antes=TX,antesA=APR,antesC=CATS,antesL=ALERTAS,antesS=SEMPADRAO;TX=o.tx;APR=o.aprendido||APR;if(o.semPadrao)SEMPADRAO=o.semPadrao;if(Array.isArray(o.alertas))ALERTAS=o.alertas;if(o.cats)garantirCats(o);renderSelects();persist();render();$('#bkPin').value='';toast(TX.length+' lançamentos restaurados',()=>{TX=antes;APR=antesA;CATS=antesC;ALERTAS=antesL;SEMPADRAO=antesS;renderSelects();persist();render()})};
 
 /* ---------- personalizar categorias ---------- */
 const PAL=['#0091ea','#7cb342','#ff7043','#ab47bc','#26a69a','#ec407a','#5c6bc0','#ffa000','#8d6e63','#00acc1'];
