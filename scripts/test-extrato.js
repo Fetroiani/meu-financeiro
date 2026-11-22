@@ -28,4 +28,6 @@ ok(c.length === 3 && c[0].valor === 123.45 && c[2].valor === -300, 'csv banco ' 
 const c2 = E.csv('date,title,amount\n2026-11-10,Uber,23.90\n2026-11-11,Pagamento recebido,-500.00', hoje);
 ok(c2.length === 2 && c2[0].valor === 23.9 && c2[0].data === '2026-11-10' && c2[1].valor === -500, 'csv nubank ' + JSON.stringify(c2));
 ok(E.detectar('x.ofx', '<OFX>').tipo === 'ofx', 'detectar');
+const cb = E.cabecalho(pdf);
+ok(cb.venc === '2026-12-05' && cb.total === 483.55, 'cabecalho ' + JSON.stringify(cb));
 console.log(f ? f + ' falha(s)' : 'Todos os testes de fatura passaram'); process.exit(f ? 1 : 0);

@@ -1,5 +1,5 @@
 // Guarda o app no celular para abrir rápido e funcionar sem internet.
-const V = 'meucaixa-v3';
+const V = 'meucaixa-v4';
 const ARQ = ['./', 'index.html', 'cupom.js', 'cofre.js', 'extrato.js', 'vendor/xlsx.full.min.js', 'logo.png', 'manifest.webmanifest', 'icons/icon-192.png',
   'vendor/jsQR.js', 'vendor/tesseract.min.js', 'vendor/worker.min.js', 'vendor/lang/por.traineddata.gz',
   'vendor/core/tesseract-core-lstm.wasm.js', 'vendor/core/tesseract-core-simd-lstm.wasm.js', 'vendor/core/tesseract-core-relaxedsimd-lstm.wasm.js'];

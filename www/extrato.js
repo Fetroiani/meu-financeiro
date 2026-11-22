@@ -126,6 +126,15 @@
   }
   const pareceExtrato = (texto, hoje) => porLinhas(texto, hoje).length >= 3;
 
-  const api = { detectar, porLinhas, ofx, csv, pareceExtrato, valorBR };
+  // Vencimento e total da fatura, para criar o alerta.
+  function cabecalho(texto) {
+    const n = norm(texto);
+    const v = n.match(/VENCIMENTO[^0-9]{0,30}(\d{2})[\/.-](\d{2})[\/.-](\d{2,4})/);
+    const t = n.match(/(TOTAL DA FATURA|VALOR TOTAL DA FATURA|TOTAL A PAGAR|VALOR A PAGAR|PAGAMENTO TOTAL)[^0-9]{0,30}(\d{1,3}(?:\.\d{3})*,\d{2})/);
+    let venc = null;
+    if (v) { let y = +v[3]; if (y < 100) y += 2000; venc = `${y}-${v[2]}-${v[1]}`; }
+    return { venc, total: t ? valorBR(t[2]) : null };
+  }
+  const api = { cabecalho, detectar, porLinhas, ofx, csv, pareceExtrato, valorBR };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Extrato = api;
 })(this);

@@ -140,6 +140,12 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 .ftab input[type=checkbox]{width:22px;height:22px;min-height:0}
 .ftab tr.off{opacity:.45}
 @media(max-width:600px){.ftab tr{display:grid;grid-template-columns:30px 44px minmax(0,1fr) auto;align-items:center;border-bottom:1px solid var(--line);padding:6px 0}.ftab td{border:0;padding:2px 4px}.ftab td:last-child{grid-column:2/-1}.ftab select{width:100%}}
+.alerta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border:2px solid var(--ink);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:#fff4d6;color:#3d2a00;cursor:pointer;text-align:left;font:inherit;width:100%}
+.alerta.atr{background:#ffe0e4;color:#5c0011}.alerta b{font-size:17px}.alerta span{flex:1;min-width:180px}
+.al{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}
+.al .q{grid-column:2/-1;display:flex;gap:6px;flex-wrap:wrap}.al .q .btn{min-height:38px;padding:0 12px;font-size:14px}
+.al small{color:var(--mut);font-size:13px;grid-column:2}.al .st{font-weight:700;font-size:13px;white-space:nowrap;padding:3px 8px;border-radius:999px}
+.st.ok{background:var(--line);color:var(--mut)}.st.perto{background:#ffe7a8;color:#5a3c00}.st.atr{background:#ffd0d7;color:#7a0016}.st.pago{background:#d8f5e6;color:#04553a}
 .empty{padding:26px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px;margin-top:12px}
 @media(max-width:700px){.box{grid-template-columns:1fr}.fig{min-height:220px}.bar{grid-template-columns:40px 1fr 84px}}
 @media(prefers-reduced-motion:no-preference){.meter i,.bar .t i{transition:width .5s ease}}
@@ -164,6 +170,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   <h3 id="dMes">Categorias</h3>
   <div id="dCats"></div>
   <h3>Ferramentas</h3>
+  <button class="ditem" data-dv="venc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>Vencimentos</span><small id="dVenc"></small></button>
   <button class="ditem" data-dv="cats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg><span>Personalizar categorias</span><small></small></button>
   <button class="ditem" data-dv="cupom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg><span>Enviar fatura ou documento</span><small></small></button>
   <button class="ditem" id="dXlsx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8l8 8M16 8l-8 8"/></svg><span>Baixar planilha Excel (.xlsx)</span><small></small></button>
@@ -186,6 +193,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 
 <main>
 <div class="view on" id="v-inicio">
+  <button class="alerta" id="alBanner" hidden></button>
   <div class="box">
     <div class="green">
       <div class="month"><button id="mPrev" aria-label="Mês anterior">‹</button><strong id="mName"></strong><button id="mNext" aria-label="Próximo mês">›</button></div>
@@ -206,6 +214,24 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   <input id="busca" type="search" placeholder="Buscar por descrição ou loja" style="margin-top:10px">
   <div class="sum"><span id="exCount"></span><span id="exSum"></span></div>
   <div class="list" id="lista"></div>
+</div>
+
+<div class="view" id="v-venc">
+  <h2>Vencimentos</h2>
+  <p class="note">As contas de consumo e as faturas de cartão que você lê ganham alerta sozinhas. Aqui você também cadastra outras contas (aluguel, escola, plano de saúde…). Quando pagar, toque em <b>Paguei</b>: o valor vai para o extrato e, se a conta é mensal, o próximo mês já fica agendado.</p>
+  <div class="list" id="alLista"></div>
+  <h2 style="margin-top:22px;font-size:18px" id="alFTit">Novo alerta</h2>
+  <form class="f" id="alForm">
+    <label>Conta<input id="alNome" required placeholder="Ex.: Aluguel, Escola, Plano de saúde"></label>
+    <div class="two"><label>Vencimento<input id="alData" type="date" required></label><label>Valor (R$, opcional)<input id="alValor" inputmode="decimal" placeholder="0,00"></label></div>
+    <div class="two"><label>Categoria<select id="alCat"></select></label><label>Repetir<select id="alRep"><option value="mensal">Todo mês</option><option value="anual">Todo ano</option><option value="">Só uma vez</option></select></label></div>
+    <label>Avisar quantos dias antes<select id="alDias"><option value="0">No dia</option><option value="1">1 dia antes</option><option value="3" selected>3 dias antes</option><option value="5">5 dias antes</option><option value="7">7 dias antes</option></select></label>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" type="submit">Salvar alerta</button><button class="btn ghost" type="button" id="alCancel" hidden>Cancelar edição</button></div>
+  </form>
+  <details class="bk"><summary>Receber aviso com o app fechado</summary>
+    <p class="note">Toque em <b>Calendário</b> num alerta para colocar o lembrete na agenda do celular. A agenda avisa no dia certo, mesmo com o app fechado, e não envia nada para a internet. Com o app instalado na tela inicial, o ícone também mostra quantas contas estão vencendo.</p>
+    <button class="btn ghost" id="alIcsTodos">Colocar todos os alertas na agenda</button>
+  </details>
 </div>
 
 <div class="view" id="v-config">
@@ -292,7 +318,7 @@ const DEF_CATS=[
  {k:'dolar',n:'Dólar',c:'#2e7d32'},{k:'euro',n:'Euro',c:'#f2b705'},{k:'extra',n:'Extra',c:'#8d8f8e'}];
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(DEF_CATS);
-const VERSAO='2026.11.22-3';
+const VERSAO='2026.11.22-4';
 const IN={k:'receita',n:'Entrada',c:'#00a86b'};
 const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS.find(c=>c.k==='extra'));
 const $=s=>document.querySelector(s);
@@ -307,7 +333,7 @@ const extraKW=()=>{const o={};CATS.forEach(c=>{if(c.kw&&c.kw.length)o[c.k]=c.kw}
 function garantirCats(o){CATS=o&&Array.isArray(o.cats)&&o.cats.length?o.cats:clone(DEF_CATS);
  for(const d of DEF_CATS)if(['combustivel','cartao'].includes(d.k)&&!CATS.some(c=>c.k===d.k)&&!(o&&o.semPadrao&&o.semPadrao.includes(d.k)))CATS.splice(Math.max(0,CATS.length-1),0,clone(d));
  if(!CATS.some(c=>c.k==='extra'))CATS.push(clone(DEF_CATS.find(c=>c.k==='extra')))}
-let SEMPADRAO=[];
+let SEMPADRAO=[],ALERTAS=[];
 
 /* ---------- armazenamento criptografado (Preferences no app, localStorage no navegador) ---------- */
 const CAP=window.Capacitor&&window.Capacitor.Plugins||{};const NATIVO=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
@@ -318,10 +344,10 @@ async function ler(k){if(Pref){try{return (await Pref.get({key:k})).value}catch(
 async function escrever(k,v){if(Pref){await Pref.set({key:k,value:v})}else{try{localStorage.setItem(k,v)}catch(e){}}}
 async function apagarK(k){if(Pref){try{await Pref.remove({key:k})}catch(e){}}try{localStorage.removeItem(k)}catch(e){}}
 let fila=Promise.resolve();
-function persist(){if(!CHAVE)return;const k=CHAVE,o={v:3,tx:TX,aprendido:APR,cats:CATS,semPadrao:SEMPADRAO};fila=fila.then(async()=>escrever(K_DADOS,await Cofre.cifrar(k,o))).catch(e=>toast('Erro ao salvar: '+e.message))}
+function persist(){if(!CHAVE)return;const k=CHAVE,o={v:3,tx:TX,aprendido:APR,cats:CATS,semPadrao:SEMPADRAO,alertas:ALERTAS};fila=fila.then(async()=>escrever(K_DADOS,await Cofre.cifrar(k,o))).catch(e=>toast('Erro ao salvar: '+e.message))}
 async function put(t){const i=TX.findIndex(x=>x.id===t.id);i>=0?TX[i]=t:TX.push(t);render();persist()}
 async function del(id){TX=TX.filter(x=>x.id!==id);render();persist()}
-async function carregarDados(){const d=await ler(K_DADOS);let o=null;if(d){o=await Cofre.decifrar(CHAVE,d);TX=o.tx||[];APR=o.aprendido||{};SEMPADRAO=o.semPadrao||[]}else{TX=[];APR={}}garantirCats(o);renderSelects();render()}
+async function carregarDados(){const d=await ler(K_DADOS);let o=null;if(d){o=await Cofre.decifrar(CHAVE,d);TX=o.tx||[];APR=o.aprendido||{};SEMPADRAO=o.semPadrao||[];ALERTAS=o.alertas||[]}else{TX=[];APR={};ALERTAS=[]}garantirCats(o);renderSelects();render()}
 async function migrarLegado(){let mudou=false;for(const k of LEGADO){let v=null;if(Pref)try{v=(await Pref.get({key:k})).value}catch(e){}if(!v)try{v=localStorage.getItem(k)}catch(e){}
  if(v){try{const o=JSON.parse(v);if(k===LEGADO[0]&&Array.isArray(o)){TX=o;mudou=true}else if(k===LEGADO[1]){APR=o;mudou=true}}catch(e){}}await apagarK(k)}if(mudou){persist();render()}}
 
@@ -377,7 +403,7 @@ async function tentarBio(){if(!(await bioLigada()))return;if(!NATIVO){try{lkMsg(
  catch(e){if(String(e.code)==='21'){await escrever(K_BIO,'0');atualizarBioBtn();lkMsg('A biometria mudou neste celular. Entre com o PIN e ligue de novo em Segurança.')}else lkMsg('Digite seu PIN')}}
 $('#pBio').onclick=tentarBio;
 function liberar(){lk.hidden=true;$('#lkBox').hidden=true;modo='';buf='';pontos();render();atualizarBioBtn()}
-function bloquear(){fecharMenu();CHAVE=null;BRUTA=null;TX=[];APR={};CATS=clone(DEF_CATS);render();modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
+function bloquear(){fecharMenu();CHAVE=null;BRUTA=null;TX=[];APR={};ALERTAS=[];CATS=clone(DEF_CATS);render();modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
 $('#btnLock').onclick=bloquear;
 $('#lkLink').onclick=()=>{if(modo==='novo'||modo==='novoConf'){lk.hidden=true;modo='';return}
  lkMsg('Sem o PIN, ninguém consegue abrir os dados, nem nós. Você pode apagar tudo neste celular e começar de novo. Depois, se tiver um backup, é só restaurar.');$('#lkLink').hidden=true;
@@ -454,7 +480,7 @@ function render(){const doMes=TX.filter(t=>ym(t.data)===mes);
  document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{filtro=b.dataset.c;subFiltro='';go('extrato');render()});
  const ms=[...Array(6)].map((_,i)=>shift(mes,i-5)),vals=ms.map(m=>porCat(m)),mx=Math.max(1,...vals.map(o=>Object.values(o).reduce((a,b)=>a+b,0)));
  $('#bars').innerHTML=ms.map((m,i)=>{const o=vals[i],s=Object.values(o).reduce((a,b)=>a+b,0);return`<div class="bar"><span>${new Date(m+'-15T12:00').toLocaleDateString('pt-BR',{month:'short'}).replace('.','')}</span><span class="t">${CATS.filter(c=>o[c.k]).map(c=>`<i title="${c.n}: ${brl(o[c.k])}" style="width:${o[c.k]/mx*100}%;background:${c.c}"></i>`).join('')}</span><span class="n">${brl(s)}</span></div>`}).join('');
- renderChips();renderLista();drawPie();if($('#drawer').classList.contains('on'))renderMenu()}
+ renderChips();renderLista();drawPie();renderAlertas();if($('#drawer').classList.contains('on'))renderMenu()}
 
 /* ---------- lançamento manual ---------- */
 let tipo='despesa',editId=null;const COT={dolar:['USD','US$'],euro:['EUR','€']};
@@ -522,17 +548,21 @@ $('#ler').onclick=async()=>{if(!foto)return;const b=$('#ler');b.disabled=true;b.
   revisar(j)}
  catch(e){cupomMsg('Não consegui ler este cupom ('+esc(e.message||e)+'). Tente de novo ou lance à mão.',true)}
  finally{b.disabled=false;b.textContent='Ler e separar itens';progresso=()=>{}}};
-function revisar(j,manual){rev=(j.itens||[]).map(i=>({d:String(i.descricao||''),v:num(i.valor),c:CATS.some(c=>c.k===i.categoria)?i.categoria:'extra'}));rev.forEach(i=>i.o=i.c);
+let ULTJ=null;
+function revisar(j,manual){ULTJ=manual?null:j;rev=(j.itens||[]).map(i=>({d:String(i.descricao||''),v:num(i.valor),c:CATS.some(c=>c.k===i.categoria)?i.categoria:'extra'}));rev.forEach(i=>i.o=i.c);
  $('#rLoja').value=j.loja||'';$('#rData').value=/^\d{4}-\d\d-\d\d$/.test(j.data||'')?j.data:today();
  if(!manual){const s=rev.reduce((a,i)=>a+i.v,0);const dif=j.total&&Math.abs(s-j.total)>.05;const ch=Cupom.lerQR(qr);
-  cupomMsg(j.conta?`Identifiquei uma <b>conta de ${esc(j.conta.toLowerCase())}</b>${j.total?' de '+brl(num(j.total)):''}${j.data?', vencimento '+j.data.split('-').reverse().join('/'):''}. Confira o valor antes de salvar.`:`Encontrei ${rev.length} itens${j.total?' · total do cupom '+brl(num(j.total)):''}.${dif?' <b>A soma dos itens ('+brl(s)+') difere do total</b>: confira os valores, a foto pode ter cortado alguma linha.':''} Toque na categoria para trocar.${ch?'<br>QR da NFC-e lido. Chave: '+ch.replace(/(\d{4})/g,'$1 '):''}`)}
+  cupomMsg(j.conta?`Identifiquei uma <b>conta de ${esc(j.conta.toLowerCase())}</b>${j.total?' de '+brl(num(j.total)):''}${j.data?', vencimento '+j.data.split('-').reverse().join('/'):''}. ${j.data&&dias(j.data)>=0?' Ao salvar, vira um <b>alerta de vencimento</b>; quando pagar, toque em Paguei.':' Já venceu: vai direto para o extrato e o próximo mês fica agendado.'} Confira o valor antes de salvar.`:`Encontrei ${rev.length} itens${j.total?' · total do cupom '+brl(num(j.total)):''}.${dif?' <b>A soma dos itens ('+brl(s)+') difere do total</b>: confira os valores, a foto pode ter cortado alguma linha.':''} Toque na categoria para trocar.${ch?'<br>QR da NFC-e lido. Chave: '+ch.replace(/(\d{4})/g,'$1 '):''}`)}
  $('#revisao').hidden=false;renderRev()}
 function renderRev(){$('#rItens').innerHTML=rev.map((i,n)=>`<div class="item"><input class="desc" data-i="${n}" data-k="d" value="${esc(i.d)}" placeholder="Item" aria-label="Descrição"><select data-i="${n}" data-k="c" aria-label="Categoria">${opcoesCat(i.c)}</select><input class="val" data-i="${n}" data-k="v" inputmode="decimal" value="${i.v.toFixed(2).replace('.',',')}" aria-label="Valor"></div>`).join('');
  document.querySelectorAll('#rItens [data-i]').forEach(el=>el.onchange=()=>{const i=rev[el.dataset.i];i[el.dataset.k]=el.dataset.k==='v'?num(el.value):el.value;resumoRev()});resumoRev()}
 function resumoRev(){const g={};rev.forEach(i=>g[i.c]=(g[i.c]||0)+i.v);$('#rTot').textContent='Total '+brl(rev.reduce((a,i)=>a+i.v,0));
  $('#rTotCats').textContent=Object.entries(g).map(([k,v])=>cat(k).n+' '+brl(v)).join(' · ')}
 $('#rAdd').onclick=()=>{rev.push({d:'',v:0,c:'extra',o:'extra'});renderRev()};
-$('#rSalvar').onclick=()=>{const g={};rev.filter(i=>i.v).forEach(i=>(g[i.c]=g[i.c]||[]).push({d:i.d,v:i.v}));const loja=$('#rLoja').value.trim()||'Cupom',data=$('#rData').value||today();
+$('#rSalvar').onclick=()=>{if(ULTJ&&ULTJ.conta){const v=Math.round(rev.reduce((a,i)=>a+i.v,0)*100)/100,venc=$('#rData').value;const nome='Conta de '+ULTJ.conta.toLowerCase()+(($('#rLoja').value.trim()&&$('#rLoja').value.trim()!==ULTJ.conta)?' · '+$('#rLoja').value.trim():'');
+  if(venc&&dias(venc)>=0){criarAlertaAuto({nome,venc,valor:v,cat:'contas',rep:'mensal',pago:false});ULTJ=null;rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');go('venc');render();return}
+  criarAlertaAuto({nome,venc,valor:v,cat:'contas',rep:'mensal',pago:true})}
+ const g={};rev.filter(i=>i.v).forEach(i=>(g[i.c]=g[i.c]||[]).push({d:i.d,v:i.v}));const loja=$('#rLoja').value.trim()||'Cupom',data=$('#rData').value||today();
  const ks=Object.keys(g);if(!ks.length){flash('Nenhum item com valor.');return}
  rev.forEach(i=>{if(i.d&&i.c!==i.o)APR[Cupom.norm(i.d).trim()]=i.c});  ks.forEach(k=>put({id:uid(),ts:Date.now(),tipo:'despesa',desc:loja+' · '+cat(k).n,loja,valor:Math.round(g[k].reduce((a,i)=>a+i.v,0)*100)/100,data,cat:k,origem:'cupom',itens:g[k],...(qr?{qr:String(qr).slice(0,400)}:{})}));
  toast('Cupom salvo em '+ks.length+(ks.length>1?' categorias':' categoria'));rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');mes=ym(data);go('inicio');render()};
@@ -592,13 +622,14 @@ async function abrirDocumento(f){const x=ext(f.name);$('#fat').hidden=true;$('#r
   else texto=await f.text();
   $('#ocrTxt').textContent=(texto||'').slice(0,20000);$('#ocrBox').hidden=false;
   if(!r)r=Extrato.detectar(f.name,texto);
-  if(r.itens.length>=2)return revisarFatura(r,f.name);
+  if(r.itens.length>=2){r.cab=Extrato.cabecalho(texto||'');return revisarFatura(r,f.name)}
   const j=Cupom.interpretar(texto,APR,extraKW());
   if(j.itens.length){revisar(j);return}
   cupomMsg('Não encontrei lançamentos neste arquivo. Veja abaixo o texto que o app conseguiu ler.',true)}
  catch(e){cupomMsg('Não consegui abrir este arquivo ('+esc(e.message||e)+').',true)}}
 function cartaoOpts(sel){const c=CATS.find(x=>x.k==='cartao');return '<option value="">Nenhum</option>'+(c&&c.subs||[]).map(su=>`<option value="${su.k}" ${su.k===sel?'selected':''}>${esc(su.n)}</option>`).join('')+(c?'<option value="+">+ Novo cartão…</option>':'')}
-function revisarFatura(r,nome){const banco=r.tipo==='ofx'||(r.tipo==='csv'&&r.itens.some(i=>i.valor<0)&&r.itens.filter(i=>i.valor<0).length>r.itens.length*.2&&!/fatura|cart/i.test(nome));
+let FATCAB=null;
+function revisarFatura(r,nome){FATCAB=r.cab||null;const banco=r.tipo==='ofx'||(r.tipo==='csv'&&r.itens.some(i=>i.valor<0)&&r.itens.filter(i=>i.valor<0).length>r.itens.length*.2&&!/fatura|cart/i.test(nome));
  $('#fatTipo').value=banco?'extrato':'fatura';const cc=CATS.find(x=>x.k==='cartao');$('#fatCartao').innerHTML=cartaoOpts(cc&&cc.subs&&cc.subs[0]&&cc.subs[0].k);
  FAT=r.itens.map(i=>{const credito=i.valor<0;const nd=Cupom.norm(i.descricao);let c=/MERCADO ?LIVRE|MERCADOPAGO|MERCADO PAGO|AMAZON|SHOPEE|ALIEXPRESS|MAGALU|SHEIN|PAYPAL|\bPIX\b|TRANSF|\bTED\b|\bDOC\b/.test(nd)?null:Cupom.categorizar(i.descricao,i.descricao,APR,extraKW());if(c==='extra')c=null;return{...i,on:!credito||banco,c,o:c}});
  $('#fat').hidden=false;renderFat();cupomMsg(`Encontrei <b>${FAT.length} lançamentos</b> em ${esc(nome)}. Confira as categorias e toque em Salvar.`);$('#fat').scrollIntoView({behavior:'smooth'})}
@@ -618,8 +649,72 @@ $('#fatSalvar').onclick=()=>{const banco=$('#fatTipo').value==='extrato';const c
   if(!ent&&i.o!==c&&c!=='cartao')APR[Cupom.norm(i.descricao).trim()]=c;
   const t={id:uid(),ts:Date.now(),tipo:ent?'receita':'despesa',desc:i.descricao,valor:Math.abs(i.valor),data:i.data,cat:c,origem:banco?'extrato':'fatura'};
   if(cn){t.cartao=cn;if(c==='cartao')t.sub=ck}TX.push(t);ultimo.push(t.id);n++});
+ if(!banco&&FATCAB&&FATCAB.venc){const tot=FATCAB.total||Math.round(FAT.filter(i=>i.on).reduce((a,i)=>a+i.valor,0)*100)/100;criarAlertaAuto({nome:'Fatura do cartão'+(cn?' '+cn:''),venc:FATCAB.venc,valor:tot,cat:'cartao',sub:ck||'',rep:'mensal',pago:false,fatura:true})}
  persist();FAT=[];$('#fat').hidden=true;cupomMsg('');$('#ocrBox').hidden=true;render();go('extrato');
  toast(n+' lançamentos salvos',()=>{TX=TX.filter(t=>!ultimo.includes(t.id));persist();render()})};
+
+/* ---------- vencimentos e alertas ---------- */
+const hojeD=()=>new Date(today()+'T12:00');
+const dias=d=>Math.round((new Date(d+'T12:00')-hojeD())/864e5);
+const fmtD=d=>d.split('-').reverse().join('/');
+function somaMes(d,n,anual){const [y,m,dd]=d.split('-').map(Number);const t=new Date(y,m-1+(anual?12:n),1);const ult=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(Math.min(dd,ult)).padStart(2,'0')}`}
+function statusAl(a){if(a.pago)return['pago','Paga'];const n=dias(a.venc);if(n<0)return['atr',n===-1?'Venceu ontem':'Venceu há '+(-n)+' dias'];if(n===0)return['atr','Vence hoje'];if(n<=(a.avisar??3))return['perto',n===1?'Vence amanhã':'Vence em '+n+' dias'];return['ok','Em '+n+' dias']}
+// Alerta criado sozinho ao ler conta/fatura. Se a conta lida já foi lançada (pago), agenda o próximo mês.
+function criarAlertaAuto(o){if(!o.venc)return;const chave=Cupom.norm(o.nome);
+ let a=ALERTAS.find(x=>Cupom.norm(x.nome)===chave&&!x.pago);
+ if(o.pago){if(a&&a.venc.slice(0,7)===o.venc.slice(0,7)){a.pago=true;a.pagoEm=today()}
+  const prox=somaMes(o.venc,1);if(!ALERTAS.some(x=>Cupom.norm(x.nome)===chave&&x.venc===prox))ALERTAS.push({id:uid(),nome:o.nome,venc:prox,valor:o.valor,estimado:true,cat:o.cat,sub:o.sub||'',rep:o.rep,avisar:3,auto:true});
+  toast('Alerta criado: '+o.nome+' vence '+fmtD(prox)+' (valor estimado)')}
+ else{if(a){a.venc=o.venc;a.valor=o.valor;a.estimado=false}else ALERTAS.push({id:uid(),nome:o.nome,venc:o.venc,valor:o.valor,cat:o.cat,sub:o.sub||'',rep:o.rep,avisar:3,auto:true,fatura:!!o.fatura});
+  setTimeout(()=>toast('Alerta criado: '+o.nome+' vence '+fmtD(o.venc)),1200)}
+ persist()}
+function pendentes(){return ALERTAS.filter(a=>!a.pago).sort((a,b)=>a.venc.localeCompare(b.venc))}
+function avisando(){return pendentes().filter(a=>dias(a.venc)<=(a.avisar??3))}
+function renderAlertas(){const av=avisando(),atr=av.filter(a=>dias(a.venc)<=0);
+ const bn=$('#alBanner');if(av.length&&CHAVE){bn.hidden=false;bn.className='alerta'+(atr.length?' atr':'');
+  const a=av[0];bn.innerHTML=`<span><b>${esc(a.nome)}</b> · ${statusAl(a)[1].toLowerCase()}${a.valor?' · '+brl(a.valor):''}${av.length>1?`<br>e mais ${av.length-1} conta(s) para pagar`:''}</span><strong>Ver vencimentos ›</strong>`}else bn.hidden=true;
+ $('#dVenc').textContent=av.length?av.length+' a pagar':(pendentes().length?pendentes().length+' agendados':'');
+ try{if(navigator.setAppBadge){av.length?navigator.setAppBadge(av.length):navigator.clearAppBadge()}}catch(e){}
+ if(!$('#v-venc').classList.contains('on'))return;
+ const pend=pendentes(),pagos=ALERTAS.filter(a=>a.pago).sort((a,b)=>b.venc.localeCompare(a.venc)).slice(0,6);
+ $('#alLista').innerHTML=(pend.length||pagos.length)?[...pend,...pagos].map(a=>{const [k,t]=statusAl(a);const c=cat(a.cat||'extra');const sn=a.sub?subNome({cat:a.cat,sub:a.sub}):'';
+  return`<div class="al"><span class="dot" style="background:${c.c}"></span><span class="d"><b>${esc(a.nome)}</b></span><span class="st ${k}">${t}</span>
+  <small>${fmtD(a.venc)} · ${a.valor?brl(a.valor)+(a.estimado?' (estimado)':''):'valor a definir'} · ${esc(c.n)}${sn?' › '+esc(sn):''}${a.rep==='mensal'?' · todo mês':a.rep==='anual'?' · todo ano':''}</small>
+  <span class="q">${a.pago?`<button class="btn ghost" data-ad="${a.id}">Apagar</button>`:`<button class="btn em" data-ap="${a.id}">Paguei</button><button class="btn ghost" data-ae="${a.id}">Editar</button><button class="btn ghost" data-ai="${a.id}">Calendário</button><button class="btn ghost" data-ad="${a.id}">Apagar</button>`}</span></div>`}).join(''):'<div class="empty">Nenhum vencimento ainda. Leia uma conta de consumo ou uma fatura, ou cadastre abaixo.</div>';
+ document.querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>pagarAlerta(b.dataset.ap));
+ document.querySelectorAll('[data-ae]').forEach(b=>b.onclick=()=>editarAlerta(b.dataset.ae));
+ document.querySelectorAll('[data-ai]').forEach(b=>b.onclick=()=>baixarICS([ALERTAS.find(a=>a.id===b.dataset.ai)]));
+ document.querySelectorAll('[data-ad]').forEach(b=>b.onclick=()=>{const antes=clone(ALERTAS);ALERTAS=ALERTAS.filter(a=>a.id!==b.dataset.ad);persist();render();toast('Alerta apagado',()=>{ALERTAS=antes;persist();render()})})}
+function pagarAlerta(id){const a=ALERTAS.find(x=>x.id===id);if(!a)return;
+ const caixa=document.createElement('div');caixa.className='cm';caixa.innerHTML=`<label>Valor pago (R$)<input id="pgV" inputmode="decimal" value="${a.valor?a.valor.toFixed(2).replace('.',','):''}"></label><label>Data do pagamento<input id="pgD" type="date" value="${today()}"></label><div style="display:flex;gap:8px"><button class="btn em" id="pgOk">Confirmar</button><button class="btn ghost" id="pgNo">Cancelar</button></div>`;
+ document.querySelector(`[data-ap="${id}"]`).closest('.al').after(caixa);$('#pgV').focus();$('#pgNo').onclick=()=>caixa.remove();
+ $('#pgOk').onclick=()=>{const v=num($('#pgV').value);const antesA=clone(ALERTAS),antesT=TX.length;
+  // a fatura do cartão já tem os gastos lançados um a um: marcar como paga não lança de novo
+  if(v>0&&!a.fatura)TX.push({id:uid(),ts:Date.now(),tipo:'despesa',desc:a.nome,valor:v,data:$('#pgD').value||today(),cat:a.cat||'extra',...(a.sub?{sub:a.sub}:{}),origem:'vencimento'});
+  a.pago=true;a.pagoEm=$('#pgD').value||today();if(v)a.valor=v;
+  if(a.rep){const prox=somaMes(a.venc,1,a.rep==='anual');ALERTAS.push({...clone(a),id:uid(),venc:prox,pago:false,pagoEm:null,estimado:!!a.valor})}
+  caixa.remove();persist();render();toast(a.fatura?'Fatura marcada como paga':'Pago e lançado no extrato',()=>{ALERTAS=antesA;TX=TX.slice(0,antesT);persist();render()})}}
+let alEdit=null;
+function editarAlerta(id){const a=ALERTAS.find(x=>x.id===id);alEdit=id;$('#alNome').value=a.nome;$('#alData').value=a.venc;$('#alValor').value=a.valor?a.valor.toFixed(2).replace('.',','):'';$('#alCat').innerHTML=opcoesCat(a.cat||'contas');$('#alRep').value=a.rep||'';$('#alDias').value=String(a.avisar??3);$('#alFTit').textContent='Editar alerta';$('#alCancel').hidden=false;$('#alForm').scrollIntoView({behavior:'smooth'})}
+function limparAl(){alEdit=null;$('#alForm').reset();$('#alCat').innerHTML=opcoesCat('contas');$('#alData').value='';$('#alFTit').textContent='Novo alerta';$('#alCancel').hidden=true}
+$('#alCancel').onclick=limparAl;
+$('#alForm').onsubmit=e=>{e.preventDefault();const o={nome:$('#alNome').value.trim(),venc:$('#alData').value,valor:num($('#alValor').value)||0,cat:$('#alCat').value,rep:$('#alRep').value,avisar:+$('#alDias').value};
+ if(alEdit){Object.assign(ALERTAS.find(x=>x.id===alEdit),o,{estimado:false})}else ALERTAS.push({id:uid(),...o});
+ const ed=!!alEdit;limparAl();persist();render();toast(ed?'Alerta alterado':'Alerta criado: '+o.nome+' vence '+fmtD(o.venc))};
+document.querySelector('[data-dv="venc"]').addEventListener('click',()=>{limparAl();renderAlertas()});
+$('#alBanner').onclick=()=>{go('venc');limparAl();renderAlertas()};
+// Lembrete na agenda do celular (.ics), com aviso antes do vencimento
+function baixarICS(lista){lista=lista.filter(a=>a&&!a.pago);if(!lista.length){toast('Nenhum alerta pendente');return}
+ const st=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
+ const ev=lista.map(a=>{const d=a.venc.replace(/-/g,'');const d2=somaMes(a.venc,0).replace(/-/g,'');const fim=new Date(a.venc+'T12:00');fim.setDate(fim.getDate()+1);const df=fim.toISOString().slice(0,10).replace(/-/g,'');
+  return['BEGIN:VEVENT','UID:'+a.id+'@meucaixa','DTSTAMP:'+st,'DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+df,'SUMMARY:Vence: '+a.nome.replace(/[,;]/g,' ')+(a.valor?' (R$ '+a.valor.toFixed(2).replace('.',',')+')':''),
+   'DESCRIPTION:Lembrete do Meu Caixa',...(a.rep==='mensal'?['RRULE:FREQ=MONTHLY']:a.rep==='anual'?['RRULE:FREQ=YEARLY']:[]),
+   'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+a.nome.replace(/[,;]/g,' ')+' vence hoje','TRIGGER;RELATED=START:PT9H','END:VALARM',
+   ...((a.avisar??3)>0?['BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+a.nome.replace(/[,;]/g,' ')+' vence em '+(a.avisar??3)+' dia(s)','TRIGGER:-'+((a.avisar??3)>1?'P'+((a.avisar??3)-1)+'DT15H':'PT15H'),'END:VALARM']:[]),'END:VEVENT'].join('\r\n')});
+ const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Meu Caixa//PT-BR','CALSCALE:GREGORIAN',...ev,'END:VCALENDAR'].join('\r\n');
+ const blob=new Blob([ics],{type:'text/calendar'});const nome=(lista.length>1?'vencimentos':Cupom.norm(lista[0].nome).replace(/[^A-Z0-9]+/g,'-').toLowerCase())+'.ics';
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000);toast('Abra o arquivo para adicionar à agenda')}
+$('#alIcsTodos').onclick=()=>baixarICS(pendentes());
 
 /* ---------- planilha Excel ---------- */
 $('#dXlsx').onclick=async()=>{if(!window.XLSX){toast('A planilha ainda está carregando, tente de novo');return}
@@ -631,6 +726,7 @@ $('#dXlsx').onclick=async()=>{if(!window.XLSX){toast('A planilha ainda está car
   r['Entradas']=doM.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);CATS.forEach(c=>r[c.n]=doM.filter(t=>t.tipo!=='receita'&&t.cat===c.k).reduce((a,t)=>a+t.valor,0));
   r['Total de saídas']=doM.filter(t=>t.tipo!=='receita').reduce((a,t)=>a+t.valor,0);r['Saldo']=r['Entradas']-r['Total de saídas'];for(const k in r)if(typeof r[k]==='number')r[k]=Math.round(r[k]*100)/100;return r});
  XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(res),'Resumo por mês');
+ if(ALERTAS.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ALERTAS.slice().sort((a,b)=>a.venc.localeCompare(b.venc)).map(a=>({'Conta':a.nome,'Vencimento':new Date(a.venc+'T12:00'),'Valor (R$)':a.valor||'','Situação':a.pago?'Paga':statusAl(a)[1],'Repetir':a.rep==='mensal'?'Todo mês':a.rep==='anual'?'Todo ano':'Uma vez','Categoria':cat(a.cat||'extra').n}))),'Vencimentos');
  const nome='meu-caixa-'+today()+'.xlsx';const blob=new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
  const file=new File([blob],nome,{type:blob.type});
  if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/.test(navigator.userAgent)){try{await navigator.share({files:[file],title:'Meu Caixa'});return}catch(e){if(e.name==='AbortError')return}}
