@@ -72,5 +72,7 @@
 	<string>O Meu Caixa pode salvar a foto do cupom na sua galeria.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>pt-BR</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>O Meu Caixa usa o Face ID para abrir o app com segurança.</string>
 </dict>
 </plist>

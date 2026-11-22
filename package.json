@@ -17,6 +17,8 @@
     "@capacitor/core": "8.6.2",
     "@capacitor/ios": "8.6.2",
     "@capacitor/preferences": "8.0.1",
+    "@capacitor/privacy-screen": "^2.0.1",
+    "@capgo/capacitor-native-biometric": "^8.9.3",
     "@tesseract.js-data/por": "1.0.0",
     "jsqr": "1.4.0",
     "tesseract.js": "7.0.0"

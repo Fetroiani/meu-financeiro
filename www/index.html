@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#00a86b">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Meu Caixa">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Meu Caixa</title>
 <style>
 /* VOICE: calm, direct personal money tool, Portuguese, no jargon.
@@ -92,16 +99,43 @@ input,select{font:16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padd
 .toast button{background:none;border:0;color:var(--em);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer;min-height:36px}
 .bk{margin-top:22px;border:1px solid var(--line);border-radius:12px;padding:12px 14px}.bk summary{cursor:pointer;font-weight:700;min-height:28px}.bk textarea{width:100%;min-height:110px;font:13px ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--card);color:var(--ink);margin:8px 0}
 pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
+.lock{position:fixed;inset:0;z-index:50;background:#00a86b;color:#fff;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));overflow:auto}
+.lock[hidden]{display:none}
+.lk-in{width:min(340px,100%);display:grid;justify-items:center;gap:14px;text-align:center}
+.lk-in img{width:84px;height:84px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.lk-in h1{font-size:28px;font-weight:800}
+.lk-in p{margin:0;min-height:48px;font-size:16px}
+.dots{display:flex;gap:14px;height:18px}.dots i{width:16px;height:16px;border-radius:50%;border:2px solid #fff}.dots i.on{background:#fff}
+.dots.erro{animation:treme .35s}@keyframes treme{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.pad{display:grid;grid-template-columns:repeat(3,72px);gap:14px 26px;margin-top:6px}
+.pad button{width:72px;height:72px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font:600 28px system-ui,-apple-system,sans-serif;cursor:pointer}
+.pad button:active{background:rgba(255,255,255,.35)}.pad button.sm{font-size:15px;background:transparent}
+.pad button:disabled{visibility:hidden}
+.lk-link{background:none;border:0;color:#fff;text-decoration:underline;font:500 15px system-ui,sans-serif;min-height:44px;cursor:pointer}
+.lk-box{display:grid;gap:10px;width:100%}.lk-box input{text-align:center}
+.lk-box .btn{border-color:#fff}.lk-box .btn.ghost{color:#fff}
+.lkbtn{background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;min-height:40px;padding:0 12px;font:600 14px system-ui,sans-serif;cursor:pointer}
 .empty{padding:26px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px;margin-top:12px}
 @media(max-width:700px){.box{grid-template-columns:1fr}.fig{min-height:220px}.bar{grid-template-columns:40px 1fr 84px}}
 @media(prefers-reduced-motion:no-preference){.meter i,.bar .t i{transition:width .5s ease}}
 </style>
 </head>
 <body>
+<div class="lock" id="lock">
+  <div class="lk-in">
+    <img src="logo.png" alt="">
+    <h1>Meu Caixa</h1>
+    <p id="lkMsg">Carregando…</p>
+    <div class="dots" id="dots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="pad" id="pad"></div>
+    <div class="lk-box" id="lkBox" hidden></div>
+    <button class="lk-link" id="lkLink">Esqueci meu PIN</button>
+  </div>
+</div>
 <div class="wrap">
 <header class="top">
   <h1>Meu Caixa</h1>
-  <span class="sync" id="sync">Salvo neste celular</span>
+  <span class="sync" id="sync">Protegido com PIN</span><button class="lkbtn" id="btnLock" aria-label="Bloquear o app">Bloquear</button>
   <nav class="tabs" role="tablist">
     <button role="tab" data-v="inicio" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 4"/></svg>Início</button>
     <button role="tab" data-v="extrato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 6h14M5 12h14M5 18h9"/></svg>Extrato</button>
@@ -132,9 +166,14 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   <input id="busca" type="search" placeholder="Buscar por descrição ou loja" style="margin-top:10px">
   <div class="sum"><span id="exCount"></span><span id="exSum"></span></div>
   <div class="list" id="lista"></div>
+  <details class="bk"><summary>Segurança</summary>
+    <p class="note">Seus dados ficam só neste celular, criptografados (AES-256). Sem o seu PIN ou a sua biometria ninguém consegue lê-los. O app se bloqueia sozinho 1 minuto depois que você sai dele.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="secPin">Trocar PIN</button><button class="btn ghost" id="secBio" hidden></button></div>
+  </details>
   <details class="bk"><summary>Backup dos dados</summary>
-    <p class="note">Seus lançamentos ficam só neste celular. Copie o backup e guarde (num e-mail ou nota) antes de trocar de aparelho. Para restaurar, cole o texto e toque em Restaurar.</p>
+    <p class="note">O backup sai criptografado, protegido pelo seu PIN atual. Guarde o texto (num e-mail ou nota) antes de trocar de celular. Para restaurar, cole o texto, informe o PIN que você usava quando fez o backup e toque em Restaurar.</p>
     <textarea id="bkTxt" aria-label="Texto do backup"></textarea>
+    <input id="bkPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN do backup (se for outro)" style="margin-bottom:8px">
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="bkCopy">Copiar backup</button><button class="btn ghost" id="bkLoad">Restaurar</button></div>
   </details>
 </div>
@@ -176,14 +215,15 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 <script src="vendor/jsQR.js"></script>
 <script src="vendor/tesseract.min.js"></script>
 <script src="cupom.js"></script>
+<script src="cofre.js"></script>
 <script>
 {
 const CATS=[
- {k:'mercado',n:'Mercado',c:'#00a86b'},{k:'bares',n:'Bares',c:'#ff8a3d'},{k:'vestuario',n:'Vestuário',c:'#c2185b'},
+ {k:'mercado',n:'Mercado',c:'#00a86b'},{k:'contas',n:'Conta de consumo',c:'#8a5a2b'},{k:'bares',n:'Bares',c:'#ff8a3d'},{k:'vestuario',n:'Vestuário',c:'#c2185b'},
  {k:'assinaturas',n:'Assinaturas',c:'#6d5bd0'},{k:'presentes',n:'Presentes',c:'#ff5c8a'},{k:'investimentos',n:'Investimentos',c:'#1e88e5'},
  {k:'dolar',n:'Dólar',c:'#2e7d32'},{k:'euro',n:'Euro',c:'#f2b705'},{k:'extra',n:'Extra',c:'#8d8f8e'}];
 const IN={k:'receita',n:'Entrada',c:'#00a86b'};
-const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS[8]);
+const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS.find(c=>c.k==='extra'));
 const $=s=>document.querySelector(s);
 const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
@@ -192,17 +232,73 @@ const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4)
 const ym=d=>d.slice(0,7);
 const uid=()=>'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
-/* ---------- armazenamento: neste celular (Preferences no app, localStorage no navegador) ---------- */
-const CAP=window.Capacitor&&window.Capacitor.Plugins||{};const Pref=window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()?CAP.Preferences:null;
-const LS='meucaixa.tx',LA='meucaixa.aprendido';
-const lerLocal=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||d)}catch(e){return JSON.parse(d)}};
-let TX=lerLocal(LS,'[]'),APR=lerLocal(LA,'{}');
-async function grava(k,v){const s=JSON.stringify(v);try{localStorage.setItem(k,s)}catch(e){}if(Pref)try{await Pref.set({key:k,value:s})}catch(e){}}
-const persist=()=>grava(LS,TX);
+/* ---------- armazenamento criptografado (Preferences no app, localStorage no navegador) ---------- */
+const CAP=window.Capacitor&&window.Capacitor.Plugins||{};const NATIVO=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+const Pref=NATIVO?CAP.Preferences:null,BIO=NATIVO?CAP.NativeBiometric:null;
+const K_COFRE='meucaixa.cofre',K_DADOS='meucaixa.dados',K_BIO='meucaixa.bio',K_DEK='meucaixa.dek',LEGADO=['meucaixa.tx','meucaixa.aprendido'];
+let TX=[],APR={},CHAVE=null,BRUTA=null,COFRE=null;
+async function ler(k){if(Pref){try{return (await Pref.get({key:k})).value}catch(e){return null}}try{return localStorage.getItem(k)}catch(e){return null}}
+async function escrever(k,v){if(Pref){await Pref.set({key:k,value:v})}else{try{localStorage.setItem(k,v)}catch(e){}}}
+async function apagarK(k){if(Pref){try{await Pref.remove({key:k})}catch(e){}}try{localStorage.removeItem(k)}catch(e){}}
+let fila=Promise.resolve();
+function persist(){if(!CHAVE)return;const k=CHAVE,o={tx:TX,aprendido:APR};fila=fila.then(async()=>escrever(K_DADOS,await Cofre.cifrar(k,o))).catch(e=>toast('Erro ao salvar: '+e.message))}
 async function put(t){const i=TX.findIndex(x=>x.id===t.id);i>=0?TX[i]=t:TX.push(t);render();persist()}
 async function del(id){TX=TX.filter(x=>x.id!==id);render();persist()}
-(async()=>{if(!Pref)return;try{const a=await Pref.get({key:LS});if(a.value){TX=JSON.parse(a.value);render()}else if(TX.length)persist();
- const b=await Pref.get({key:LA});if(b.value)APR=JSON.parse(b.value)}catch(e){}})();
+async function carregarDados(){const d=await ler(K_DADOS);if(d){const o=await Cofre.decifrar(CHAVE,d);TX=o.tx||[];APR=o.aprendido||{}}else{TX=[];APR={}}render()}
+async function migrarLegado(){let mudou=false;for(const k of LEGADO){let v=null;if(Pref)try{v=(await Pref.get({key:k})).value}catch(e){}if(!v)try{v=localStorage.getItem(k)}catch(e){}
+ if(v){try{const o=JSON.parse(v);if(k===LEGADO[0]&&Array.isArray(o)){TX=o;mudou=true}else if(k===LEGADO[1]){APR=o;mudou=true}}catch(e){}}await apagarK(k)}if(mudou){persist();render()}}
+
+/* ---------- bloqueio: PIN + biometria ---------- */
+let modo='',buf='',pin1='',falhas=0,ate=0,saiu=0,naCamera=false;
+const lk=$('#lock');
+$('#pad').innerHTML=[1,2,3,4,5,6,7,8,9].map(n=>`<button data-n="${n}">${n}</button>`).join('')+'<button class="sm" id="pBio" aria-label="Entrar com biometria">Biometria</button><button data-n="0">0</button><button class="sm" id="pDel" aria-label="Apagar dígito">Apagar</button>';
+document.querySelectorAll('#pad [data-n]').forEach(b=>b.onclick=()=>digito(b.dataset.n));
+$('#pDel').onclick=()=>{buf=buf.slice(0,-1);pontos()};
+document.addEventListener('keydown',e=>{if(lk.hidden||!$('#lkBox').hidden)return;if(/^\d$/.test(e.key))digito(e.key);else if(e.key==='Backspace'){buf=buf.slice(0,-1);pontos()}});
+const lkMsg=m=>$('#lkMsg').textContent=m;
+function pontos(){document.querySelectorAll('#dots i').forEach((d,i)=>d.classList.toggle('on',i<buf.length))}
+function erro(m){lkMsg(m);const d=$('#dots');d.classList.remove('erro');void d.offsetWidth;d.classList.add('erro');buf='';pontos()}
+function telaPin(m,link){$('#lkBox').hidden=true;$('#pad').hidden=false;$('#dots').hidden=false;buf='';pontos();lkMsg(m);$('#lkLink').hidden=!link;$('#lkLink').textContent=link||'';lk.hidden=false}
+function caixa(html){$('#pad').hidden=true;$('#dots').hidden=true;$('#lkBox').innerHTML=html;$('#lkBox').hidden=false}
+async function bioLigada(){return !!BIO&&(await ler(K_BIO))==='1'}
+async function bioDisponivel(){if(!BIO)return false;try{return (await BIO.isAvailable({useFallback:false})).isAvailable}catch(e){return false}}
+async function atualizarBioBtn(){const on=await bioLigada();$('#pBio').disabled=!(modo==='abrir'&&on);const ok=await bioDisponivel();$('#secBio').hidden=!ok;$('#secBio').textContent=on?'Desligar biometria':'Entrar com biometria'}
+function digito(n){if(buf.length>=6||$('#pad').hidden)return;buf+=n;pontos();if(buf.length===6)setTimeout(processa,120)}
+async function processa(){const p=buf;
+ if(modo==='criar'||modo==='novo'){if(Cofre.pinFraco(p))return erro('Esse PIN é fácil de adivinhar. Escolha outro.');pin1=p;modo=modo==='criar'?'confirmar':'novoConf';buf='';pontos();return lkMsg('Digite o PIN de novo para confirmar')}
+ if(modo==='confirmar'){if(p!==pin1){modo='criar';return erro('Os PINs não conferem. Crie de novo.')}
+  lkMsg('Criando seu cofre…');const r=await Cofre.criar(p);COFRE=r.cofre;CHAVE=r.chave;BRUTA=r.bruta;await escrever(K_COFRE,JSON.stringify(COFRE));await migrarLegado();persist();
+  if(await bioDisponivel())return perguntarBio();return liberar()}
+ if(modo==='novoConf'){if(p!==pin1){modo='novo';return erro('Os PINs não conferem. Tente de novo.')}
+  COFRE=await Cofre.trocarPin(BRUTA,p);await escrever(K_COFRE,JSON.stringify(COFRE));lk.hidden=true;return toast('PIN trocado')}
+ if(modo==='abrir'){if(Date.now()<ate)return erro(`Muitas tentativas. Espere ${Math.ceil((ate-Date.now())/1000)} segundos.`);
+  lkMsg('Abrindo…');try{const r=await Cofre.abrir(COFRE,p);CHAVE=r.chave;BRUTA=r.bruta;falhas=0;await carregarDados();liberar()}
+  catch(e){falhas++;if(falhas>=5)ate=Date.now()+30000*2**(falhas-5);erro(falhas>=5?'PIN incorreto. Aguarde '+30*2**(falhas-5)+' segundos.':'PIN incorreto. Tente de novo.')}}}
+function perguntarBio(){lkMsg('Quer entrar com Face ID ou digital da próxima vez?');$('#lkLink').hidden=true;
+ caixa('<button class="btn" id="bSim">Sim, usar biometria</button><button class="btn ghost" id="bNao">Agora não</button>');
+ $('#bSim').onclick=async()=>{await ligarBio();liberar()};$('#bNao').onclick=liberar}
+async function ligarBio(){try{await BIO.setData({key:K_DEK,value:Cofre.b64(BRUTA),accessControl:2,title:'Ativar biometria',negativeButtonText:'Cancelar'});await escrever(K_BIO,'1');toast('Biometria ligada')}catch(e){toast('Não foi possível ligar a biometria')}atualizarBioBtn()}
+async function desligarBio(){try{await BIO.deleteData({key:K_DEK})}catch(e){}await escrever(K_BIO,'0');toast('Biometria desligada');atualizarBioBtn()}
+async function tentarBio(){if(!(await bioLigada()))return;try{const r=await BIO.getSecureData({key:K_DEK,reason:'Abrir o Meu Caixa',title:'Meu Caixa',subtitle:'Confirme que é você',negativeButtonText:'Usar PIN'});
+ BRUTA=Cofre.unb64(r.value);CHAVE=await Cofre.importar(BRUTA);await carregarDados();liberar()}
+ catch(e){if(String(e.code)==='21'){await escrever(K_BIO,'0');atualizarBioBtn();lkMsg('A biometria mudou neste celular. Entre com o PIN e ligue de novo em Segurança.')}else lkMsg('Digite seu PIN')}}
+$('#pBio').onclick=tentarBio;
+function liberar(){lk.hidden=true;$('#lkBox').hidden=true;modo='';buf='';pontos();render();atualizarBioBtn()}
+function bloquear(){CHAVE=null;BRUTA=null;TX=[];APR={};render();modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
+$('#btnLock').onclick=bloquear;
+$('#lkLink').onclick=()=>{if(modo==='novo'||modo==='novoConf'){lk.hidden=true;modo='';return}
+ lkMsg('Sem o PIN, ninguém consegue abrir os dados, nem nós. Você pode apagar tudo neste celular e começar de novo. Depois, se tiver um backup, é só restaurar.');$('#lkLink').hidden=true;
+ caixa('<input id="rsTxt" placeholder="Digite APAGAR para confirmar" autocomplete="off"><button class="btn" id="rsOk">Apagar tudo e recomeçar</button><button class="btn ghost" id="rsNo">Voltar</button>');
+ $('#rsNo').onclick=()=>telaPin('Digite seu PIN','Esqueci meu PIN');
+ $('#rsOk').onclick=async()=>{if($('#rsTxt').value.trim().toUpperCase()!=='APAGAR')return;for(const k of [K_COFRE,K_DADOS,K_BIO])await apagarK(k);if(BIO)try{await BIO.deleteData({key:K_DEK})}catch(e){}
+  COFRE=null;modo='criar';telaPin('Crie um PIN de 6 dígitos para proteger seus dados')}};
+$('#secPin').onclick=()=>{modo='novo';telaPin('Digite o novo PIN de 6 dígitos','Cancelar')};
+$('#secBio').onclick=async()=>{(await bioLigada())?desligarBio():ligarBio()};
+document.addEventListener('visibilitychange',()=>{if(document.hidden){saiu=Date.now()}else if(CHAVE&&!naCamera&&Date.now()-saiu>60000)bloquear()});
+(async()=>{if(NATIVO&&CAP.PrivacyScreen)try{await CAP.PrivacyScreen.enable({android:{dimBackground:false,privacyModeOnActivityHidden:'splash'},ios:{blurEffect:'dark'}})}catch(e){}
+ if(!window.crypto||!crypto.subtle){lkMsg('Este navegador não suporta criptografia. Abra pelo app.');$('#pad').hidden=true;return}
+ const c=await ler(K_COFRE);if(c){COFRE=JSON.parse(c);modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
+ else{modo='criar';telaPin('Crie um PIN de 6 dígitos para proteger seus dados');atualizarBioBtn()}})();
 
 /* ---------- navegação ---------- */
 function go(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
@@ -280,7 +376,7 @@ limpar();
 let foto=null,qr=null,rev=[],worker=null;
 const dataUrlBlob=u=>fetch(u).then(r=>r.blob());
 async function escolher(){
- if(CAP.Camera&&Pref){try{const ph=await CAP.Camera.getPhoto({quality:90,resultType:'dataUrl',source:'PROMPT',width:2000,correctOrientation:true,promptLabelHeader:'Foto do cupom',promptLabelPhoto:'Escolher da galeria',promptLabelPicture:'Tirar foto',promptLabelCancel:'Cancelar'});usarFoto(await dataUrlBlob(ph.dataUrl))}catch(e){if(!/cancel/i.test(e&&e.message||''))cupomMsg('Não consegui abrir a câmera: '+esc(e.message||e),true)}}
+ if(CAP.Camera&&Pref){naCamera=true;try{const ph=await CAP.Camera.getPhoto({quality:90,resultType:'dataUrl',source:'PROMPT',width:2000,correctOrientation:true,promptLabelHeader:'Foto do cupom',promptLabelPhoto:'Escolher da galeria',promptLabelPicture:'Tirar foto',promptLabelCancel:'Cancelar'});usarFoto(await dataUrlBlob(ph.dataUrl))}catch(e){if(!/cancel/i.test(e&&e.message||''))cupomMsg('Não consegui abrir a câmera: '+esc(e.message||e),true)}finally{setTimeout(()=>naCamera=false,1500)}}
  else $('#foto').click()}
 $('#tirar').onclick=escolher;
 $('#foto').onchange=e=>{const f=e.target.files[0];if(f)usarFoto(f)};
@@ -315,7 +411,7 @@ $('#ler').onclick=async()=>{if(!foto)return;const b=$('#ler');b.disabled=true;b.
 function revisar(j,manual){rev=(j.itens||[]).map(i=>({d:String(i.descricao||''),v:num(i.valor),c:CATS.some(c=>c.k===i.categoria)?i.categoria:'extra'}));rev.forEach(i=>i.o=i.c);
  $('#rLoja').value=j.loja||'';$('#rData').value=/^\d{4}-\d\d-\d\d$/.test(j.data||'')?j.data:today();
  if(!manual){const s=rev.reduce((a,i)=>a+i.v,0);const dif=j.total&&Math.abs(s-j.total)>.05;const ch=Cupom.lerQR(qr);
-  cupomMsg(`Encontrei ${rev.length} itens${j.total?' · total do cupom '+brl(num(j.total)):''}.${dif?' <b>A soma dos itens ('+brl(s)+') difere do total</b>: confira os valores, a foto pode ter cortado alguma linha.':''} Toque na categoria para trocar.${ch?'<br>QR da NFC-e lido. Chave: '+ch.replace(/(\d{4})/g,'$1 '):''}`)}
+  cupomMsg(j.conta?`Identifiquei uma <b>conta de ${esc(j.conta.toLowerCase())}</b>${j.total?' de '+brl(num(j.total)):''}${j.data?', vencimento '+j.data.split('-').reverse().join('/'):''}. Confira o valor antes de salvar.`:`Encontrei ${rev.length} itens${j.total?' · total do cupom '+brl(num(j.total)):''}.${dif?' <b>A soma dos itens ('+brl(s)+') difere do total</b>: confira os valores, a foto pode ter cortado alguma linha.':''} Toque na categoria para trocar.${ch?'<br>QR da NFC-e lido. Chave: '+ch.replace(/(\d{4})/g,'$1 '):''}`)}
  $('#revisao').hidden=false;renderRev()}
 function renderRev(){$('#rItens').innerHTML=rev.map((i,n)=>`<div class="item"><input class="desc" data-i="${n}" data-k="d" value="${esc(i.d)}" placeholder="Item" aria-label="Descrição"><select data-i="${n}" data-k="c" aria-label="Categoria">${CATS.map(c=>`<option value="${c.k}" ${c.k===i.c?'selected':''}>${c.n}</option>`).join('')}</select><input class="val" data-i="${n}" data-k="v" inputmode="decimal" value="${i.v.toFixed(2).replace('.',',')}" aria-label="Valor"></div>`).join('');
  document.querySelectorAll('#rItens [data-i]').forEach(el=>el.onchange=()=>{const i=rev[el.dataset.i];i[el.dataset.k]=el.dataset.k==='v'?num(el.value):el.value;resumoRev()});resumoRev()}
@@ -324,18 +420,23 @@ function resumoRev(){const g={};rev.forEach(i=>g[i.c]=(g[i.c]||0)+i.v);$('#rTot'
 $('#rAdd').onclick=()=>{rev.push({d:'',v:0,c:'extra',o:'extra'});renderRev()};
 $('#rSalvar').onclick=()=>{const g={};rev.filter(i=>i.v).forEach(i=>(g[i.c]=g[i.c]||[]).push({d:i.d,v:i.v}));const loja=$('#rLoja').value.trim()||'Cupom',data=$('#rData').value||today();
  const ks=Object.keys(g);if(!ks.length){flash('Nenhum item com valor.');return}
- rev.forEach(i=>{if(i.d&&i.c!==i.o)APR[Cupom.norm(i.d).trim()]=i.c});grava(LA,APR);
- ks.forEach(k=>put({id:uid(),ts:Date.now(),tipo:'despesa',desc:loja+' · '+cat(k).n,loja,valor:Math.round(g[k].reduce((a,i)=>a+i.v,0)*100)/100,data,cat:k,origem:'cupom',itens:g[k],...(qr?{qr:String(qr).slice(0,400)}:{})}));
+ rev.forEach(i=>{if(i.d&&i.c!==i.o)APR[Cupom.norm(i.d).trim()]=i.c});  ks.forEach(k=>put({id:uid(),ts:Date.now(),tipo:'despesa',desc:loja+' · '+cat(k).n,loja,valor:Math.round(g[k].reduce((a,i)=>a+i.v,0)*100)/100,data,cat:k,origem:'cupom',itens:g[k],...(qr?{qr:String(qr).slice(0,400)}:{})}));
  toast('Cupom salvo em '+ks.length+(ks.length>1?' categorias':' categoria'));rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');mes=ym(data);go('inicio');render()};
 
 /* ---------- backup ---------- */
-$('#bkCopy').onclick=async()=>{const t=JSON.stringify({app:'meucaixa',v:1,tx:TX,aprendido:APR});$('#bkTxt').value=t;try{await navigator.clipboard.writeText(t);toast('Backup copiado')}catch(e){$('#bkTxt').select();toast('Selecione o texto e copie')}};
-$('#bkLoad').onclick=()=>{try{const j=JSON.parse($('#bkTxt').value);if(!Array.isArray(j.tx))throw 0;const antes=TX;TX=j.tx;if(j.aprendido){APR=j.aprendido;grava(LA,APR)}persist();render();toast(TX.length+' lançamentos restaurados',()=>{TX=antes;persist();render()})}catch(e){toast('Texto de backup inválido')}};
+$('#bkCopy').onclick=async()=>{if(!CHAVE)return;const t=JSON.stringify({app:'meucaixa',v:2,cofre:COFRE,dados:await Cofre.cifrar(CHAVE,{tx:TX,aprendido:APR})});$('#bkTxt').value=t;try{await navigator.clipboard.writeText(t);toast('Backup criptografado copiado')}catch(e){$('#bkTxt').select();toast('Selecione o texto e copie')}};
+$('#bkLoad').onclick=async()=>{let o;try{const j=JSON.parse($('#bkTxt').value);
+  if(j.v===2){try{o=await Cofre.decifrar(CHAVE,j.dados)}catch(e){const p=$('#bkPin').value.trim();if(!p){toast('Informe o PIN usado quando o backup foi feito');return}
+   try{const r=await Cofre.abrir(j.cofre,p);o=await Cofre.decifrar(r.chave,j.dados)}catch(e){toast('PIN do backup incorreto');return}}}
+  else o={tx:j.tx,aprendido:j.aprendido};
+  if(!Array.isArray(o.tx))throw 0}catch(e){toast('Texto de backup inválido');return}
+ const antes=TX,antesA=APR;TX=o.tx;APR=o.aprendido||APR;persist();render();$('#bkPin').value='';toast(TX.length+' lançamentos restaurados',()=>{TX=antes;APR=antesA;persist();render()})};
 
 /* ---------- avisos ---------- */
 let tt;function toast(m,undo){$('#tMsg').textContent=m;$('#tUndo').hidden=!undo;$('#tUndo').onclick=()=>{undo&&undo();$('#toast').style.display='none'};$('#toast').style.display='flex';clearTimeout(tt);tt=setTimeout(()=>$('#toast').style.display='none',5000)}
 const flash=m=>toast(m);
 render();
+if(!NATIVO&&'serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 </script>
 </body>

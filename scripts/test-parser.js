@@ -72,5 +72,24 @@ VALOR TOTAL R$              37/,39`;
 const r4 = C.interpretar(t4);
 ok(r4.itens.length === 2 && r4.itens[0].descricao.startsWith('ARROZ') && r4.itens[1].valor === 8.49, 'cupom em duas linhas: ' + JSON.stringify(r4.itens));
 ok(r4.total === 37.39, 'total com erro de OCR');
+const t5 = `ENEL DISTRIBUICAO SAO PAULO
+NOTA FISCAL / CONTA DE ENERGIA ELETRICA
+CONSUMO 245 KWH
+VENCIMENTO 10/12/2026
+TOTAL A PAGAR R$ 198,37
+83660000001-0 98370048100-5 12345678901-2 34567890123-4`;
+const r5 = C.interpretar(t5);
+ok(r5.conta === 'Luz' && r5.itens.length === 1 && r5.itens[0].categoria === 'contas', 'conta de luz ' + JSON.stringify(r5));
+ok(r5.total === 198.37, 'valor da conta ' + r5.total);
+ok(r5.data === '2026-12-10', 'vencimento');
+ok(C.valorLinhaDigitavel('83660000001-0 98370048100-5 12345678901-2 34567890123-4') === 198.37, 'linha digitavel concessionaria');
+ok(C.valorLinhaDigitavel('23793.38128 60000.000003 00000.000400 1 98760000045090') === 450.9, 'linha digitavel boleto');
+ok(C.tipoConta('SABESP - CIA DE SANEAMENTO BASICO') === 'Água', 'agua');
+ok(C.tipoConta('CONDOMINIO EDIFICIO SOLAR - BOLETO') === 'Condomínio', 'condominio');
+ok(C.tipoConta('PREFEITURA DE SP - IPTU 2026') === 'IPTU', 'iptu');
+ok(C.tipoConta('COMGAS') === 'Gás', 'gas');
+ok(C.categorizar('AGUA MINERAL 1,5L', 'SUPERMERCADO X') === 'mercado', 'agua mineral continua mercado');
+ok(C.tipoConta(t1) === null, 'cupom de mercado nao e conta');
+ok(C.tipoConta('SUPERMERCADO X\nREFRIG COCA LIGHT 2L 9,90\nMAIONESE LIGHT 7,50') === null, 'produto light nao vira conta de luz');
 console.log(falhas ? falhas + ' falha(s)' : 'Todos os testes passaram');
 process.exit(falhas ? 1 : 0);

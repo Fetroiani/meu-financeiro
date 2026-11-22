@@ -1,6 +1,18 @@
 # Meu Caixa: app financeiro pessoal (Android e iPhone)
 
-Um app sem fins lucrativos para acompanhar saldo, extrato e gastos por categoria: mercado, bares, vestuário, assinaturas, presentes, investimentos, dólar, euro e extra. Para registrar uma compra, basta fotografar o cupom ou a nota fiscal. O app lê os itens e separa cada um na categoria certa.
+Um app sem fins lucrativos para acompanhar saldo, extrato e gastos por categoria: mercado, conta de consumo (condomínio, água, luz, gás, IPTU), bares, vestuário, assinaturas, presentes, investimentos, dólar, euro e extra. Para registrar uma compra, basta fotografar o cupom ou a nota fiscal. O app lê os itens e separa cada um na categoria certa.
+
+## Link com atalho na tela (recomendado)
+
+O app funciona direto no navegador do celular, como um link. Para publicar de graça pelo GitHub Pages:
+1. Envie esta pasta para um repositório no GitHub.
+2. Em **Settings > Pages**, escolha **Source: GitHub Actions**. O fluxo "Publicar o link" gera o endereço `https://SEU-USUARIO.github.io/NOME-DO-REPOSITORIO/`.
+3. No celular, abra o link:
+   - **iPhone (Safari):** toque em Compartilhar e depois em **Adicionar à Tela de Início**.
+   - **Android (Chrome):** toque em ⋮ e depois em **Instalar app** (ou **Adicionar à tela inicial**).
+   O atalho usa o logo do Meu Caixa e abre em tela cheia, como um app.
+
+**Segurança:** ao abrir pela primeira vez, você cria um PIN de 6 dígitos. Os dados são criptografados com AES-256, usando uma chave protegida pelo PIN (PBKDF2, 310 mil iterações), e ficam só no seu celular. Nada vai para servidores. Depois de 5 erros de PIN, o app faz você esperar. Ele também se bloqueia sozinho 1 minuto depois que você sai dele. No app nativo dá para entrar com Face ID ou digital.
 
 ## Como funciona
 

@@ -19,6 +19,9 @@
     assinaturas: ['ASSINATURA', 'MENSALIDADE', 'NETFLIX', 'SPOTIFY', 'DISNEY', 'HBO', 'MAX ', 'PRIME VIDEO', 'AMAZON PRIME', 'YOUTUBE',
       'DEEZER', 'GLOBOPLAY', 'PARAMOUNT', 'APPLE TV', 'ICLOUD', 'GOOGLE ONE', 'GOOGLE STORAGE', 'MICROSOFT 365', 'OFFICE 365',
       'ACADEMIA', 'SMART FIT', 'SMARTFIT', 'GYMPASS', 'WELLHUB', 'CRUNCHYROLL', 'CHATGPT', 'CLAUDE', 'PLANO MENSAL'],
+    contas: ['CONDOMINIO', 'TAXA CONDOMINIAL', 'COTA CONDOMINIAL', 'IPTU', 'CONTA DE AGUA', 'CONTA DE LUZ', 'CONTA DE GAS',
+      'ENERGIA ELETRICA', 'FORNECIMENTO DE ENERGIA', 'CONSUMO DE ENERGIA', 'AGUA E ESGOTO', 'CONSUMO DE AGUA', 'SANEAMENTO',
+      'GAS ENCANADO', 'GAS NATURAL', 'GAS CANALIZADO', 'BOTIJAO', 'GLP 13', 'RECARGA GAS'],
     investimentos: ['TESOURO', 'CDB', 'LCI', 'LCA', 'FUNDO DE INVEST', 'APLICACAO', 'CORRETORA', 'ACOES', 'POUPANCA', 'PREVIDENCIA'],
     dolar: ['DOLAR', 'USD', 'US$'],
     euro: ['EURO', 'EUR ', '€'],
@@ -43,7 +46,7 @@
     mercado: ['SUPERMERCADO', 'SUPERMERCADOS', 'MERCADO', 'ATACAD', 'ASSAI', 'CARREFOUR', 'PAO DE ACUCAR', 'EXTRA ', 'DIA ', 'BIG ',
       'MAKRO', 'SAMS CLUB', 'HORTIFRUTI', 'SACOLAO', 'MERCEARIA', 'EMPORIO', 'FARMACIA', 'DROGARIA', 'DROGASIL', 'RAIA', 'PAGUE MENOS', 'PANIFICADORA', 'PADARIA']
   };
-  const ORDEM = ['dolar', 'euro', 'investimentos', 'assinaturas', 'presentes', 'vestuario', 'bares', 'mercado'];
+  const ORDEM = ['contas', 'dolar', 'euro', 'investimentos', 'assinaturas', 'presentes', 'vestuario', 'bares', 'mercado'];
 
   // Linhas que têm valor mas não são itens.
   const NAO_ITEM = /(SUB ?TOTAL|\bTOTAL\b|TROCO|DINHEIRO|CART[AÃ]O DE|CREDITO|CR[EÉ]DITO|D[EÉ]BITO|DEBITO|\bPIX\b|VALOR PAGO|VALOR A PAGAR|VL\.? ?PAGO|FORMA DE PAG|PAGAMENTO|TRIBUTO|IMPOSTO|LEI 12|ICMS|\bPIS\b|\bCOFINS\b|CNPJ|CPF|INSCRI|\bIE\b|\bIM\b|QTD\.? ?TOTAL|QTDE\.? ?TOTAL|ITENS|ACRESC|SALDO|PROTOCOLO|CHAVE|EXTRATO N|N[º°O]\.? ?\d{3,}|SERIE|VIA CONSUM|CONSUMIDOR|TEL[:. ]|FONE|ENDERE|\bRUA\b|\bAV\b)/;
@@ -118,9 +121,58 @@
     return m ? m[1] : null;
   }
 
+
+  // ---------- Contas de consumo (condomínio, água, luz, gás, IPTU) ----------
+  const CONTAS = [
+    ['Condomínio', /CONDOMINI|TAXA CONDOMINIAL|COTA CONDOMINIAL|ADMINISTRADORA DE CONDOM/],
+    ['IPTU', /\bIPTU\b|IMPOSTO PREDIAL|IMPOSTO SOBRE A PROPRIEDADE PREDIAL/],
+    ['Gás', /COMGAS|NATURGY|\bCEG\b|GASMIG|COPERGAS|BAHIAGAS|SULGAS|COMPAGAS|SCGAS|ULTRAGAZ|LIQUIGAS|SUPERGASBRAS|NACIONAL GAS|GAS NATURAL|GAS CANALIZADO|GAS ENCANADO|GLP 13|M3 DE GAS/],
+    ['Água', /SABESP|COPASA|CEDAE|AGUAS DO RIO|\bIGUA SANEAMENTO|EMBASA|SANEPAR|CASAN|COMPESA|CAESB|CAGECE|CORSAN|SANEAGO|CAERN|CAGEPA|\bDESO\b|\bDMAE\b|\bSAAE\b|SANASA|BRK AMBIENTAL|AEGEA|AGUA E ESGOTO|CONSUMO DE AGUA|SANEAMENTO/],
+    ['Luz', /\bENEL\b|CEMIG|CPFL|LIGHT SERVICOS|LIGHT S\.?A\b|COPEL|CELESC|EQUATORIAL|NEOENERGIA|COELBA|COSERN|CELPE|ELEKTRO|ENERGISA|\bEDP\b|\bRGE SUL\b|AMAZONAS ENERGIA|ENERGIA ELETRICA|FORNECIMENTO DE ENERGIA|CONSUMO DE ENERGIA|\bKWH\b/]
+  ];
+  function tipoConta(texto) {
+    const n = norm(texto);
+    for (const [nome, re] of CONTAS) if (re.test(n)) return nome;
+    return null;
+  }
+  // Valor tirado da linha digitável (mais confiável que o texto, quando o OCR pega os números).
+  function valorLinhaDigitavel(texto) {
+    for (const l of String(texto).split(/\n/)) {
+      const d = l.replace(/[^\d]/g, '');
+      if (d.length === 48 && d[0] === '8') {            // arrecadação (água, luz, gás, IPTU)
+        const cod = [0, 12, 24, 36].map(i => d.slice(i, i + 11)).join('');
+        if ('6789'.includes(cod[2]) && cod[2] !== '8' && cod[2] !== '9') { const v = parseInt(cod.slice(4, 15), 10) / 100; if (v > 0) return v; }
+      }
+      if (d.length === 47) {                              // boleto bancário (condomínio)
+        const v = parseInt(d.slice(37), 10) / 100; if (v > 0) return v;
+      }
+    }
+    return 0;
+  }
+  function lerVencimento(texto) {
+    const m = norm(texto).match(/VENC[A-Z.]*[^0-9]{0,25}(\d{2})[\/.-](\d{2})[\/.-](\d{4})/);
+    return m ? `${m[3]}-${m[2]}-${m[1]}` : null;
+  }
+  function lerTotalConta(linhas) {
+    for (const l of linhas) {
+      const n = norm(l);
+      if (/(TOTAL A PAGAR|VALOR A PAGAR|VALOR DO DOCUMENTO|VALOR COBRADO|\(=\) ?VALOR|VALOR TOTAL|TOTAL DA FATURA|TOTAL GERAL)/.test(n)) {
+        const m = n.match(/(\d{1,3}(?:\.\d{3})*,\d{2})/g);
+        if (m) return money(m[m.length - 1]);
+      }
+    }
+    return 0;
+  }
+
   function interpretar(texto, aprendido) {
     const linhas = String(texto || '').replace(/(\d)\s*[\/']\s*,?\s*(\d{2})\b/g, '$1,$2').replace(/(\d)\s?,\s(\d{2})\b/g, '$1,$2').split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
     const loja = lerLoja(linhas);
+    const conta = tipoConta(texto);
+    if (conta) {                         // conta de consumo: um lançamento só, com o valor da fatura
+      const valor = valorLinhaDigitavel(texto) || lerTotalConta(linhas) || lerTotal(linhas);
+      return { loja: loja || conta, data: lerVencimento(texto) || lerData(texto), total: valor, conta,
+        itens: [{ descricao: 'Conta de ' + conta.toLowerCase() + (loja ? ' · ' + loja : ''), valor, categoria: 'contas' }] };
+    }
     const itens = [];
     let fim = false, pend = null;          // pend: linha de descrição sem valor (cupom em duas linhas)
     for (const l of linhas) {
@@ -147,6 +199,6 @@
     return { loja, data: lerData(texto), total: lerTotal(linhas), itens };
   }
 
-  const api = { interpretar, categorizar, norm, lerQR };
+  const api = { interpretar, categorizar, norm, lerQR, tipoConta, valorLinhaDigitavel };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Cupom = api;
 })(this);
