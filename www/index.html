@@ -99,9 +99,9 @@ input,select{font:16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padd
 .toast button{background:none;border:0;color:var(--em);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer;min-height:36px}
 .bk{margin-top:22px;border:1px solid var(--line);border-radius:12px;padding:12px 14px}.bk summary{cursor:pointer;font-weight:700;min-height:28px}.bk textarea{width:100%;min-height:110px;font:13px ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--card);color:var(--ink);margin:8px 0}
 pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
-.lock{position:fixed;inset:0;z-index:50;background:#00a86b;color:#fff;display:flex;align-items:center;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));overflow:auto}
+.lock{position:fixed;inset:0;z-index:50;background:#00a86b;color:#fff;display:flex;align-items:flex-start;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));overflow:auto}
 .lock[hidden]{display:none}
-.lk-in{width:min(340px,100%);display:grid;justify-items:center;gap:14px;text-align:center}
+.lk-in{margin:auto 0;width:min(340px,100%);display:grid;justify-items:center;gap:14px;text-align:center}
 .lk-in img{width:84px;height:84px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
 .lk-in h1{font-size:28px;font-weight:800}
 .lk-in p{margin:0;min-height:48px;font-size:16px}
@@ -111,6 +111,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 .pad button{width:72px;height:72px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font:600 28px system-ui,-apple-system,sans-serif;cursor:pointer}
 .pad button:active{background:rgba(255,255,255,.35)}.pad button.sm{font-size:15px;background:transparent}
 .pad button:disabled{visibility:hidden}
+.inst{background:rgba(0,0,0,.22);border-radius:14px;padding:12px 14px;font-size:15px;line-height:1.4;text-align:left;width:100%}.inst .t{display:block;font-weight:800;margin-bottom:4px}.inst .btn{margin-top:8px;border-color:#fff;background:#fff;color:#0b0b0b;width:100%}
 .lk-link{background:none;border:0;color:#fff;text-decoration:underline;font:500 15px system-ui,sans-serif;min-height:44px;cursor:pointer}
 .lk-box{display:grid;gap:10px;width:100%}.lk-box input{text-align:center}
 .lk-box .btn{border-color:#fff}.lk-box .btn.ghost{color:#fff}
@@ -125,6 +126,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   <div class="lk-in">
     <img src="logo.png" alt="">
     <h1>Meu Caixa</h1>
+    <div class="inst" id="inst" hidden></div>
     <p id="lkMsg">Carregando…</p>
     <div class="dots" id="dots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
     <div class="pad" id="pad"></div>
@@ -435,6 +437,22 @@ $('#bkLoad').onclick=async()=>{let o;try{const j=JSON.parse($('#bkTxt').value);
 /* ---------- avisos ---------- */
 let tt;function toast(m,undo){$('#tMsg').textContent=m;$('#tUndo').hidden=!undo;$('#tUndo').onclick=()=>{undo&&undo();$('#toast').style.display='none'};$('#toast').style.display='flex';clearTimeout(tt);tt=setTimeout(()=>$('#toast').style.display='none',5000)}
 const flash=m=>toast(m);
+/* ---------- ajuda para criar o atalho na tela ---------- */
+{const ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),and=/Android/.test(ua);
+ const inst=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+ const inApp=/FBAN|FBAV|Instagram|Line\/|WhatsApp|Claude|; wv\)|GSA\//.test(ua);
+ const box=$('#inst');let evt=null;
+ const show=h=>{box.innerHTML=h;box.hidden=false};
+ if(!NATIVO&&!inst&&(ios||and)){
+  if(ios&&(inApp||/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)||!/Safari/.test(ua)))show('<span class=\"t\">Para criar o atalho, abra no Safari</span>Você abriu o link dentro de outro app. Toque nos ⋯ ou no ícone de bússola e escolha <b>Abrir no Safari</b>. Ou copie o link e cole no Safari.');
+  else if(ios)show('<span class=\"t\">Criar o atalho na tela</span>Toque no botão <b>Compartilhar</b> (quadrado com seta ↑, na barra de baixo ou no ⋯). Role a lista para baixo e toque em <b>Adicionar à Tela de Início</b>.');
+  else if(inApp)show('<span class=\"t\">Para instalar, abra no Chrome</span>Você abriu o link dentro de outro app. Toque nos ⋮ e escolha <b>Abrir no Chrome</b> (ou no navegador).');
+  else show('<span class=\"t\">Criar o atalho na tela</span>Toque nos ⋮ do Chrome, no canto de cima, e depois em <b>Adicionar à tela inicial</b> e <b>Instalar</b>.');
+ }
+ window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();evt=e;if(!NATIVO&&!inst){show('<span class=\"t\">Instale o Meu Caixa no celular</span>O atalho abre em tela cheia, como um app.<button class="btn" id="instBtn">Instalar app</button>');
+  $('#instBtn').onclick=async()=>{evt.prompt();const r=await evt.userChoice;if(r.outcome==='accepted')box.hidden=true}}});
+ window.addEventListener('appinstalled',()=>{box.hidden=true});}
+
 render();
 if(!NATIVO&&'serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
