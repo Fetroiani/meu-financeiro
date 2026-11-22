@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#00a86b">
+<title>Meu Caixa</title>
+<style>
+/* VOICE: calm, direct personal money tool, Portuguese, no jargon.
+   IDEA: a pharmacy-style label box: the month's balance printed on a green block, categories as a dosage table.
+   PICTURE: the live donut of spending by category beside the big balance figure.
+   COLOUR and TYPE: white, emerald #00a86b block, pale pink #ffd6e0 block, black; night #04140d. Schibsted Grotesk.
+   LAYOUT: rectangles like a medicine box; bottom tab bar on phones, top tabs on wide screens. */
+:root{color-scheme:light dark;--bg:light-dark(#fff,#04140d);--ink:light-dark(#0b0b0b,#eaf6ef);--mut:light-dark(#5b5f5c,#9fb8aa);--line:light-dark(#e5e7e5,#173527);--card:light-dark(#fff,#08201a);--em:#00a86b;--emd:light-dark(#007a4e,#2fd197);--pink:light-dark(#ffd6e0,#3a1f28);--pinkink:light-dark(#4a0f20,#ffd6e0);--red:light-dark(#c62845,#ff7b92)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:clip;padding-bottom:calc(84px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
+h1,h2,h3{margin:0;line-height:1.1;text-wrap:balance}
+h2{font-size:22px;font-weight:800}
+.wrap{max-width:1100px;margin:0 auto;padding:0 max(4vw,14px)}
+header.top{display:flex;align-items:center;gap:12px;padding:max(14px,env(safe-area-inset-top)) 0 14px;flex-wrap:wrap}
+header.top h1{font-size:22px;font-weight:800;flex:1}
+.sync{font-size:13px;color:var(--mut)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid var(--line);z-index:5;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{background:none;border:0;color:var(--mut);font:600 13px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:10px 4px 14px;min-height:60px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
+nav.tabs button svg{width:22px;height:22px}
+nav.tabs button[aria-selected=true]{color:var(--emd)}
+@media(min-width:800px){body{padding-bottom:30px}nav.tabs{position:static;display:flex;border:0;gap:6px;background:none}nav.tabs button{flex-direction:row;min-height:44px;padding:8px 14px;border-radius:999px;font-size:15px}nav.tabs button[aria-selected=true]{background:var(--em);color:#fff}}
+.view{display:none}.view.on{display:block}
+.box{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);border:2px solid var(--ink);border-radius:14px;overflow:hidden;margin-top:6px}
+.green{background:var(--em);color:#fff;padding:22px;display:flex;flex-direction:column;gap:14px}
+.green .lbl{font-size:15px;opacity:.9}
+.big{font-size:clamp(36px,7vw,54px);font-weight:800;line-height:1;white-space:nowrap}
+.mini{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini div{background:rgba(0,0,0,.14);border-radius:10px;padding:10px 12px}
+.mini b{display:block;font-size:20px;white-space:nowrap}
+.mini span{font-size:13px}
+.donut{padding:18px;background:var(--card);display:flex;flex-direction:column;gap:8px}
+.fig{position:relative;min-height:240px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.month{display:flex;align-items:center;gap:6px}
+.month button{background:rgba(255,255,255,.2);color:#fff;border:0;width:44px;height:44px;border-radius:10px;font-size:20px;cursor:pointer}
+.month strong{flex:1;font-size:18px}
+.pinkband{background:var(--pink);color:var(--pinkink);border:2px solid var(--ink);border-top:0;border-radius:0 0 14px 14px;padding:14px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:-14px;padding-top:26px}
+.pinkband p{margin:0;flex:1;min-width:200px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:12px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);font:700 16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer;text-decoration:none}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.em{background:var(--em);border-color:var(--em);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--emd);outline-offset:2px}
+section.blk{margin-top:26px}
+.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:10px;margin-top:12px}
+.cat{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card);cursor:pointer;text-align:left;color:inherit;font:inherit;display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center}
+.cat:hover{border-color:var(--ink)}
+.dot{width:12px;height:12px;border-radius:4px}
+.cat .v{font-weight:700;white-space:nowrap;text-align:right}
+.meter{grid-column:1/-1;height:8px;background:var(--line);border-radius:9px;overflow:hidden}.meter i{display:block;height:100%}
+.cat small{grid-column:2/-1;color:var(--mut);font-size:13px}
+.bars{display:grid;gap:8px;margin-top:12px}
+.bar{display:grid;grid-template-columns:52px 1fr 100px;gap:10px;align-items:center;font-size:14px}
+.bar .t{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--line)}
+.bar .t i{display:block;height:100%}
+.bar .n{text-align:right;white-space:nowrap;font-weight:600}
+.list{margin-top:12px;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;padding:12px 2px;border-bottom:1px solid var(--line);align-items:center}
+.row .d{font-weight:600}.row small{color:var(--mut);font-size:13px;grid-column:2}
+.row .v{text-align:right;font-weight:700;white-space:nowrap}
+.row .v.in{color:var(--emd)}
+.row .act{grid-column:3;display:flex;gap:4px;justify-content:flex-end}
+.icon{background:none;border:0;color:var(--mut);min-width:44px;min-height:36px;cursor:pointer;font:600 13px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.chip{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:999px;padding:6px 12px;min-height:38px;font:500 14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+form.f{display:grid;gap:12px;max-width:560px;margin-top:14px}
+label{display:grid;gap:4px;font-weight:600;font-size:14px}
+input,select{font:16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:10px 12px;min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:100%}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
+.seg button{border:0;background:transparent;color:var(--ink);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:44px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.drop{border:2px dashed var(--ink);border-radius:14px;padding:22px;display:grid;gap:12px;justify-items:center;text-align:center;background:var(--pink);color:var(--pinkink);margin-top:14px}
+.drop img{max-height:260px;max-width:100%;border-radius:10px;border:1px solid var(--line)}
+.items{margin-top:14px;display:grid;gap:8px}
+.item{display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+.item input.desc{grid-column:1/-1}
+.item select{grid-column:1}
+.item input.val{text-align:right}
+.sum{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px 2px;font-weight:700}
+.note{font-size:14px;color:var(--mut)}
+.msg{padding:10px 14px;border-radius:10px;background:var(--pink);color:var(--pinkink);margin-top:12px;font-size:15px}
+.msg.err{background:light-dark(#ffe3e6,#3b1117);color:var(--red)}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;display:none;gap:12px;align-items:center;z-index:9;max-width:92vw}
+.toast button{background:none;border:0;color:var(--em);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer;min-height:36px}
+.bk{margin-top:22px;border:1px solid var(--line);border-radius:12px;padding:12px 14px}.bk summary{cursor:pointer;font-weight:700;min-height:28px}.bk textarea{width:100%;min-height:110px;font:13px ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--card);color:var(--ink);margin:8px 0}
+pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
+.empty{padding:26px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px;margin-top:12px}
+@media(max-width:700px){.box{grid-template-columns:1fr}.fig{min-height:220px}.bar{grid-template-columns:40px 1fr 84px}}
+@media(prefers-reduced-motion:no-preference){.meter i,.bar .t i{transition:width .5s ease}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="top">
+  <h1>Meu Caixa</h1>
+  <span class="sync" id="sync">Salvo neste celular</span>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-v="inicio" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 4"/></svg>Início</button>
+    <button role="tab" data-v="extrato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 6h14M5 12h14M5 18h9"/></svg>Extrato</button>
+    <button role="tab" data-v="cupom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg>Cupom</button>
+    <button role="tab" data-v="novo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Lançar</button>
+  </nav>
+</header>
+
+<main>
+<div class="view on" id="v-inicio">
+  <div class="box">
+    <div class="green">
+      <div class="month"><button id="mPrev" aria-label="Mês anterior">‹</button><strong id="mName"></strong><button id="mNext" aria-label="Próximo mês">›</button></div>
+      <div><div class="lbl">Saldo do mês</div><div class="big" id="saldo">R$ 0,00</div></div>
+      <div class="mini"><div><span>Entradas</span><b id="ent">R$ 0,00</b></div><div><span>Saídas</span><b id="sai">R$ 0,00</b></div></div>
+      <div class="lbl" id="saldoTot"></div>
+    </div>
+    <div class="donut"><h2>Para onde foi o dinheiro</h2><div class="fig"><svg id="pie" role="img" aria-label="Gráfico de gastos por categoria"></svg></div></div>
+  </div>
+  <div class="pinkband"><p><b>Tirou foto do cupom?</b> O app lê os itens e separa cada um na categoria certa.</p><button class="btn" data-go="cupom">Ler cupom fiscal</button></div>
+  <section class="blk"><h2>Categorias do mês</h2><div class="cats" id="cats"></div></section>
+  <section class="blk"><h2>Últimos 6 meses</h2><div class="bars" id="bars"></div></section>
+</div>
+
+<div class="view" id="v-extrato">
+  <h2>Extrato</h2>
+  <div class="chips" id="fchips"></div>
+  <input id="busca" type="search" placeholder="Buscar por descrição ou loja" style="margin-top:10px">
+  <div class="sum"><span id="exCount"></span><span id="exSum"></span></div>
+  <div class="list" id="lista"></div>
+  <details class="bk"><summary>Backup dos dados</summary>
+    <p class="note">Seus lançamentos ficam só neste celular. Copie o backup e guarde (num e-mail ou nota) antes de trocar de aparelho. Para restaurar, cole o texto e toque em Restaurar.</p>
+    <textarea id="bkTxt" aria-label="Texto do backup"></textarea>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="bkCopy">Copiar backup</button><button class="btn ghost" id="bkLoad">Restaurar</button></div>
+  </details>
+</div>
+
+<div class="view" id="v-cupom">
+  <h2>Ler cupom ou nota fiscal</h2>
+  <p class="note">Fotografe o cupom inteiro, reto, com boa luz e sem dobras. A leitura acontece no próprio celular, sem internet. Quando você troca a categoria de um item, o app aprende para a próxima vez.</p>
+  <div class="drop" id="drop">
+    <img id="prev" alt="Foto do cupom" hidden>
+    <button class="btn" id="tirar">Tirar foto ou escolher imagem</button>
+    <input id="foto" type="file" accept="image/*" capture="environment" hidden>
+    <button class="btn em" id="ler" disabled>Ler e separar itens</button>
+  </div>
+  <div id="cupomMsg"></div>
+  <details class="bk" id="ocrBox" hidden><summary>Ver o texto que o app leu</summary><pre class="ocr" id="ocrTxt"></pre></details>
+  <div id="revisao" hidden>
+    <h2 style="margin-top:20px">Confira antes de salvar</h2>
+    <div class="two" style="margin-top:10px"><label>Loja<input id="rLoja"></label><label>Data<input id="rData" type="date"></label></div>
+    <div class="items" id="rItens"></div>
+    <div class="sum"><span id="rTotCats"></span><span id="rTot"></span></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="rAdd">+ Item</button><button class="btn em" id="rSalvar">Salvar no extrato</button></div>
+  </div>
+</div>
+
+<div class="view" id="v-novo">
+  <h2 id="fTitle">Novo lançamento</h2>
+  <form class="f" id="form">
+    <div class="seg"><button type="button" data-t="despesa" aria-pressed="true">Saída</button><button type="button" data-t="receita" aria-pressed="false">Entrada</button></div>
+    <label>Descrição<input id="fDesc" required placeholder="Ex.: Netflix, salário, almoço"></label>
+    <div class="two"><label>Valor (R$)<input id="fVal" inputmode="decimal" required placeholder="0,00"></label><label>Data<input id="fData" type="date" required></label></div>
+    <label id="fCatL">Categoria<select id="fCat"></select></label>
+    <div class="two" id="fMoeda" hidden><label id="fMoedaL">Valor em US$<input id="fValM" inputmode="decimal" placeholder="0,00"></label><label>Cotação<input id="fCot" readonly tabindex="-1"></label></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" type="submit">Salvar</button><button class="btn ghost" type="button" id="fCancel" hidden>Cancelar edição</button></div>
+  </form>
+</div>
+</main>
+</div>
+<div class="toast" id="toast"><span id="tMsg"></span><button id="tUndo">Desfazer</button></div>
+<script src="vendor/jsQR.js"></script>
+<script src="vendor/tesseract.min.js"></script>
+<script src="cupom.js"></script>
+<script>
+{
+const CATS=[
+ {k:'mercado',n:'Mercado',c:'#00a86b'},{k:'bares',n:'Bares',c:'#ff8a3d'},{k:'vestuario',n:'Vestuário',c:'#c2185b'},
+ {k:'assinaturas',n:'Assinaturas',c:'#6d5bd0'},{k:'presentes',n:'Presentes',c:'#ff5c8a'},{k:'investimentos',n:'Investimentos',c:'#1e88e5'},
+ {k:'dolar',n:'Dólar',c:'#2e7d32'},{k:'euro',n:'Euro',c:'#f2b705'},{k:'extra',n:'Extra',c:'#8d8f8e'}];
+const IN={k:'receita',n:'Entrada',c:'#00a86b'};
+const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS[8]);
+const $=s=>document.querySelector(s);
+const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const num=s=>{if(typeof s==='number')return s;s=String(s||'').trim().replace(/[^\d,.-]/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isNaN(n)?0:Math.round(n*100)/100};
+const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const ym=d=>d.slice(0,7);
+const uid=()=>'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+
+/* ---------- armazenamento: neste celular (Preferences no app, localStorage no navegador) ---------- */
+const CAP=window.Capacitor&&window.Capacitor.Plugins||{};const Pref=window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform()?CAP.Preferences:null;
+const LS='meucaixa.tx',LA='meucaixa.aprendido';
+const lerLocal=(k,d)=>{try{return JSON.parse(localStorage.getItem(k)||d)}catch(e){return JSON.parse(d)}};
+let TX=lerLocal(LS,'[]'),APR=lerLocal(LA,'{}');
+async function grava(k,v){const s=JSON.stringify(v);try{localStorage.setItem(k,s)}catch(e){}if(Pref)try{await Pref.set({key:k,value:s})}catch(e){}}
+const persist=()=>grava(LS,TX);
+async function put(t){const i=TX.findIndex(x=>x.id===t.id);i>=0?TX[i]=t:TX.push(t);render();persist()}
+async function del(id){TX=TX.filter(x=>x.id!==id);render();persist()}
+(async()=>{if(!Pref)return;try{const a=await Pref.get({key:LS});if(a.value){TX=JSON.parse(a.value);render()}else if(TX.length)persist();
+ const b=await Pref.get({key:LA});if(b.value)APR=JSON.parse(b.value)}catch(e){}})();
+
+/* ---------- navegação ---------- */
+function go(v){document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+ document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));
+ if(v==='inicio')requestAnimationFrame(drawPie);window.scrollTo(0,0)}
+document.querySelectorAll('[data-v],[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.v||b.dataset.go));
+
+/* ---------- início ---------- */
+let mes=ym(today());
+const shift=(m,n)=>{let [y,mm]=m.split('-').map(Number);mm+=n;while(mm<1){mm+=12;y--}while(mm>12){mm-=12;y++}return y+'-'+String(mm).padStart(2,'0')};
+const mesNome=m=>{const s=new Date(m+'-15T12:00').toLocaleDateString('pt-BR',{month:'long',year:'numeric'});return s[0].toUpperCase()+s.slice(1)};
+$('#mPrev').onclick=()=>{mes=shift(mes,-1);render()};$('#mNext').onclick=()=>{mes=shift(mes,1);render()};
+function porCat(m){const o={};TX.filter(t=>t.tipo!=='receita'&&ym(t.data)===m).forEach(t=>o[t.cat]=(o[t.cat]||0)+t.valor);return o}
+function drawPie(){const s=$('#pie'),W=s.clientWidth,H=s.clientHeight;if(!W)return;
+ const pc=porCat(mes),tot=Object.values(pc).reduce((a,b)=>a+b,0);
+ const r=Math.min(W*(W<420?.42:.3),H*.44),cx=W<420?W/2:r+10,cy=H/2,ir=r*.62;
+ if(!tot){s.innerHTML=`<circle cx="${cx}" cy="${cy}" r="${(r+ir)/2}" fill="none" stroke="var(--line)" stroke-width="${r-ir}"/><text x="${cx}" y="${cy+5}" text-anchor="middle" fill="var(--mut)" font-size="14">Sem gastos</text>`;return}
+ let a=-Math.PI/2,out='';const P=(ang,rr)=>[cx+rr*Math.cos(ang),cy+rr*Math.sin(ang)];
+ const items=CATS.filter(c=>pc[c.k]).map(c=>({...c,v:pc[c.k]})).sort((x,y)=>y.v-x.v);
+ items.forEach(c=>{const da=Math.max(c.v/tot*Math.PI*2-.0001,.0001),b=a+da,l=da>Math.PI?1:0;const [x1,y1]=P(a,r),[x2,y2]=P(b,r),[x3,y3]=P(b,ir),[x4,y4]=P(a,ir);
+  out+=`<path d="M${x1} ${y1}A${r} ${r} 0 ${l} 1 ${x2} ${y2}L${x3} ${y3}A${ir} ${ir} 0 ${l} 0 ${x4} ${y4}Z" fill="${c.c}" stroke="var(--card)" stroke-width="2"><title>${c.n}: ${brl(c.v)}</title></path>`;a=b});
+ out+=`<text x="${cx}" y="${cy-4}" text-anchor="middle" fill="var(--mut)" font-size="13">gasto</text><text x="${cx}" y="${cy+16}" text-anchor="middle" fill="var(--ink)" font-size="${r>80?17:14}" font-weight="800">${brl(tot)}</text>`;
+ if(W>=420){const lx=cx+r+24;items.slice(0,8).forEach((c,i)=>{const y=cy-(Math.min(items.length,8)-1)*13+i*26;out+=`<rect x="${lx}" y="${y-6}" width="12" height="12" rx="3" fill="${c.c}"/><text x="${lx+18}" y="${y+5}" fill="var(--ink)" font-size="14">${c.n} <tspan fill="var(--mut)">${Math.round(c.v/tot*100)}%</tspan></text>`})}
+ s.innerHTML=out}
+new ResizeObserver(drawPie).observe($('#pie'));
+
+/* ---------- extrato ---------- */
+let filtro='todas';
+function renderChips(){$('#fchips').innerHTML=[{k:'todas',n:'Todas'},IN,...CATS].map(c=>`<button class="chip" data-f="${c.k}" aria-pressed="${filtro===c.k}">${c.n}</button>`).join('');
+ document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;render()})}
+$('#busca').oninput=()=>render();
+function renderLista(){const q=$('#busca').value.toLowerCase();
+ const l=TX.filter(t=>filtro==='todas'||(filtro==='receita'?t.tipo==='receita':t.cat===filtro&&t.tipo!=='receita')).filter(t=>!q||(t.desc+' '+(t.loja||'')).toLowerCase().includes(q)).sort((a,b)=>b.data.localeCompare(a.data)||(b.ts||0)-(a.ts||0));
+ const s=l.reduce((a,t)=>a+(t.tipo==='receita'?t.valor:-t.valor),0);
+ $('#exCount').textContent=l.length+(l.length===1?' lançamento':' lançamentos');$('#exSum').textContent='Saldo: '+brl(s);
+ $('#lista').innerHTML=l.length?l.map(t=>{const c=cat(t.tipo==='receita'?'receita':t.cat);const dd=t.data.split('-').reverse().join('/');
+  const its=t.itens?.length?t.itens.map(i=>i.d).filter(Boolean).join(', '):'';const extra=[dd,c.n,t.origem==='cupom'?'':t.loja,t.moeda?`${t.moeda} ${t.valorMoeda.toLocaleString('pt-BR',{minimumFractionDigits:2})}`:'',its.length>70?its.slice(0,68)+'…':its].filter(Boolean).map(esc).join(' · ');
+  return`<div class="row"><span class="dot" style="background:${c.c}"></span><span class="d">${esc(t.desc)}</span><span class="v ${t.tipo==='receita'?'in':''}">${t.tipo==='receita'?'+':'−'} ${brl(t.valor)}</span><small>${extra}</small><span class="act"><button class="icon" data-ed="${t.id}">Editar</button><button class="icon" data-del="${t.id}">Apagar</button></span></div>`}).join(''):`<div class="empty">Nada por aqui. Lance um gasto ou leia um cupom.</div>`;
+ document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const t=TX.find(x=>x.id===b.dataset.del);del(t.id);toast('Lançamento apagado',()=>put(t))});
+ document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>editar(TX.find(x=>x.id===b.dataset.ed)))}
+
+/* ---------- render geral ---------- */
+function render(){const doMes=TX.filter(t=>ym(t.data)===mes);
+ const ent=doMes.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0),sai=doMes.filter(t=>t.tipo!=='receita').reduce((a,t)=>a+t.valor,0);
+ const tot=TX.reduce((a,t)=>a+(t.tipo==='receita'?t.valor:-t.valor),0);
+ $('#mName').textContent=mesNome(mes);$('#saldo').textContent=brl(ent-sai);$('#ent').textContent=brl(ent);$('#sai').textContent=brl(sai);
+ $('#saldoTot').textContent='Saldo acumulado: '+brl(tot);
+ const pc=porCat(mes),max=Math.max(1,...Object.values(pc)),ant=porCat(shift(mes,-1));
+ $('#cats').innerHTML=CATS.map(c=>{const v=pc[c.k]||0,n=doMes.filter(t=>t.cat===c.k&&t.tipo!=='receita').length,d=v-(ant[c.k]||0);
+  return`<button class="cat" data-c="${c.k}"><span class="dot" style="background:${c.c}"></span><b>${c.n}</b><span class="v">${brl(v)}</span><small>${n} lanç.${ant[c.k]||v?` · ${d>=0?'+':'−'}${brl(Math.abs(d))} vs. mês anterior`:''}</small><span class="meter"><i style="width:${v/max*100}%;background:${c.c}"></i></span></button>`}).join('');
+ document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{filtro=b.dataset.c;go('extrato');render()});
+ const ms=[...Array(6)].map((_,i)=>shift(mes,i-5)),vals=ms.map(m=>porCat(m)),mx=Math.max(1,...vals.map(o=>Object.values(o).reduce((a,b)=>a+b,0)));
+ $('#bars').innerHTML=ms.map((m,i)=>{const o=vals[i],s=Object.values(o).reduce((a,b)=>a+b,0);return`<div class="bar"><span>${new Date(m+'-15T12:00').toLocaleDateString('pt-BR',{month:'short'}).replace('.','')}</span><span class="t">${CATS.filter(c=>o[c.k]).map(c=>`<i title="${c.n}: ${brl(o[c.k])}" style="width:${o[c.k]/mx*100}%;background:${c.c}"></i>`).join('')}</span><span class="n">${brl(s)}</span></div>`}).join('');
+ renderChips();renderLista();drawPie()}
+
+/* ---------- lançamento manual ---------- */
+let tipo='despesa',editId=null;const COT={dolar:['USD','US$'],euro:['EUR','€']};
+$('#fCat').innerHTML=CATS.map(c=>`<option value="${c.k}">${c.n}</option>`).join('');
+document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>setTipo(b.dataset.t));
+function setTipo(t){tipo=t;document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));$('#fCatL').hidden=t==='receita';moedaUI()}
+function moedaUI(){const m=COT[$('#fCat').value];const on=tipo==='despesa'&&!!m;$('#fMoeda').hidden=!on;if(on){$('#fMoedaL').firstChild.textContent='Valor em '+m[1];calcCot()}}
+function calcCot(){const r=num($('#fVal').value),f=num($('#fValM').value);$('#fCot').value=r&&f?'R$ '+(r/f).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4}):'—'}
+$('#fCat').onchange=moedaUI;$('#fVal').oninput=calcCot;$('#fValM').oninput=calcCot;
+function limpar(){editId=null;$('#form').reset();$('#fData').value=today();$('#fTitle').textContent='Novo lançamento';$('#fCancel').hidden=true;setTipo('despesa')}
+function editar(t){limpar();editId=t.id;setTipo(t.tipo);$('#fDesc').value=t.desc;$('#fVal').value=t.valor.toFixed(2).replace('.',',');$('#fData').value=t.data;if(t.cat)$('#fCat').value=t.cat;if(t.valorMoeda)$('#fValM').value=String(t.valorMoeda).replace('.',',');moedaUI();$('#fTitle').textContent='Editar lançamento';$('#fCancel').hidden=false;go('novo')}
+$('#fCancel').onclick=()=>{limpar();go('extrato')};
+$('#form').onsubmit=e=>{e.preventDefault();const v=num($('#fVal').value);if(v<=0){flash('Informe um valor maior que zero.');return}
+ const old=TX.find(x=>x.id===editId)||{};const c=tipo==='receita'?null:$('#fCat').value;
+ const t={...old,id:editId||uid(),ts:old.ts||Date.now(),tipo,desc:$('#fDesc').value.trim(),valor:v,data:$('#fData').value,cat:c,origem:old.origem||'manual'};
+ if(c&&COT[c]&&num($('#fValM').value)){t.moeda=COT[c][0];t.valorMoeda=num($('#fValM').value)}else{delete t.moeda;delete t.valorMoeda}
+ put(t);const wasEdit=!!editId;limpar();if(wasEdit)go('extrato');toast(wasEdit?'Alterado':'Salvo: '+t.desc+' '+brl(v))};
+limpar();
+
+/* ---------- leitura do cupom (OCR no aparelho) ---------- */
+let foto=null,qr=null,rev=[],worker=null;
+const dataUrlBlob=u=>fetch(u).then(r=>r.blob());
+async function escolher(){
+ if(CAP.Camera&&Pref){try{const ph=await CAP.Camera.getPhoto({quality:90,resultType:'dataUrl',source:'PROMPT',width:2000,correctOrientation:true,promptLabelHeader:'Foto do cupom',promptLabelPhoto:'Escolher da galeria',promptLabelPicture:'Tirar foto',promptLabelCancel:'Cancelar'});usarFoto(await dataUrlBlob(ph.dataUrl))}catch(e){if(!/cancel/i.test(e&&e.message||''))cupomMsg('Não consegui abrir a câmera: '+esc(e.message||e),true)}}
+ else $('#foto').click()}
+$('#tirar').onclick=escolher;
+$('#foto').onchange=e=>{const f=e.target.files[0];if(f)usarFoto(f)};
+async function usarFoto(f){foto=f;$('#prev').src=URL.createObjectURL(f);$('#prev').hidden=false;$('#ler').disabled=false;$('#revisao').hidden=true;$('#ocrBox').hidden=true;cupomMsg('');qr=await lerQR(f)}
+function carregar(f){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=no;im.src=URL.createObjectURL(f)})}
+async function preparar(f,max,cinza){const im=await carregar(f);const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,c.width,c.height);
+ if(cinza){const d=x.getImageData(0,0,c.width,c.height),p=d.data;let lo=255,hi=0;const g=new Uint8ClampedArray(p.length/4);
+  for(let i=0;i<g.length;i++){const v=.299*p[i*4]+.587*p[i*4+1]+.114*p[i*4+2];g[i]=v;if(v<lo)lo=v;if(v>hi)hi=v}
+  const r=Math.max(1,hi-lo);for(let i=0;i<g.length;i++){const v=(g[i]-lo)*255/r;p[i*4]=p[i*4+1]=p[i*4+2]=v}x.putImageData(d,0,0)}
+ return c}
+async function lerQR(f){try{
+ if('BarcodeDetector' in window){const bd=new BarcodeDetector({formats:['qr_code']});const r=await bd.detect(await createImageBitmap(f));if(r[0])return r[0].rawValue}
+ if(window.jsQR){const c=await preparar(f,1200,false),x=c.getContext('2d');const r=jsQR(x.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r)return r.data}
+}catch(e){}return null}
+function cupomMsg(h,err){$('#cupomMsg').innerHTML=h?`<div class="msg ${err?'err':''}">${h}</div>`:''}
+let progresso=()=>{};
+async function ocr(f){
+ if(!window.Tesseract)throw new Error('motor de leitura não carregou');
+ if(!worker){const base=new URL('vendor/',location.href).href;
+  worker=await Tesseract.createWorker('por',1,{workerPath:base+'worker.min.js',corePath:base+'core',langPath:base+'lang',gzip:true,workerBlobURL:false,logger:m=>progresso(m)});
+  await worker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'})}
+ const c=await preparar(f,2000,true);const {data}=await worker.recognize(c);return data.text}
+$('#ler').onclick=async()=>{if(!foto)return;const b=$('#ler');b.disabled=true;b.textContent='Lendo o cupom…';
+ progresso=m=>{if(m.status==='recognizing text')b.textContent='Lendo o cupom… '+Math.round(m.progress*100)+'%';else if(/load|init/.test(m.status))b.textContent='Preparando a leitura…'};
+ cupomMsg('Lendo os itens no próprio celular. Na primeira vez leva um pouco mais.');
+ try{const texto=await ocr(foto);$('#ocrTxt').textContent=texto;$('#ocrBox').hidden=false;
+  const j=Cupom.interpretar(texto,APR);
+  if(!j.itens.length){cupomMsg('Não encontrei itens com valor nesta foto. Tente outra foto mais perto e com mais luz, ou preencha abaixo.',true);j.itens=[{descricao:'',valor:0,categoria:'mercado'}];revisar(j,true);return}
+  revisar(j)}
+ catch(e){cupomMsg('Não consegui ler este cupom ('+esc(e.message||e)+'). Tente de novo ou lance à mão.',true)}
+ finally{b.disabled=false;b.textContent='Ler e separar itens';progresso=()=>{}}};
+function revisar(j,manual){rev=(j.itens||[]).map(i=>({d:String(i.descricao||''),v:num(i.valor),c:CATS.some(c=>c.k===i.categoria)?i.categoria:'extra'}));rev.forEach(i=>i.o=i.c);
+ $('#rLoja').value=j.loja||'';$('#rData').value=/^\d{4}-\d\d-\d\d$/.test(j.data||'')?j.data:today();
+ if(!manual){const s=rev.reduce((a,i)=>a+i.v,0);const dif=j.total&&Math.abs(s-j.total)>.05;const ch=Cupom.lerQR(qr);
+  cupomMsg(`Encontrei ${rev.length} itens${j.total?' · total do cupom '+brl(num(j.total)):''}.${dif?' <b>A soma dos itens ('+brl(s)+') difere do total</b>: confira os valores, a foto pode ter cortado alguma linha.':''} Toque na categoria para trocar.${ch?'<br>QR da NFC-e lido. Chave: '+ch.replace(/(\d{4})/g,'$1 '):''}`)}
+ $('#revisao').hidden=false;renderRev()}
+function renderRev(){$('#rItens').innerHTML=rev.map((i,n)=>`<div class="item"><input class="desc" data-i="${n}" data-k="d" value="${esc(i.d)}" placeholder="Item" aria-label="Descrição"><select data-i="${n}" data-k="c" aria-label="Categoria">${CATS.map(c=>`<option value="${c.k}" ${c.k===i.c?'selected':''}>${c.n}</option>`).join('')}</select><input class="val" data-i="${n}" data-k="v" inputmode="decimal" value="${i.v.toFixed(2).replace('.',',')}" aria-label="Valor"></div>`).join('');
+ document.querySelectorAll('#rItens [data-i]').forEach(el=>el.onchange=()=>{const i=rev[el.dataset.i];i[el.dataset.k]=el.dataset.k==='v'?num(el.value):el.value;resumoRev()});resumoRev()}
+function resumoRev(){const g={};rev.forEach(i=>g[i.c]=(g[i.c]||0)+i.v);$('#rTot').textContent='Total '+brl(rev.reduce((a,i)=>a+i.v,0));
+ $('#rTotCats').textContent=Object.entries(g).map(([k,v])=>cat(k).n+' '+brl(v)).join(' · ')}
+$('#rAdd').onclick=()=>{rev.push({d:'',v:0,c:'extra',o:'extra'});renderRev()};
+$('#rSalvar').onclick=()=>{const g={};rev.filter(i=>i.v).forEach(i=>(g[i.c]=g[i.c]||[]).push({d:i.d,v:i.v}));const loja=$('#rLoja').value.trim()||'Cupom',data=$('#rData').value||today();
+ const ks=Object.keys(g);if(!ks.length){flash('Nenhum item com valor.');return}
+ rev.forEach(i=>{if(i.d&&i.c!==i.o)APR[Cupom.norm(i.d).trim()]=i.c});grava(LA,APR);
+ ks.forEach(k=>put({id:uid(),ts:Date.now(),tipo:'despesa',desc:loja+' · '+cat(k).n,loja,valor:Math.round(g[k].reduce((a,i)=>a+i.v,0)*100)/100,data,cat:k,origem:'cupom',itens:g[k],...(qr?{qr:String(qr).slice(0,400)}:{})}));
+ toast('Cupom salvo em '+ks.length+(ks.length>1?' categorias':' categoria'));rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');mes=ym(data);go('inicio');render()};
+
+/* ---------- backup ---------- */
+$('#bkCopy').onclick=async()=>{const t=JSON.stringify({app:'meucaixa',v:1,tx:TX,aprendido:APR});$('#bkTxt').value=t;try{await navigator.clipboard.writeText(t);toast('Backup copiado')}catch(e){$('#bkTxt').select();toast('Selecione o texto e copie')}};
+$('#bkLoad').onclick=()=>{try{const j=JSON.parse($('#bkTxt').value);if(!Array.isArray(j.tx))throw 0;const antes=TX;TX=j.tx;if(j.aprendido){APR=j.aprendido;grava(LA,APR)}persist();render();toast(TX.length+' lançamentos restaurados',()=>{TX=antes;persist();render()})}catch(e){toast('Texto de backup inválido')}};
+
+/* ---------- avisos ---------- */
+let tt;function toast(m,undo){$('#tMsg').textContent=m;$('#tUndo').hidden=!undo;$('#tUndo').onclick=()=>{undo&&undo();$('#toast').style.display='none'};$('#toast').style.display='flex';clearTimeout(tt);tt=setTimeout(()=>$('#toast').style.display='none',5000)}
+const flash=m=>toast(m);
+render();
+}
+</script>
+</body>
+</html>

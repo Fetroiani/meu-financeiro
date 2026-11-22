@@ -1,0 +1,7 @@
+{
+  "appId": "br.meucaixa.app",
+  "appName": "Meu Caixa",
+  "webDir": "www",
+  "android": { "allowMixedContent": false },
+  "plugins": {}
+}
