@@ -4,6 +4,8 @@ Um app sem fins lucrativos para acompanhar saldo, extrato e gastos por categoria
 
 ## Link com atalho na tela (recomendado)
 
+**Link do app:** https://fetroiani.github.io/meu-financeiro/
+
 O app funciona direto no navegador do celular, como um link. Para publicar de graça pelo GitHub Pages:
 1. Envie esta pasta para um repositório no GitHub.
 2. Em **Settings > Pages**, escolha **Source: GitHub Actions**. O fluxo "Publicar o link" gera o endereço `https://SEU-USUARIO.github.io/NOME-DO-REPOSITORIO/`.
