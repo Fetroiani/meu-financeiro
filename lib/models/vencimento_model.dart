@@ -13,7 +13,7 @@ enum Recorrencia {
 }
 
 /// Tabela `public.vencimentos`: contas a pagar e alertas recorrentes.
-class Vencimento {
+class VencimentoModel {
   final String? id;
   final String userId;
   final String? categoriaId;
@@ -25,7 +25,7 @@ class Vencimento {
   final bool pago;
   final DateTime? createdAt;
 
-  const Vencimento({
+  const VencimentoModel({
     this.id,
     required this.userId,
     this.categoriaId,
@@ -38,7 +38,21 @@ class Vencimento {
     this.createdAt,
   });
 
-  factory Vencimento.fromJson(Map<String, dynamic> j) => Vencimento(
+  /// Cópia com o dono definido pela sessão (o RLS exige user_id = auth.uid()).
+  VencimentoModel comDono(String uid) => VencimentoModel(
+        id: id,
+        userId: uid,
+        categoriaId: categoriaId,
+        conta: conta,
+        valorEstimado: valorEstimado,
+        dataVencimento: dataVencimento,
+        recorrencia: recorrencia,
+        diasAviso: diasAviso,
+        pago: pago,
+        createdAt: createdAt,
+      );
+
+  factory VencimentoModel.fromJson(Map<String, dynamic> j) => VencimentoModel(
         id: j['id'] as String?,
         userId: j['user_id'] as String,
         categoriaId: j['categoria_id'] as String?,
@@ -77,14 +91,14 @@ class Vencimento {
   bool avisar(DateTime hoje) => !pago && diasAte(hoje) <= diasAviso;
 
   /// Próxima ocorrência depois de paga (null para conta única).
-  Vencimento? proxima() {
+  VencimentoModel? proxima() {
     final n = switch (recorrencia) {
       Recorrencia.mensal => somarMeses(dataVencimento, 1),
       Recorrencia.anual => somarMeses(dataVencimento, 12),
       Recorrencia.unica => null,
     };
     if (n == null) return null;
-    return Vencimento(
+    return VencimentoModel(
       userId: userId,
       categoriaId: categoriaId,
       conta: conta,

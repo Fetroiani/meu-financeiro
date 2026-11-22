@@ -11,7 +11,10 @@ android/app/build/
 supabase/.temp/
 supabase/.branches/
 supabase/.env
+*.jks
+*.keystore
+*.p12
 # Dart
 .dart_tool/
-packages/**/pubspec.lock
-packages/**/build/
+.packages
+build/

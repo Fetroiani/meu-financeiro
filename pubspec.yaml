@@ -1,0 +1,15 @@
+name: anotei_ja
+description: Camada de dados do Anotei Já (modelos e repositórios Supabase), espelhando supabase/schema.sql.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+# "supabase" é o cliente Dart puro. Num app Flutter, use supabase_flutter, que exporta o mesmo SupabaseClient.
+dependencies:
+  supabase: ^2.6.0
+
+dev_dependencies:
+  lints: ^4.0.0
+  test: ^1.25.0

@@ -1,7 +1,7 @@
 import 'comum.dart';
 
 /// Tabela `public.categorias`.
-class Categoria {
+class CategoriaModel {
   final String? id;
   final String userId;
   final String nome;
@@ -13,7 +13,7 @@ class Categoria {
   final List<String> subpastas;
   final DateTime? createdAt;
 
-  const Categoria({
+  const CategoriaModel({
     this.id,
     required this.userId,
     required this.nome,
@@ -28,7 +28,21 @@ class Categoria {
 
   static final _cor = RegExp(r'^#[0-9a-f]{6}$', caseSensitive: false);
 
-  factory Categoria.fromJson(Map<String, dynamic> j) => Categoria(
+  /// Cópia com o dono definido pela sessão (o RLS exige user_id = auth.uid()).
+  CategoriaModel comDono(String uid) => CategoriaModel(
+        id: id,
+        userId: uid,
+        nome: nome,
+        tipo: tipo,
+        cor: cor,
+        icone: icone,
+        palavrasChave: palavrasChave,
+        metaMensal: metaMensal,
+        subpastas: subpastas,
+        createdAt: createdAt,
+      );
+
+  factory CategoriaModel.fromJson(Map<String, dynamic> j) => CategoriaModel(
         id: j['id'] as String?,
         userId: j['user_id'] as String,
         nome: j['nome'] as String,
@@ -78,7 +92,7 @@ class Categoria {
     return palavrasChave.map(n).any((p) => p.isNotEmpty && t.contains(' $p '));
   }
 
-  Categoria copyWith({
+  CategoriaModel copyWith({
     String? nome,
     TipoLancamento? tipo,
     String? cor,
@@ -88,7 +102,7 @@ class Categoria {
     bool limparMeta = false,
     List<String>? subpastas,
   }) =>
-      Categoria(
+      CategoriaModel(
         id: id,
         userId: userId,
         nome: nome ?? this.nome,

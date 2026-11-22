@@ -5,12 +5,16 @@ on:
     branches: [main]
     paths:
       - "supabase/**"
-      - "packages/anotei_ja_models/**"
+      - "lib/**"
+      - "test/**"
+      - "pubspec.yaml"
       - ".github/workflows/supabase.yml"
   pull_request:
     paths:
       - "supabase/**"
-      - "packages/anotei_ja_models/**"
+      - "lib/**"
+      - "test/**"
+      - "pubspec.yaml"
   workflow_dispatch:
 
 permissions:
@@ -50,9 +54,6 @@ jobs:
   testar-modelos:
     name: Analisar e testar modelos Dart
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: packages/anotei_ja_models
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1

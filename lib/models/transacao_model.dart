@@ -1,7 +1,7 @@
 import 'comum.dart';
 
 /// Tabela `public.transacoes`: entradas, gastos, parcelas e moeda estrangeira.
-class Transacao {
+class TransacaoModel {
   final String? id;
   final String userId;
   final String? categoriaId;
@@ -19,7 +19,7 @@ class Transacao {
   final String? observacao;
   final DateTime? createdAt;
 
-  const Transacao({
+  const TransacaoModel({
     this.id,
     required this.userId,
     this.categoriaId,
@@ -40,7 +40,27 @@ class Transacao {
 
   bool get parcelada => totalParcelas > 1;
 
-  factory Transacao.fromJson(Map<String, dynamic> j) => Transacao(
+  /// Cópia com o dono definido pela sessão (o RLS exige user_id = auth.uid()).
+  TransacaoModel comDono(String uid) => TransacaoModel(
+        id: id,
+        userId: uid,
+        categoriaId: categoriaId,
+        subpasta: subpasta,
+        descricao: descricao,
+        valorBrl: valorBrl,
+        valorUsd: valorUsd,
+        cotacaoUsd: cotacaoUsd,
+        tipo: tipo,
+        dataTransacao: dataTransacao,
+        pago: pago,
+        parcelaAtual: parcelaAtual,
+        totalParcelas: totalParcelas,
+        grupoParcelamentoId: grupoParcelamentoId,
+        observacao: observacao,
+        createdAt: createdAt,
+      );
+
+  factory TransacaoModel.fromJson(Map<String, dynamic> j) => TransacaoModel(
         id: j['id'] as String?,
         userId: j['user_id'] as String,
         categoriaId: j['categoria_id'] as String?,
@@ -92,7 +112,7 @@ class Transacao {
   /// Divide uma compra em [vezes] parcelas mensais, como o app faz hoje:
   /// todas iguais e os centavos que sobram vão para a última.
   /// Ex.: R$ 100,00 em 3x = 33,33 + 33,33 + 33,34.
-  static List<Transacao> parcelar({
+  static List<TransacaoModel> parcelar({
     required String userId,
     required String descricao,
     required double valorTotal,
@@ -117,7 +137,7 @@ class Transacao {
         final b = usdC ~/ vezes;
         usd = ultima ? usdC - b * (vezes - 1) : b;
       }
-      return Transacao(
+      return TransacaoModel(
         userId: userId,
         categoriaId: categoriaId,
         subpasta: subpasta,

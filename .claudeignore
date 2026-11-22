@@ -1,0 +1,10 @@
+# Arquivos que o Claude não deve ler: segredos e chaves de assinatura.
+.env
+.env.*
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+supabase/.temp/
+supabase/.env
