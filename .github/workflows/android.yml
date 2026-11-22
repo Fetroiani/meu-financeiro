@@ -1,7 +1,6 @@
 name: APK Android de teste
 on:
-  push:
-  workflow_dispatch:
+  workflow_dispatch:   # só quando pedido manualmente (o foco agora é o link)
 jobs:
   build:
     runs-on: ubuntu-latest
