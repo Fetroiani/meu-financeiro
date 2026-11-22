@@ -91,5 +91,14 @@ ok(C.tipoConta('COMGAS') === 'Gás', 'gas');
 ok(C.categorizar('AGUA MINERAL 1,5L', 'SUPERMERCADO X') === 'mercado', 'agua mineral continua mercado');
 ok(C.tipoConta(t1) === null, 'cupom de mercado nao e conta');
 ok(C.tipoConta('SUPERMERCADO X\nREFRIG COCA LIGHT 2L 9,90\nMAIONESE LIGHT 7,50') === null, 'produto light nao vira conta de luz');
+// pacote de palavras-chave do primeiro acesso: só vale quando o leitor não reconhece o item, e por palavra inteira
+const PAD = { alimentacao: ['ifood', 'cafe', 'lanche'], transporte: ['uber', '99'], saude: ['drogaria', 'drogasil'], contas: ['agua', 'gas', 'vivo'], lazer: ['bar'] };
+ok(C.categorizar('IFOOD *RESTAURANTE', '', {}, {}, PAD) === 'alimentacao', 'ifood na fatura vai para alimentacao');
+ok(C.categorizar('UBER *TRIP', '', {}, {}, PAD) === 'transporte', 'uber vai para transporte');
+ok(C.categorizar('CAFE PILAO 500G', 'SUPERMERCADO BOM', {}, {}, PAD) === 'mercado', 'cafe do mercado continua mercado');
+ok(C.categorizar('AGUA MINERAL 1,5L', 'SUPERMERCADO', {}, {}, PAD) === 'mercado', 'agua mineral nao vira conta de agua');
+ok(C.categorizar('DIPIRONA 500MG', 'DROGARIA SAO PAULO', {}, {}, PAD) === 'saude', 'item de drogaria vai para saude pelo nome da loja');
+ok(C.categorizar('BARRA CEREAL', 'SUPERMERCADO', {}, {}, PAD) === 'mercado', 'bar nao casa com barra');
+ok(C.categorizar('COMPRA X', 'MERCADO LIVRE', {}, {}, { mercado: ['mercado'], compras: ['mercado livre'] }) === 'compras', 'palavra-chave mais longa vence');
 console.log(falhas ? falhas + ' falha(s)' : 'Todos os testes passaram');
 process.exit(falhas ? 1 : 0);

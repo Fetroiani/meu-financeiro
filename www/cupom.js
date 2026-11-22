@@ -74,7 +74,7 @@
     return null;
   }
 
-  function categorizar(desc, loja, aprendido, extra) {
+  function categorizar(desc, loja, aprendido, extra, padrao) {
     const chave = norm(desc).trim();
     if (aprendido && aprendido[chave]) return aprendido[chave];
     const n = ' ' + chave.replace(/[^A-Z0-9$€&]+/g, ' ') + ' ';      // palavras separadas por espaço
@@ -84,6 +84,15 @@
     for (const c of ORDEM) {
       if (c === 'bares' && lc === 'mercado') continue;     // cerveja do mercado é compra de casa
       if (KW[c].some(k => n.includes(' ' + k))) return c; // casa com o começo de uma palavra
+    }
+    // Pacote de palavras-chave padrão (vem pronto no primeiro acesso): palavra inteira, primeiro na descrição, depois no nome da loja.
+    if (padrao) {
+      const L = ' ' + norm(loja).replace(/[^A-Z0-9$€&]+/g, ' ') + ' ';
+      for (const alvo of [n, L]) {          // vence a palavra-chave mais longa: "mercado livre" ganha de "mercado"
+        let melhor = null, tam = 0;
+        for (const c in padrao) for (let k of padrao[c]) { k = norm(k).replace(/[^A-Z0-9$€&]+/g, ' ').trim(); if (k && k.length > tam && alvo.includes(' ' + k + ' ')) { melhor = c; tam = k.length; } }
+        if (melhor) return melhor;
+      }
     }
     return lc || 'extra';
   }
@@ -167,7 +176,7 @@
     return 0;
   }
 
-  function interpretar(texto, aprendido, extra) {
+  function interpretar(texto, aprendido, extra, padrao) {
     const linhas = String(texto || '').replace(/(\d)\s*[\/']\s*,?\s*(\d{2})\b/g, '$1,$2').replace(/(\d)\s?,\s(\d{2})\b/g, '$1,$2').split(/\r?\n/).map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
     const loja = lerLoja(linhas);
     const conta = tipoConta(texto);
@@ -195,7 +204,7 @@
       itens.push({ descricao: d, valor: money(m[1]) });
     }
     // Desconto vai para a categoria do maior grupo.
-    itens.forEach(i => { if (!i.desconto) i.categoria = categorizar(i.descricao, loja, aprendido, extra); });
+    itens.forEach(i => { if (!i.desconto) i.categoria = categorizar(i.descricao, loja, aprendido, extra, padrao); });
     const g = {}; itens.filter(i => !i.desconto).forEach(i => g[i.categoria] = (g[i.categoria] || 0) + i.valor);
     const maior = Object.keys(g).sort((a, b) => g[b] - g[a])[0] || 'extra';
     itens.forEach(i => { if (i.desconto) i.categoria = maior; delete i.desconto; });
