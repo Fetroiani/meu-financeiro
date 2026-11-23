@@ -435,7 +435,7 @@ f1.addEventListener('submit',async e=>{e.preventDefault();$('#eEnv').textContent
  try{
   if(!PREVIA){
    if(!CFG.supabaseUrl||!CFG.supabaseKey)throw new Error('config');
-   const r=await fetch(CFG.supabaseUrl.replace(/\/$/,'')+'/rest/v1/cadastros',{method:'POST',headers:{'apikey':CFG.supabaseKey,'Authorization':'Bearer '+CFG.supabaseKey,'Content-Type':'application/json','Prefer':'return=minimal'},
+   const r=await fetch(CFG.supabaseUrl.replace(/\/$/,'')+'/rest/v1/cadastros',{method:'POST',headers:{'apikey':CFG.supabaseKey,'Content-Type':'application/json','Prefer':'return=minimal'},
     body:JSON.stringify({id,nome:d.nome,celular:d.celular,email:d.email,consentimento:true,plataforma:PLAT})});
    if(!r.ok&&r.status!==409)throw new Error('http '+r.status)}
   ls.set('anoteija.cadastro',id);passo2(id)
