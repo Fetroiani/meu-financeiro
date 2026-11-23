@@ -2,1035 +2,467 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#00b4d8">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" type="image/png" href="icons/v3/favicon-64.png">
-<meta name="description" content="Anotei Já: controle financeiro pessoal. Fotografe o cupom e o app separa os gastos por categoria.">
-<meta property="og:title" content="Anotei Já">
-<meta property="og:description" content="Controle financeiro pessoal, simples e seguro.">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Anotei Já: controle financeiro grátis</title>
+<meta name="description" content="Anotei Já é um app de controle financeiro pessoal grátis: fotografe o cupom e ele separa seus gastos por categoria. Sem cadastro, dados criptografados só no seu celular. Funciona no iPhone e no Android.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="canonical" href="app.html" data-abrir>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Anotei Já: controle financeiro pessoal grátis">
+<meta property="og:description" content="Fotografe o cupom e o Anotei Já separa seus gastos por categoria. Grátis, no iPhone e no Android.">
 <meta property="og:image" content="https://fetroiani.github.io/meu-financeiro/icons/v3/og-1200x630.png">
-<meta name="msapplication-TileColor" content="#00b4d8">
-<meta name="msapplication-TileImage" content="icons/v3/icon-256.png">
+<meta property="og:url" content="https://fetroiani.github.io/meu-financeiro/">
+<meta name="theme-color" content="#00b4d8">
+<link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="icons/v3/icon-180.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Anotei Já">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Anotei Já</title>
+<script>/* Quem abre pelo ícone instalado vai direto para o app. */
+try{if(matchMedia('(display-mode: standalone)').matches||navigator.standalone===true)location.replace('app.html'+location.search)}catch(e){}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Anotei Já","applicationCategory":"FinanceApplication","operatingSystem":"iOS, Android","inLanguage":"pt-BR","url":"https://fetroiani.github.io/meu-financeiro/","offers":{"@type":"Offer","price":"0","priceCurrency":"BRL"},"description":"App de controle financeiro pessoal grátis que lê o cupom fiscal e separa os gastos por categoria."}</script>
+<link rel="stylesheet" href="site/site.css">
 <style>
-/* VOICE: calm, direct personal money tool, Portuguese, no jargon.
-   IDEA: a pharmacy-style label box: the month's balance printed on a green block, categories as a dosage table.
-   PICTURE: the live donut of spending by category beside the big balance figure.
-   COLOUR and TYPE: white, logo gradient green #22d39a > cyan #16b4d0 > blue #1d4fd8, pale aqua block, navy ink #0b1a33; night #050f1f.
-   LAYOUT: rectangles like a medicine box; bottom tab bar on phones, top tabs on wide screens. */
-:root{color-scheme:light dark;--bg:light-dark(#fff,#050f1f);--ink:light-dark(#0b1a33,#e8f1fb);--mut:light-dark(#55627a,#9db0c8);--line:light-dark(#e2e8f0,#17304d);--card:light-dark(#fff,#0a1a30);--em:#00b4d8;--grad:linear-gradient(135deg,#00B4D8 0%,#00C896 100%);--gink:#04263a;--emd:light-dark(#00738c,#3ddbb4);--pos:light-dark(#007a5c,#2fe0b0);--pink:light-dark(#dff8f1,#0d2e3a);--pinkink:light-dark(#0b3d5c,#b8f3e2);--red:light-dark(#c62845,#ff7b92)}
+/* VOICE: página de produto, convidativa e direta; fala com quem chegou pelo Google querendo organizar o dinheiro.
+   IDEA: a vitrine de um app: celulares com as telas reais, faixas limpas que alternam texto e tela, botão de uso sempre à mão.
+   PICTURE: dois celulares sobrepostos no hero (Início escuro com saldo e Extrato), sobre um halo no gradiente da marca.
+   COLOUR and TYPE: branco, tinta navy #04263a, gradiente #00B4D8→#00C896 nos botões e destaques, faixa menta #effbf7; noite #061a26. Plus Jakarta Sans + Inter.
+   LAYOUT: navbar fixa com CTA, hero, prova rápida, 3 passos, recursos em zigue-zague, grade de extras, segurança escura, plano grátis, instalação em abas, FAQ, CTA final. */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#061a26);--bg2:light-dark(#effbf7,#0a2433);--ink:light-dark(#04263a,#e8f5f8);--mut:light-dark(#4f6672,#9fb9c4);--line:light-dark(#dde9ed,#173a4b);--card:light-dark(#ffffff,#0c2a3a);--acc:light-dark(#00839a,#3fd6c0);--g1:#00B4D8;--g2:#00C896;--navy:#04263a}
 :root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
-*{box-sizing:border-box;min-width:0}[hidden]{display:none!important}
-html{overflow-x:clip;touch-action:manipulation}body,button,a,input,select,textarea,label{touch-action:manipulation}
-/* iPhone dá zoom sozinho ao tocar em campo com letra menor que 16px: em telas de toque, todo campo usa 16px */
-@media (pointer:coarse){input,select,textarea{font-size:16px!important}}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:clip;padding-bottom:calc(84px + env(safe-area-inset-bottom));-webkit-tap-highlight-color:transparent}
-h1,h2,h3{margin:0;line-height:1.1;text-wrap:balance}
-h2{font-size:22px;font-weight:800}
-.wrap{max-width:1100px;margin:0 auto;padding:0 max(4vw,14px)}
-header.top{display:flex;align-items:center;gap:12px;padding:max(14px,env(safe-area-inset-top)) 0 14px;flex-wrap:wrap;position:relative;isolation:isolate;color:var(--gink);margin-bottom:14px}
-header.top::before{content:'';position:absolute;top:0;bottom:0;left:calc(50% - 50vw);right:calc(50% - 50vw);background:var(--grad);z-index:-1}
-header.top .menu,header.top .lkbtn,header.top .sync{color:var(--gink)}header.top .lkbtn{border-color:rgba(4,38,58,.35);background:rgba(255,255,255,.35)}
-@media(min-width:800px){header.top nav.tabs button{color:var(--gink)}}
-header.top h1{font-size:22px;font-weight:800;flex:1;display:flex;align-items:center;gap:8px}header.top h1 img{width:34px;height:34px}
-.sync{font-size:13px;color:var(--mut)}@media(max-width:430px){.sync{display:none}}
-nav.tabs{position:fixed;left:0;right:0;bottom:0;display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg);border-top:1px solid var(--line);z-index:5;padding-bottom:env(safe-area-inset-bottom)}
-nav.tabs button{background:none;border:0;color:var(--mut);font:600 13px/1.2 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:10px 4px 14px;min-height:60px;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer}
-nav.tabs button svg{width:22px;height:22px}
-nav.tabs button[aria-selected=true]{color:var(--emd)}
-@media(min-width:800px){body{padding-bottom:30px}nav.tabs{position:static;display:flex;border:0;gap:6px;background:none}nav.tabs button{flex-direction:row;min-height:44px;padding:8px 14px;border-radius:999px;font-size:15px}nav.tabs button[aria-selected=true]{background:var(--gink);color:#fff}}
-.view{display:none}.view.on{display:block}
-.box{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);border:2px solid var(--ink);border-radius:14px;overflow:hidden;margin-top:6px}
-.green{background:var(--grad);color:var(--gink);padding:22px;display:flex;flex-direction:column;gap:14px}
-.green .lbl{font-size:15px;opacity:.9}
-.big{font-size:clamp(36px,7vw,54px);font-weight:800;line-height:1;white-space:nowrap}
-.mini{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.mini div{background:rgba(255,255,255,.38);border-radius:10px;padding:10px 12px}
-.mini b{display:block;font-size:20px;white-space:nowrap}
-.mini span{font-size:13px}
-.donut{padding:18px;background:var(--card);display:flex;flex-direction:column;gap:8px}
-.fig{position:relative;min-height:240px}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
-.month{display:flex;align-items:center;gap:6px}
-.month button{background:rgba(255,255,255,.45);color:var(--gink);border:0;width:44px;height:44px;border-radius:10px;font-size:20px;cursor:pointer}
-.month strong{flex:1;font-size:18px}
-.pinkband{background:var(--pink);color:var(--pinkink);border:2px solid var(--ink);border-top:0;border-radius:0 0 14px 14px;padding:14px 18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:-14px;padding-top:26px}
-.pinkband p{margin:0;flex:1;min-width:200px}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:46px;padding:0 18px;border-radius:12px;border:2px solid var(--ink);background:var(--ink);color:var(--bg);font:700 16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer;text-decoration:none}
-.btn.ghost{background:transparent;color:var(--ink)}
-.btn.em{background:var(--grad);border-color:transparent;color:var(--gink)}
-.btn:disabled{opacity:.5;cursor:default}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--emd);outline-offset:2px}
-section.blk{margin-top:26px}
-.cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,250px),1fr));gap:10px;margin-top:12px}
-.cat{border:1px solid var(--line);border-radius:12px;padding:12px 14px;background:var(--card);cursor:pointer;text-align:left;color:inherit;font:inherit;display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;align-items:center}
-.cat:hover{border-color:var(--ink)}
-.dot{width:12px;height:12px;border-radius:4px}
-.cat .v{font-weight:700;white-space:nowrap;text-align:right}
-.meter{grid-column:1/-1;height:8px;background:var(--line);border-radius:9px;overflow:hidden}.meter i{display:block;height:100%}
-.cat small{grid-column:2/-1;color:var(--mut);font-size:13px}
-.bars{display:grid;gap:8px;margin-top:12px}
-.bar{display:grid;grid-template-columns:52px 1fr 100px;gap:10px;align-items:center;font-size:14px}
-.bar .t{display:flex;height:22px;border-radius:6px;overflow:hidden;background:var(--line)}
-.bar .t i{display:block;height:100%}
-.bar .n{text-align:right;white-space:nowrap;font-weight:600}
-.list{margin-top:12px;border-top:1px solid var(--line)}
-.row{display:grid;grid-template-columns:auto 1fr auto;gap:2px 12px;padding:12px 2px;border-bottom:1px solid var(--line);align-items:center}
-.row .d{font-weight:600}.row small{color:var(--mut);font-size:13px;grid-column:2}
-.row .v{text-align:right;font-weight:700;white-space:nowrap}
-.row .v.in{color:var(--pos)}
-.row .act{grid-column:3;display:flex;gap:4px;justify-content:flex-end}
-.icon{background:none;border:0;color:var(--mut);min-width:44px;min-height:36px;cursor:pointer;font:600 13px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
-.chip{border:1px solid var(--line);background:var(--card);color:inherit;border-radius:999px;padding:6px 12px;min-height:38px;font:500 14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer}
-.chip[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-form.f{display:grid;gap:12px;max-width:560px;margin-top:14px}
-label{display:grid;gap:4px;font-weight:600;font-size:14px}
-input,select{font:16px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:10px 12px;min-height:46px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);width:100%}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.seg{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--ink);border-radius:12px;overflow:hidden}
-.seg button{border:0;background:transparent;color:var(--ink);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:44px;cursor:pointer}
-.seg button[aria-pressed=true]{background:var(--ink);color:var(--bg)}
-.drop{border:2px dashed var(--ink);border-radius:14px;padding:22px;display:grid;gap:12px;justify-items:center;text-align:center;background:var(--pink);color:var(--pinkink);margin-top:14px}
-.drop img{max-height:260px;max-width:100%;border-radius:10px;border:1px solid var(--line)}
-.items{margin-top:14px;display:grid;gap:8px}
-.item{display:grid;grid-template-columns:1fr 110px;gap:6px 10px;align-items:center;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
-.item input.desc{grid-column:1/-1}
-.item select{grid-column:1}
-.item input.val{text-align:right}
-.sum{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px 2px;font-weight:700}
-.note{font-size:14px;color:var(--mut)}
-.msg{padding:10px 14px;border-radius:10px;background:var(--pink);color:var(--pinkink);margin-top:12px;font-size:15px}
-.msg.err{background:light-dark(#ffe3e6,#3b1117);color:var(--red)}
-.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:12px;display:none;gap:12px;align-items:center;z-index:9;max-width:92vw}
-.toast button{background:none;border:0;color:var(--em);font:700 15px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;cursor:pointer;min-height:36px}
-.bk{margin-top:22px;border:1px solid var(--line);border-radius:12px;padding:12px 14px}.bk summary{cursor:pointer;font-weight:700;min-height:28px}.bk textarea{width:100%;min-height:110px;font:13px ui-monospace,monospace;border:1px solid var(--line);border-radius:10px;padding:8px;background:var(--card);color:var(--ink);margin:8px 0}
-pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px}
-.lock{position:fixed;inset:0;z-index:50;background:linear-gradient(160deg,#008ba8 0%,#0a5a6e 45%,#062433 100%);color:#fff;display:flex;align-items:flex-start;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom));overflow:auto}
-.lock[hidden]{display:none}
-.lk-in{margin:auto 0;width:min(340px,100%);display:grid;justify-items:center;gap:14px;text-align:center}
-.lk-in img{width:84px;height:84px;border-radius:22px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
-.lk-in h1{font-size:28px;font-weight:800}
-.lk-in p{margin:0;min-height:48px;font-size:16px}
-.dots{display:flex;gap:14px;height:18px}.dots i{width:16px;height:16px;border-radius:50%;border:2px solid #fff}.dots i.on{background:#fff}
-.dots.erro{animation:treme .35s}@keyframes treme{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
-.pad{display:grid;grid-template-columns:repeat(3,72px);gap:14px 26px;margin-top:6px}
-.pad button{width:72px;height:72px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font:600 28px system-ui,-apple-system,sans-serif;cursor:pointer}
-.pad button:active{background:rgba(255,255,255,.35)}.pad button.sm{font-size:15px;background:transparent}
-.pad button:disabled{visibility:hidden}
-.inst{background:rgba(0,0,0,.22);border-radius:14px;padding:12px 14px;font-size:15px;line-height:1.4;text-align:left;width:100%}.inst .t{display:block;font-weight:800;margin-bottom:4px}.inst .btn{margin-top:8px;border-color:#fff;background:#fff;color:#0b0b0b;width:100%}
-.lk-link{background:none;border:0;color:#fff;text-decoration:underline;font:500 15px system-ui,sans-serif;min-height:44px;cursor:pointer}
-.lk-box{display:grid;gap:10px;width:100%}.lk-box input{text-align:center}
-.lk-box .btn{border-color:#fff}.lk-box .btn.ghost{color:#fff}
-.lkbtn{background:none;border:1px solid var(--line);color:var(--ink);border-radius:999px;min-height:40px;padding:0 12px;font:600 14px system-ui,sans-serif;cursor:pointer}
-.menu{background:none;border:0;color:var(--ink);width:44px;height:44px;border-radius:12px;display:grid;place-items:center;cursor:pointer;margin-left:-8px}
-.menu svg{width:26px;height:26px}
-.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20}
-.drawer{position:fixed;top:0;bottom:0;left:0;width:min(330px,86vw);background:var(--bg);z-index:21;overflow:auto;padding:max(16px,env(safe-area-inset-top)) 16px max(20px,env(safe-area-inset-bottom));box-shadow:4px 0 30px rgba(0,0,0,.25);transform:translateX(-105%);transition:transform .22s ease}
-.drawer.on{transform:none}
-.drawer h3{font-size:13px;color:var(--mut);font-weight:700;margin:18px 4px 6px}
-.dhead{display:flex;align-items:center;gap:10px}.dhead img{width:40px;height:40px;border-radius:10px}.dhead b{font-size:20px;flex:1}
-.ditem{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;width:100%;background:none;border:0;color:var(--ink);font:500 16px system-ui,-apple-system,sans-serif;text-align:left;padding:11px 6px;border-radius:10px;cursor:pointer;min-height:44px}
-.ditem:hover{background:var(--card)}.ditem small{color:var(--mut);font-size:13px;white-space:nowrap}
-.ditem.sub{padding-left:30px;font-size:15px}
-.ditem svg{width:20px;height:20px}
-.ver{font-size:12px;color:var(--mut);margin:18px 6px 0}
-.cm{border:1px solid var(--line);border-radius:12px;padding:12px;display:grid;gap:8px;background:var(--card)}
-.cm .l1{display:grid;grid-template-columns:48px 1fr auto;gap:8px;align-items:center}
-.cm input[type=color]{width:48px;height:46px;padding:2px;border-radius:10px}
-.subs{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.subs .chip{display:inline-flex;gap:6px;align-items:center}
-.ftab{width:100%;border-collapse:collapse;font-size:14px;margin-top:10px}
-.ftab td{border-bottom:1px solid var(--line);padding:6px 4px;vertical-align:middle}
-.ftab td.v{text-align:right;white-space:nowrap;font-weight:600}
-.ftab select{min-height:40px;padding:6px;font-size:14px}
-.ftab input[type=checkbox]{width:22px;height:22px;min-height:0}
-.ftab tr.off{opacity:.45}
-@media(max-width:600px){.ftab tr{display:grid;grid-template-columns:30px 44px minmax(0,1fr) auto;align-items:center;border-bottom:1px solid var(--line);padding:6px 0}.ftab td{border:0;padding:2px 4px}.ftab td:last-child{grid-column:2/-1}.ftab select{width:100%}}
-.prevb{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:14px;border-top:1px solid rgba(4,38,58,.2);padding-top:12px}.prevb b{display:block;font-size:17px;white-space:nowrap}
-.olho{background:rgba(255,255,255,.45);border:0;color:var(--gink);width:36px;height:30px;border-radius:9px;margin-left:6px;vertical-align:middle;cursor:pointer;display:inline-grid;place-items:center}.olho svg{width:20px;height:20px}
-.rapido{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;flex:1}.rapido .btn{padding:0 4px;font-size:14px;white-space:nowrap}
-.vazio{border:1px dashed var(--line);border-radius:14px;padding:22px 16px;text-align:center;display:grid;gap:12px;justify-items:center;background:var(--card);margin-top:12px}.vazio p{margin:0;color:var(--mut)}.vazio b{font-size:17px;color:var(--ink)}.vazio div{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
-.ajuda{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--mut);background:none;color:var(--mut);font:700 14px system-ui,sans-serif;cursor:pointer;vertical-align:middle;margin-left:6px;padding:0}.ajuda[aria-expanded=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.dica{background:var(--pink);color:var(--pinkink);border-radius:10px;padding:10px 12px;margin-top:10px}
-.bkb{display:flex;gap:10px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);border-radius:12px;padding:8px 10px 8px 14px;margin:0 0 12px;font-size:14px;background:var(--card)}.bkb span{flex:1;min-width:170px}.bkb .btn{min-height:38px;font-size:14px;padding:0 12px}
-.tour{position:fixed;inset:0;z-index:60;background:rgba(2,16,26,.6);display:grid;place-items:center;padding:20px}.tour[hidden]{display:none}
-.tcard{background:var(--bg);color:var(--ink);border-radius:20px;max-width:380px;width:100%;padding:24px 22px 18px;display:grid;gap:12px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
-.tcard .ic{width:56px;height:56px;border-radius:16px;background:var(--grad);display:grid;place-items:center;font-size:28px}.tcard h2{font-size:21px}.tcard p{margin:0;color:var(--mut);font-size:15px}
-.tdots{display:flex;gap:6px}.tdots i{width:8px;height:8px;border-radius:50%;background:var(--line)}.tdots i.on{background:var(--em);width:22px;border-radius:9px}
-.tnav{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:4px}
-.meta{grid-column:1/-1;font-size:12px;color:var(--mut)}
-.act .icon svg{width:18px;height:18px}.act .icon{min-width:40px;display:inline-grid;place-items:center}
-.atual{display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;margin:34px 0 10px;padding-top:18px;border-top:1px solid var(--line);color:var(--mut);font-size:13px}
-.alerta{display:flex;gap:12px;align-items:center;flex-wrap:wrap;border:2px solid var(--ink);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:#fff4d6;color:#3d2a00;cursor:pointer;text-align:left;font:inherit;width:100%}
-.alerta.atr{background:#ffe0e4;color:#5c0011}.alerta b{font-size:17px}.alerta span{flex:1;min-width:180px}
-.al{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line)}
-.al .q{grid-column:2/-1;display:flex;gap:6px;flex-wrap:wrap}.al .q .btn{min-height:38px;padding:0 12px;font-size:14px}
-.al small{color:var(--mut);font-size:13px;grid-column:2}.al .st{font-weight:700;font-size:13px;white-space:nowrap;padding:3px 8px;border-radius:999px}
-.st.ok{background:var(--line);color:var(--mut)}.st.perto{background:#ffe7a8;color:#5a3c00}.st.atr{background:#ffd0d7;color:#7a0016}.st.pago{background:#d8f5e6;color:#04553a}
-.empty{padding:26px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px;margin-top:12px}
-@media(max-width:700px){.box{grid-template-columns:1fr}.fig{min-height:220px}.bar{grid-template-columns:40px 1fr 84px}}
-@media(prefers-reduced-motion:no-preference){.meter i,.bar .t i{transition:width .5s ease}}
-.langs{display:flex;gap:6px;padding:4px 6px}.langs button{flex:1;min-height:40px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:600 14px system-ui,-apple-system,sans-serif;cursor:pointer}
-.langs button[aria-pressed="true"]{background:var(--grad);color:var(--gink);border-color:transparent}
-.langs.lk{justify-content:center;margin-top:14px}.langs.lk button{flex:0 0 auto;min-width:52px;min-height:36px;background:transparent;color:inherit;border-color:currentColor;opacity:.8}
-.langs.lk button[aria-pressed="true"]{opacity:1;background:rgba(255,255,255,.25);color:inherit}
-.scan{position:fixed;inset:0;z-index:60;background:#000;color:#fff}.scan video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.scMira{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}.scMira i{width:min(78vw,420px);height:min(52vw,280px);border:3px solid #00C896;border-radius:16px;box-shadow:0 0 0 100vmax rgba(0,0,0,.45)}
-.scTop{position:absolute;top:0;left:0;right:0;padding:max(18px,env(safe-area-inset-top)) 18px 12px;text-align:center;display:grid;gap:4px}.scTop b{font-size:18px}.scTop span{font-size:14px;opacity:.85}
-.scBot{position:absolute;bottom:0;left:0;right:0;padding:12px 16px max(18px,env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.scBot .btn.ghost{color:#fff;border-color:#fff;background:rgba(0,0,0,.35)}
-.msg span.ln{display:block;margin-top:4px}.msg span.ln:first-child{margin-top:0}.msg .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:80px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important;animation:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3,.jk{font-family:"Plus Jakarta Sans",Inter,system-ui,sans-serif;text-wrap:balance;line-height:1.1;letter-spacing:-.01em}
+h2{font-size:clamp(28px,3.8vw,42px);font-weight:800}
+h3{font-size:19px;font-weight:700}
+.band{padding:clamp(56px,8vw,104px) max(5vw,18px)}
+.in{max-width:1160px;margin:0 auto}
+.alt{background:var(--bg2)}
+.mut{color:var(--mut)}
+.lead{font-size:18px;color:var(--mut);max-width:60ch}
+.kick{font-weight:700;color:var(--acc);font-size:15px;margin-bottom:10px}
+.gtext{background:linear-gradient(100deg,var(--g1),var(--g2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav{position:fixed;inset:0 0 auto 0;z-index:30;background:color-mix(in srgb,var(--bg) 90%,transparent);backdrop-filter:blur(12px);transition:box-shadow .2s}
+.nav.sh{box-shadow:0 1px 0 var(--line)}
+.nav a.l{padding:8px 12px;border-radius:10px;font-weight:600;font-size:15px;color:var(--mut);white-space:nowrap}
+.nav a.l:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 24px;border-radius:999px;font-weight:700;font-family:"Plus Jakarta Sans",Inter,sans-serif;font-size:16px;text-decoration:none;border:2px solid transparent;cursor:pointer;white-space:nowrap;transition:transform .15s,box-shadow .15s}
+.btn.pri{background:linear-gradient(100deg,var(--g1),var(--g2));color:var(--navy);box-shadow:0 10px 24px -10px rgba(0,180,160,.7)}
+.btn.pri:hover{transform:translateY(-1px);box-shadow:0 14px 28px -10px rgba(0,180,160,.8)}
+.btn.sec{border-color:var(--line);color:var(--ink);background:var(--card)}
+.btn.sm{min-height:42px;padding:0 18px;font-size:15px}
+a:focus-visible,button:focus-visible{outline:3px solid var(--acc);outline-offset:3px}
+.ok{display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:15px;white-space:nowrap}
+.ok::before{content:"";width:20px;height:20px;border-radius:50%;flex:none;background:linear-gradient(120deg,var(--g1),var(--g2)) center/100%;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='10'/%3E%3C/svg%3E");mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='10'/%3E%3C/svg%3E")}
+.ok{position:relative}.ok::after{content:"";position:absolute;left:6px;top:50%;width:8px;height:5px;border:2px solid #fff;border-top:0;border-right:0;transform:translateY(-70%) rotate(-45deg)}
+.phone{background:#0b1622;border-radius:40px;padding:9px;box-shadow:0 40px 80px -30px rgba(4,38,58,.55),0 0 0 1px rgba(255,255,255,.06) inset;width:100%;max-width:300px}
+.phone img{display:block;width:100%;height:auto;border-radius:32px}
+.halo{position:absolute;inset:8% 4% 4%;border-radius:50%;background:radial-gradient(closest-side,rgba(0,200,150,.35),rgba(0,180,216,.18) 60%,transparent);filter:blur(10px)}
+.float{animation:fl 6s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-10px)}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px}
+.ic{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;color:var(--navy);background:linear-gradient(120deg,rgba(0,180,216,.18),rgba(0,200,150,.22));flex:none}
+:root[data-theme=dark] .ic{color:#7fe8d2}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .ic{color:#7fe8d2}}
+.ic svg{width:24px;height:24px}
+.num{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-family:"Plus Jakarta Sans",sans-serif;background:linear-gradient(120deg,var(--g1),var(--g2));color:var(--navy);font-size:18px}
+.li{display:flex;gap:10px;align-items:flex-start;padding:6px 0}
+.li svg{flex:none;width:22px;height:22px;margin-top:2px;color:var(--acc)}
+.dark{background:light-dark(var(--navy),#020d14);color:#e8f5f8}
+:root[data-theme=light] .dark{background:var(--navy)}:root[data-theme=dark] .dark{background:#020d14}
+.dark .mut{color:#a9c4cf}
+.dark .card{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12)}
+.tab{min-height:46px;padding:0 20px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font-weight:700;cursor:pointer}
+.tab[aria-selected=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.step{display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:start;padding:12px 0}
+kbd{font:600 14px Inter,sans-serif;background:var(--bg2);border:1px solid var(--line);border-radius:6px;padding:1px 8px;white-space:nowrap}
+details{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;padding:20px 44px 20px 0;font-weight:700;font-family:"Plus Jakarta Sans",Inter,sans-serif;font-size:18px;position:relative}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"";position:absolute;right:8px;top:26px;width:10px;height:10px;border-right:2.5px solid var(--acc);border-bottom:2.5px solid var(--acc);transform:rotate(45deg);transition:transform .2s}
+details[open] summary::after{transform:rotate(-135deg);top:30px}
+details>div{padding:0 0 20px;color:var(--mut);max-width:72ch}
+.plan{border-radius:28px;padding:2px;background:linear-gradient(130deg,var(--g1),var(--g2))}
+.plan>div{background:var(--card);border-radius:26px;padding:clamp(24px,4vw,40px)}
+.price{font-size:clamp(48px,7vw,64px);font-weight:800;line-height:1;white-space:nowrap}
+.mcta{position:fixed;left:12px;right:12px;bottom:12px;z-index:25;transform:translateY(calc(100% + 40px));visibility:hidden;transition:transform .25s,visibility .25s}
+.mcta.on{transform:none;visibility:visible}
+@media(min-width:768px){.mcta{display:none}}
+
+.modal{position:fixed;inset:0;z-index:60;background:rgba(2,16,26,.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.modal[hidden]{display:none}
+.mbox{background:var(--card);color:var(--ink);border-radius:24px;width:100%;max-width:460px;padding:clamp(22px,4vw,32px);box-shadow:0 40px 80px -20px rgba(0,0,0,.5);position:relative;margin:auto}
+.xbtn{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:50%;border:0;background:transparent;color:var(--mut);font-size:26px;cursor:pointer}
+.fld{display:block;margin-top:16px}
+.fld span{display:block;font-weight:600;font-size:15px;margin-bottom:6px}
+.fld input{width:100%;min-height:50px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);padding:0 14px;font:16px Inter,sans-serif}
+.fld input:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 25%,transparent)}
+.fld input[aria-invalid=true]{border-color:#d33b52}
+.err{color:#c62845;font-size:14px;margin-top:5px;min-height:0}
+:root[data-theme=dark] .err{color:#ff8a9c}
+.cons{display:flex;gap:10px;align-items:flex-start;margin-top:16px;font-size:14px;color:var(--mut);cursor:pointer}
+.cons input{width:22px;height:22px;flex:none;margin-top:1px;accent-color:#00a88a}
+.plat{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;padding:12px 18px;border-radius:18px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);text-decoration:none;font-weight:700;font-family:"Plus Jakarta Sans",Inter,sans-serif;font-size:17px;margin-top:12px;cursor:pointer;text-align:left}
+.plat small{display:block;font:500 14px Inter,sans-serif;color:var(--mut)}
+.plat.sug{border-color:transparent;background:linear-gradient(100deg,var(--g1),var(--g2));color:var(--navy)}
+.plat.sug small{color:var(--navy);opacity:.8}
+.plat svg{width:30px;height:30px;flex:none}
+.qr{background:#fff;border-radius:16px;padding:12px;width:220px;margin:14px auto 0}.qr svg{width:100%;height:auto;display:block}
+.spin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:gira .7s linear infinite}@keyframes gira{to{transform:rotate(360deg)}}
+.previa{font-size:13px;color:var(--mut);margin-top:12px;text-align:center}
 </style>
 </head>
 <body>
-<div class="lock" id="lock">
-  <div class="lk-in">
-    <img src="icons/v3/icon-192.png" alt="">
-    <h1>Anotei Já</h1>
-    <div class="inst" id="inst" hidden></div>
-    <p id="lkMsg">Carregando…</p>
-    <div class="dots" id="dots"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-    <div class="pad" id="pad"></div>
-    <div class="lk-box" id="lkBox" hidden></div>
-    <button class="lk-link" id="lkLink">Esqueci meu PIN</button>
-    <div class="langs lk" translate="no"><button data-lang="pt">PT</button><button data-lang="es">ES</button><button data-lang="en">EN</button></div>
+
+<header class="nav" id="nav">
+  <div class="in flex items-center gap-4 px-5 py-3">
+    <a href="#topo" class="flex items-center gap-2 jk font-extrabold text-xl shrink-0" style="color:var(--ink)"><img src="site/logo.webp" alt="" width="36" height="36" class="rounded-[10px]">Anotei Já</a>
+    <nav class="hidden md:flex items-center gap-1 mx-auto" aria-label="Seções">
+      <a class="l" href="#como">Como funciona</a><a class="l" href="#recursos">Recursos</a><a class="l" href="#seguranca">Segurança</a><a class="l" href="#instalar">Instalar</a><a class="l" href="#duvidas">Dúvidas</a>
+    </nav>
+    <a class="btn pri sm ml-auto md:ml-0" href="app.html" data-abrir>Usar grátis</a>
   </div>
-</div>
-<div class="scan" id="scan" hidden>
-  <video id="scVid" playsinline muted autoplay></video>
-  <div class="scMira"><i></i></div>
-  <div class="scTop"><b>Aponte para o QR Code ou o código de barras</b><span>Para o código de barras de boletos e contas, deite o celular.</span></div>
-  <div class="scBot"><button class="btn ghost" id="scLuz" hidden>Lanterna</button><button class="btn ghost" id="scDig">Digitar código</button><button class="btn" id="scFechar">Cancelar</button></div>
-</div>
-<div class="scrim" id="scrim" hidden></div>
-<aside class="drawer" id="drawer" aria-label="Menu">
-  <div class="dhead"><img src="logo.png" alt=""><b>Anotei Já</b><button class="icon" id="dClose" aria-label="Fechar menu">Fechar</button></div>
-  <h3 id="dMes">Categorias</h3>
-  <div id="dCats"></div>
-  <h3>Ferramentas</h3>
-  <button class="ditem" data-dv="venc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/></svg><span>Vencimentos</span><small id="dVenc"></small></button>
-  <button class="ditem" data-dv="cats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h7"/><circle cx="18" cy="16" r="3"/></svg><span>Personalizar categorias</span><small></small></button>
-  <button class="ditem" data-dv="cupom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></svg><span>Enviar fatura ou documento</span><small></small></button>
-  <button class="ditem" id="dXlsx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8l8 8M16 8l-8 8"/></svg><span>Baixar planilha Excel (.xlsx)</span><small></small></button>
-  <button class="ditem" data-dv="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Segurança e backup</span><small></small></button>
-  <button class="ditem" id="dLock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v9"/><path d="M6.3 7.5a8 8 0 1 0 11.4 0"/></svg><span>Bloquear agora</span><small></small></button>
-  <button class="ditem" id="dTour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg><span>Como usar o app</span><small></small></button>
-  <p class="ver" id="ver"></p>
-  <h3>Idioma</h3>
-  <div class="langs" translate="no"><button data-lang="pt">Português</button><button data-lang="es">Español</button><button data-lang="en">English</button></div>
-  <button class="btn ghost" data-atualizar style="margin:10px 6px 0;width:calc(100% - 12px)">⟳ Atualizar app</button>
-</aside>
-<div class="wrap">
-<header class="top">
-  <button class="menu" id="btnMenu" aria-label="Abrir menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
-  <h1 class="marca"><img src="logo.png" alt="">Anotei Já</h1>
-  <span class="sync" id="sync">Protegido com PIN</span><button class="lkbtn" id="btnLock" aria-label="Bloquear o app">Bloquear</button>
-  <nav class="tabs" role="tablist">
-    <button role="tab" data-v="inicio" aria-selected="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 4v8l6 4"/></svg>Início</button>
-    <button role="tab" data-v="extrato"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 6h14M5 12h14M5 18h9"/></svg>Extrato</button>
-    <button role="tab" data-v="cupom"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="7" width="18" height="13" rx="3"/><circle cx="12" cy="13.5" r="3.5"/><path d="M8 7l2-3h4l2 3"/></svg>Cupom</button>
-    <button role="tab" data-v="novo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Lançar</button>
-  </nav>
 </header>
 
-<main>
-<div class="bkb" id="bkBanner" hidden><span>💾 Faz tempo que você não salva uma cópia dos seus dados. Se o celular quebrar ou for trocado, o backup é o que salva tudo.</span><button class="btn em" id="bkIr">Fazer backup</button><button class="icon" id="bkAdiar" aria-label="Lembrar depois">Depois</button></div>
-<div class="view on" id="v-inicio">
-  <button class="alerta" id="alBanner" hidden></button>
-  <div class="box">
-    <div class="green">
-      <div class="month"><button id="mPrev" aria-label="Mês anterior">‹</button><strong id="mName"></strong><button id="mNext" aria-label="Próximo mês">›</button></div>
-      <div><div class="lbl">Saldo do mês<button class="olho" id="olho" aria-pressed="false" aria-label="Esconder valores"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div><div class="big" id="saldo">R$ 0,00</div></div>
-      <div class="mini"><div><span>Entradas</span><b id="ent">R$ 0,00</b></div><div><span>Saídas</span><b id="sai">R$ 0,00</b></div></div>
-      <div class="prevb"><div><span>A pagar no mês</span><b id="aPagar">R$ 0,00</b></div><div><span>Previsão de sobra</span><b id="sobra">R$ 0,00</b></div></div>
-      <div class="lbl" id="saldoTot"></div>
+<main id="topo">
+<section class="band" style="padding-top:clamp(110px,12vw,150px);padding-bottom:clamp(40px,6vw,80px)">
+  <div class="in grid md:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] gap-12 items-center">
+    <div>
+      <p class="kick">Controle financeiro pessoal · 100% grátis</p>
+      <h1 class="font-extrabold" style="font-size:clamp(38px,5.2vw,60px)">Tire foto do cupom. <span class="gtext">O Anotei Já organiza</span> seus gastos.</h1>
+      <p class="lead mt-6">Saiba quanto entrou, quanto saiu e para onde foi cada real. O app lê o cupom, separa os itens por categoria e guarda tudo criptografado só no seu celular.</p>
+      <div class="flex flex-wrap gap-3 mt-8">
+        <a class="btn pri" href="app.html" data-abrir>Começar agora, é grátis</a>
+        <a class="btn sec" href="#instalar">Como instalar</a>
+      </div>
+      <div class="flex flex-wrap gap-x-6 gap-y-3 mt-7 mut">
+        <span class="ok">Cadastro em 30 segundos</span><span class="ok">iPhone e Android</span><span class="ok">Funciona sem internet</span>
+      </div>
     </div>
-    <div class="donut"><h2>Para onde foi o dinheiro</h2><div class="fig"><svg id="pie" role="img" aria-label="Gráfico de gastos por categoria"></svg></div></div>
-  </div>
-  <div class="pinkband"><div class="rapido"><button class="btn" data-acao="gasto">+ Gasto</button><button class="btn ghost" data-acao="entrada">+ Entrada</button><button class="btn em" data-acao="cupom">📷 Ler cupom</button></div></div>
-  <section class="blk"><h2>Categorias do mês</h2><div class="cats" id="cats"></div></section>
-  <section class="blk"><h2>Últimos 6 meses</h2><div class="bars" id="bars"></div></section>
-  <div class="atual"><span id="verFim"></span><button class="btn ghost" data-atualizar>⟳ Atualizar app</button></div>
-</div>
-
-<div class="view" id="v-extrato">
-  <h2>Extrato</h2>
-  <div class="chips" id="fchips"></div>
-  <input id="busca" type="search" placeholder="Buscar por descrição ou loja" style="margin-top:10px">
-  <div class="sum"><span id="exCount"></span><span id="exSum"></span></div>
-  <div class="list" id="lista"></div>
-</div>
-
-<div class="view" id="v-venc">
-  <h2>Vencimentos<button class="ajuda" aria-expanded="false" aria-controls="hVenc" aria-label="Ajuda">?</button></h2>
-  <p class="note dica" id="hVenc" hidden>As contas de consumo e as faturas de cartão que você lê ganham alerta sozinhas. Aqui você também cadastra outras contas (aluguel, escola, plano de saúde…). Quando pagar, toque em <b>Paguei</b>: o valor vai para o extrato e, se a conta é mensal, o próximo mês já fica agendado.</p>
-  <div class="list" id="alLista"></div>
-  <h2 style="margin-top:22px;font-size:18px" id="alFTit">Novo alerta</h2>
-  <form class="f" id="alForm">
-    <label>Conta<input id="alNome" required placeholder="Ex.: Aluguel, Escola, Plano de saúde"></label>
-    <div class="two"><label>Vencimento<input id="alData" type="date" required></label><label>Valor (R$, opcional)<input id="alValor" inputmode="decimal" placeholder="0,00"></label></div>
-    <div class="two"><label>Categoria<select id="alCat"></select></label><label>Repetir<select id="alRep"><option value="mensal">Todo mês</option><option value="anual">Todo ano</option><option value="">Só uma vez</option></select></label></div>
-    <label>Avisar quantos dias antes<select id="alDias"><option value="0">No dia</option><option value="1">1 dia antes</option><option value="3" selected>3 dias antes</option><option value="5">5 dias antes</option><option value="7">7 dias antes</option></select></label>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" type="submit">Salvar alerta</button><button class="btn ghost" type="button" id="alCancel" hidden>Cancelar edição</button></div>
-  </form>
-  <details class="bk"><summary>Receber aviso com o app fechado</summary>
-    <p class="note">Toque em <b>Calendário</b> num alerta para colocar o lembrete na agenda do celular. A agenda avisa no dia certo, mesmo com o app fechado, e não envia nada para a internet. Com o app instalado na tela inicial, o ícone também mostra quantas contas estão vencendo.</p>
-    <button class="btn ghost" id="alIcsTodos">Colocar todos os alertas na agenda</button>
-  </details>
-</div>
-
-<div class="view" id="v-config">
-  <h2>Segurança e backup<button class="ajuda" aria-expanded="false" aria-controls="hSeg hBk" aria-label="Ajuda">?</button></h2>
-  <details class="bk" open><summary>Segurança</summary>
-    <p class="note dica" id="hSeg" hidden>Seus dados ficam só neste celular, criptografados (AES-256). Sem o seu PIN ou a sua biometria ninguém consegue lê-los. O app se bloqueia sozinho 1 minuto depois que você sai dele.</p>
-    <p class="note" id="bioNota"></p>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="secPin">Trocar PIN</button><button class="btn ghost" id="secBio" hidden></button></div>
-  </details>
-  <details class="bk" open id="nuvem"><summary>Sincronizar entre aparelhos</summary>
-    <p class="note" id="nvNota">Entre com uma conta para ver os mesmos dados no celular, no computador e em outros aparelhos. Os dados continuam guardados neste aparelho e também vão para o servidor, protegidos pelo seu login.</p>
-    <div id="nvOff" hidden>
-      <form class="f" id="nvForm" style="margin-top:8px">
-        <label>E-mail<input id="nvEmail" type="email" autocomplete="username" required></label>
-        <label>Senha<input id="nvSenha" type="password" autocomplete="current-password" minlength="8" placeholder="Pelo menos 8 caracteres"></label>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" type="submit" id="nvEntrar">Entrar</button><button class="btn ghost" type="button" id="nvCriar">Criar conta</button><button class="icon" type="button" id="nvEsqueci">Esqueci a senha</button></div>
-      </form>
+    <div class="relative flex justify-center items-center min-h-[460px]">
+      <div class="halo"></div>
+      <div class="phone relative float" style="max-width:270px;transform:translateX(-18%)"><img src="site/dark.webp" alt="Tela inicial do Anotei Já com saldo do mês de R$ 3.989,10, entradas, saídas e previsão de sobra" width="390" height="844"></div>
+      <div class="phone absolute hidden sm:block" style="max-width:230px;right:2%;bottom:-4%;"><img src="site/ext.webp" alt="Extrato com filtros por categoria e lista de lançamentos" width="390" height="844"></div>
     </div>
-    <div id="nvNova" hidden><form class="f" id="nvNovaForm"><label>Nova senha<input id="nvNovaSenha" type="password" autocomplete="new-password" minlength="8" required></label><button class="btn em" type="submit">Salvar nova senha</button></form></div>
-    <div id="nvOn" hidden>
-      <p style="margin:8px 0"><b id="nvConta"></b><br><span class="note" id="nvStatus"></span></p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" id="nvAgora">Sincronizar agora</button><button class="btn ghost" id="nvSair">Sair da conta</button></div>
+  </div>
+</section>
+
+<section class="px-5 pb-6">
+  <div class="in grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="card text-center"><p class="jk font-extrabold text-[22px] sm:text-3xl whitespace-nowrap">R$ 0</p><p class="mut text-[15px] mt-1">para sempre, sem plano pago</p></div>
+    <div class="card text-center"><p class="jk font-extrabold text-[22px] sm:text-3xl whitespace-nowrap">AES-256</p><p class="mut text-[15px] mt-1">criptografia no celular</p></div>
+    <div class="card text-center"><p class="jk font-extrabold text-[22px] sm:text-3xl whitespace-nowrap">2 min</p><p class="mut text-[15px] mt-1">para instalar pelo link</p></div>
+    <div class="card text-center"><p class="jk font-extrabold text-[22px] sm:text-3xl whitespace-nowrap">PT · ES · EN</p><p class="mut text-[15px] mt-1">três idiomas</p></div>
+  </div>
+</section>
+
+<section id="como" class="band">
+  <div class="in">
+    <div class="text-center max-w-2xl mx-auto">
+      <p class="kick">Como funciona</p>
+      <h2>Comece a organizar o seu dinheiro hoje</h2>
+      <p class="lead mt-4 mx-auto">Não precisa baixar de loja nem criar senha de site. Um cadastro rápido e o app já está na tela do seu celular.</p>
     </div>
-    <p class="msg" id="nvMsg" hidden></p>
-  </details>
-  <details class="bk" open><summary>Backup dos dados</summary>
-    <p class="note dica" id="hBk" hidden>O backup sai criptografado, protegido pelo seu PIN atual. Guarde o texto (num e-mail ou nota) antes de trocar de celular. Para restaurar, cole o texto, informe o PIN que você usava quando fez o backup e toque em Restaurar.</p>
-    <textarea id="bkTxt" aria-label="Texto do backup"></textarea>
-    <input id="bkPin" type="password" inputmode="numeric" maxlength="6" placeholder="PIN do backup (se for outro)" style="margin-bottom:8px">
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="bkCopy">Copiar backup</button><button class="btn ghost" id="bkLoad">Restaurar</button></div>
-  </details>
-</div>
-
-<div class="view" id="v-cats">
-  <h2>Personalizar categorias<button class="ajuda" aria-expanded="false" aria-controls="hCats" aria-label="Ajuda">?</button></h2>
-  <p class="note dica" id="hCats" hidden>Mude nome, cor e palavras-chave (separadas por vírgula). As palavras-chave ajudam o app a separar sozinho os itens do cupom e da fatura. Use subpastas para separar, por exemplo, cada cartão de crédito. Com uma <b>meta mensal</b>, a tela inicial mostra quanto da meta já foi usado: verde até 75%, amarelo até 99% e vermelho a partir de 100%.</p>
-  <div class="items" id="cmList"></div>
-  <div class="cm" id="cmEnt" style="margin-top:8px"></div>
-  <h2 style="margin-top:22px;font-size:18px">Nova categoria</h2>
-  <form class="f" id="cmNova"><div class="cm"><div class="l1"><input type="color" id="cnCor" value="#0091ea" aria-label="Cor"><input id="cnNome" placeholder="Nome (ex.: Saúde, Pet, Escola)" required><button class="btn em" type="submit">Criar</button></div></div></form>
-</div>
-
-<div class="view" id="v-cupom">
-  <h2>Ler cupom, nota, conta ou fatura<button class="ajuda" aria-expanded="false" aria-controls="hCupom" aria-label="Ajuda">?</button></h2>
-  <p class="note dica" id="hCupom" hidden>Fotografe o cupom inteiro, reto, com boa luz e sem dobras. A leitura acontece no próprio celular, sem internet. Quando você troca a categoria de um item, o app aprende para a próxima vez.<br><br>Para contas e boletos, escaneie o código de barras: o app pega o valor e o vencimento certinhos e cria o alerta. O QR Code do cupom ou da nota fiscal traz a loja, a data e, em algumas notas, o total.</p>
-  <div class="drop" id="drop">
-    <img id="prev" alt="Foto do cupom" hidden>
-    <button class="btn" id="tirar">📷 Tirar foto ou escolher imagem</button>
-    <button class="btn" id="btnScan">▦ Escanear QR Code ou código de barras</button>
-    <input id="foto" type="file" accept="image/*" capture="environment" hidden>
-    <button class="btn ghost" id="btnDoc">Enviar fatura ou documento</button>
-    <input id="doc" type="file" accept=".pdf,.csv,.tsv,.txt,.ofx,.qfx,.xlsx,.xls,.ods,image/*,application/pdf" hidden>
-    <span class="note" style="color:inherit">Aceita PDF, foto, CSV, OFX, Excel (.xlsx, .xls) e TXT</span>
-    <button class="btn em" id="ler" disabled>Ler e separar itens</button>
-    <button class="lk-link" id="btnDig" type="button" style="color:inherit">⌨ Digitar código de barras ou chave da nota</button>
-    <form id="digBox" hidden style="display:grid;gap:8px;width:100%"><input id="digTxt" inputmode="numeric" autocomplete="off" placeholder="Linha digitável do boleto ou chave de 44 dígitos" aria-label="Código"><button class="btn em" type="submit">Usar código</button></form>
+    <div class="grid md:grid-cols-3 gap-5 mt-12">
+      <div class="card"><span class="num">1</span><h3 class="mt-5">Faça o cadastro e instale</h3><p class="mut mt-2">Informe nome, celular e e-mail e escolha seu aparelho: Android pelo Chrome ou iPhone pelo Safari. O Anotei Já ganha ícone na tela, como qualquer app.</p></div>
+      <div class="card"><span class="num">2</span><h3 class="mt-5">Crie seu PIN de 6 dígitos</h3><p class="mut mt-2">É ele que protege seus dados. Depois, se quiser, entre com Face ID ou digital.</p></div>
+      <div class="card"><span class="num">3</span><h3 class="mt-5">Fotografe o cupom</h3><p class="mut mt-2">O app lê os itens, separa cada um na categoria certa e mostra para você conferir antes de salvar.</p></div>
+    </div>
   </div>
-  <div id="cupomMsg"></div>
-  <details class="bk" id="ocrBox" hidden><summary>Ver o texto que o app leu</summary><pre class="ocr" id="ocrTxt"></pre></details>
-  <div id="fat" hidden>
-    <h2 style="margin-top:20px" id="fatTit">Confira a fatura</h2>
-    <div class="two" style="margin-top:10px"><label>Cartão<select id="fatCartao"></select></label><label>Tipo<select id="fatTipo"><option value="fatura">Fatura de cartão</option><option value="extrato">Extrato do banco</option></select></label></div>
-    <p class="note">Desmarque o que não quer salvar. Pagamentos e estornos já vêm desmarcados. Itens sem categoria clara vão para Cartão de crédito.</p>
-    <div class="scroll"><table class="ftab" id="fatTab"></table></div>
-    <div class="sum"><span id="fatQtd"></span><span id="fatTot"></span></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="fatCancel">Cancelar</button><button class="btn em" id="fatSalvar">Salvar no extrato</button></div>
-  </div>
-  <div id="revisao" hidden>
-    <h2 style="margin-top:20px">Confira antes de salvar</h2>
-    <div class="two" style="margin-top:10px"><label>Loja<input id="rLoja"></label><label>Data<input id="rData" type="date"></label></div>
-    <div class="items" id="rItens"></div>
-    <div class="sum"><span id="rTotCats"></span><span id="rTot"></span></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn ghost" id="rAdd">+ Item</button><button class="btn em" id="rSalvar">Salvar no extrato</button></div>
-  </div>
-</div>
+</section>
 
-<div class="view" id="v-novo">
-  <h2 id="fTitle">Novo lançamento</h2>
-  <form class="f" id="form">
-    <div class="seg"><button type="button" data-t="despesa" aria-pressed="true">Saída</button><button type="button" data-t="receita" aria-pressed="false">Entrada</button></div>
-    <label>Descrição<input id="fDesc" placeholder="Ex.: Netflix, salário, almoço (opcional)" autocomplete="off"></label>
-    <div class="two"><label>Valor (R$)<input id="fVal" inputmode="decimal" required placeholder="0,00"></label><label>Data<input id="fData" type="date" required></label></div>
-    <label id="fCatL">Categoria<select id="fCat"></select></label>
-    <label id="fSubL" hidden><span id="fSubT">Subpasta</span><select id="fSub"></select></label>
-    <div class="two" id="fParcBox"><label>Parcelas<select id="fParc"></select></label><label>Moeda<select id="fMoe"><option value="">R$ (real)</option><option value="USD">US$ (dólar)</option><option value="EUR">€ (euro)</option></select></label></div>
-    <p class="note" id="fParcInfo" hidden></p>
-    <div class="two" id="fMoeda" hidden><label id="fMoedaL">Valor em US$<input id="fValM" inputmode="decimal" placeholder="0,00"></label><label>Cotação<input id="fCot" readonly tabindex="-1"></label></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" type="submit">Salvar</button><button class="btn ghost" type="button" id="fCancel" hidden>Cancelar edição</button></div>
-  </form>
-</div>
+<section id="recursos" class="band alt">
+  <div class="in grid gap-24">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="flex justify-center order-2 md:order-1"><div class="phone"><img src="site/qr.webp" alt="Cupom fiscal lido pelo QR Code com CNPJ do emitente e total de R$ 87,45" width="390" height="841"></div></div>
+      <div class="order-1 md:order-2">
+        <p class="kick">Leitura de cupom e códigos</p>
+        <h2>Esqueça de digitar compra por compra</h2>
+        <p class="lead mt-4">Aponte a câmera e o Anotei Já entende o que você comprou ou precisa pagar.</p>
+        <div class="mt-6" data-li>Fotografe o cupom ou a nota fiscal: os itens vão para as categorias certas
+|Leia o QR Code da NFC-e, boletos, contas de luz, água e gás e Pix copia e cola
+|Envie a fatura do cartão ou o extrato do banco em PDF, CSV, OFX ou Excel
+|Corrigiu uma categoria? O app aprende e acerta da próxima vez</div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div>
+        <p class="kick">Saldo e categorias</p>
+        <h2>Veja para onde está indo o seu dinheiro</h2>
+        <p class="lead mt-4">Na tela inicial você enxerga o mês inteiro de uma vez, sem planilha.</p>
+        <div class="mt-6" data-li>Saldo do mês, entradas, saídas e saldo acumulado
+|Quanto falta pagar no mês e a previsão de sobra
+|Gráfico de gastos por categoria e comparação com o mês anterior
+|Metas por categoria, com aviso quando você chega perto do limite</div>
+      </div>
+      <div class="flex justify-center"><div class="phone"><img src="site/cats.webp" alt="Categorias do mês com barras de gasto: Mercado R$ 42,00, Transporte R$ 18,90 perto da meta, Lazer e Assinaturas R$ 550,00" width="390" height="844"></div></div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+      <div class="flex justify-center order-2 md:order-1"><div class="phone"><img src="site/boleto.webp" alt="Aba Cupom lendo o código de barras de um boleto Itaú de R$ 259,90 com vencimento em 10/12/2026" width="390" height="841"></div></div>
+      <div class="order-1 md:order-2">
+        <p class="kick">Contas e vencimentos</p>
+        <h2>Nunca mais pague uma conta atrasada</h2>
+        <p class="lead mt-4">Leu um boleto ou a fatura do cartão com vencimento futuro? Vira um lembrete.</p>
+        <div class="mt-6" data-li>Alertas de vencimento na tela inicial e no ícone do app
+|Tocou em Paguei: o valor vai para o extrato e o próximo mês já fica agendado
+|Lembrete também na agenda do celular, por arquivo .ics
+|O app lembra o nome da loja pelo CNPJ da nota</div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-[minmax(0,.9fr)_minmax(0,1.1fr)] gap-12 items-center">
+      <div>
+        <p class="kick">Também no computador</p>
+        <h2>O mesmo app, na tela grande</h2>
+        <p class="lead mt-4">Abra o link no navegador do computador para lançar com calma e ver os gráficos maiores. Quer levar para uma planilha? Exporte o extrato para Excel.</p>
+        <a class="btn pri mt-8" href="app.html" data-abrir>Abrir o Anotei Já</a>
+      </div>
+      <img src="site/web.webp" alt="Anotei Já no computador com saldo, gráfico de rosca e categorias do mês" width="1000" height="703" class="rounded-2xl w-full h-auto" style="box-shadow:0 40px 80px -30px rgba(4,38,58,.45);border:1px solid var(--line)">
+    </div>
+  </div>
+</section>
+
+<section class="band">
+  <div class="in">
+    <div class="text-center max-w-2xl mx-auto">
+      <p class="kick">E tem mais</p>
+      <h2>Tudo o que você precisa, sem pagar nada</h2>
+    </div>
+    <div id="extras" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 mt-12"></div>
+  </div>
+</section>
+
+<section id="seguranca" class="band dark">
+  <div class="in grid md:grid-cols-[minmax(0,1.1fr)_minmax(0,.9fr)] gap-12 items-center">
+    <div>
+      <p class="kick" style="color:#5fe3c6">Privacidade</p>
+      <h2>Seus dados são seus. Ficam só no seu celular.</h2>
+      <p class="lead mt-4 mut">Nada de enviar seu extrato para a nuvem de uma empresa. Seus lançamentos ficam no aparelho, trancados pelo seu PIN. Do cadastro, guardamos só nome, celular e e-mail.</p>
+      <div class="grid sm:grid-cols-2 gap-4 mt-8" id="sec"></div>
+    </div>
+    <div class="flex justify-center"><div class="phone" style="max-width:270px"><img src="site/pin.webp" alt="Tela de criação do PIN de 6 dígitos do Anotei Já" width="390" height="820"></div></div>
+  </div>
+</section>
+
+<section class="band alt">
+  <div class="in grid md:grid-cols-2 gap-12 items-center">
+    <div>
+      <p class="kick">Preço</p>
+      <h2>Grátis de verdade. Sem plano premium.</h2>
+      <p class="lead mt-4">O Anotei Já é um projeto pessoal sem fins lucrativos. Como ele funciona por link, e não por loja de aplicativos, não há custo para manter nem para você usar.</p>
+    </div>
+    <div class="plan"><div>
+      <p class="jk font-bold text-lg">Anotei Já completo</p>
+      <p class="mt-3"><span class="price jk">R$ 0</span> <span class="mut">para sempre</span></p>
+      <div class="mt-6" data-li>Lançamentos e categorias sem limite
+|Leitura de cupom, boletos, contas e faturas
+|Alertas de vencimento, metas e parcelas
+|Exportar para Excel e backup criptografado
+|Face ID ou digital, e sincronização opcional</div>
+      <a class="btn pri w-full mt-8" href="app.html" data-abrir>Começar agora</a>
+    </div></div>
+  </div>
+</section>
+
+<section id="instalar" class="band">
+  <div class="in grid md:grid-cols-2 gap-12 items-start">
+    <div>
+      <p class="kick">Instalação</p>
+      <h2>Instale em dois minutos, sem loja</h2>
+      <p class="lead mt-4">Faça o cadastro, escolha seu aparelho e o app abre no navegador certo, já com o botão de instalar.</p>
+      <div class="flex gap-2 mt-8" role="tablist" id="tabs">
+        <button class="tab" role="tab" aria-selected="true" data-k="ios">iPhone</button>
+        <button class="tab" role="tab" aria-selected="false" data-k="and">Android</button>
+      </div>
+    </div>
+    <div class="card" id="steps" role="tabpanel"></div>
+  </div>
+</section>
+
+<section id="duvidas" class="band alt">
+  <div class="in max-w-[820px]">
+    <div class="text-center"><p class="kick">Dúvidas</p><h2>Perguntas frequentes</h2></div>
+    <div class="mt-10" id="faqs"></div>
+  </div>
+</section>
+
+<section class="band" style="background:linear-gradient(120deg,var(--g1),var(--g2));color:var(--navy)">
+  <div class="in text-center max-w-2xl mx-auto">
+    <img src="site/logo.webp" alt="" width="72" height="72" class="mx-auto rounded-[18px] shadow-lg">
+    <h2 class="mt-6">Comece agora a saber para onde vai o seu dinheiro</h2>
+    <p class="mt-4 text-[18px]">Grátis, com cadastro rápido e seus lançamentos protegidos no seu celular.</p>
+    <a class="btn mt-8" style="background:var(--navy);color:#fff" href="app.html" data-abrir>Usar o Anotei Já grátis</a>
+  </div>
+</section>
 </main>
+
+<footer class="px-5 py-10" style="background:var(--navy);color:#a9c4cf">
+  <div class="in flex flex-wrap gap-6 items-center justify-between text-[15px]">
+    <div class="flex items-center gap-3"><img src="site/logo.webp" alt="" width="36" height="36" class="rounded-[10px]"><span class="jk font-extrabold text-white text-lg">Anotei Já</span><span>· app financeiro pessoal sem fins lucrativos</span></div>
+    <nav class="flex flex-wrap gap-x-6 gap-y-2" aria-label="Rodapé">
+      <a href="#como" class="hover:text-white">Como funciona</a><a href="#seguranca" class="hover:text-white">Segurança</a><a href="#duvidas" class="hover:text-white">Dúvidas</a><a href="https://github.com/Fetroiani/meu-financeiro" class="hover:text-white">Código aberto no GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+<div class="mcta" id="mcta"><a class="btn pri w-full" href="app.html" data-abrir>Usar grátis agora</a></div>
+
+
+<div class="modal" id="cad" hidden>
+  <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="cadT">
+    <button class="xbtn" id="cadX" aria-label="Fechar">×</button>
+    <form id="f1" novalidate>
+      <img src="site/logo.webp" alt="" width="52" height="52" class="rounded-[14px]">
+      <h2 id="cadT" class="mt-4" style="font-size:26px">Crie seu acesso grátis</h2>
+      <p class="mut mt-2 text-[15px]">Leva 30 segundos. Seus lançamentos não fazem parte do cadastro: eles ficam só no seu celular.</p>
+      <label class="fld"><span>Nome completo</span><input id="fNome" name="nome" autocomplete="name" required maxlength="120" placeholder="Maria da Silva"><p class="err" id="eNome"></p></label>
+      <label class="fld"><span>Celular com DDD</span><input id="fCel" name="celular" type="tel" inputmode="tel" autocomplete="tel-national" required placeholder="(11) 98765-4321" maxlength="16"><p class="err" id="eCel"></p></label>
+      <label class="fld"><span>E-mail</span><input id="fMail" name="email" type="email" inputmode="email" autocomplete="email" required maxlength="160" placeholder="maria@email.com"><p class="err" id="eMail"></p></label>
+      <label class="cons"><input type="checkbox" id="fOk"><span>Concordo que o Anotei Já guarde meu nome, celular e e-mail para falar comigo sobre o app.</span></label>
+      <p class="err" id="eOk"></p>
+      <p class="err" id="eEnv" role="alert"></p>
+      <button class="btn pri w-full mt-5" id="fBtn" type="submit">Continuar</button>
+      <p class="previa" id="previa" hidden>Prévia do site: aqui o cadastro não é enviado.</p>
+    </form>
+    <div id="f2" hidden>
+      <p class="kick">Cadastro feito</p>
+      <h2 style="font-size:26px" id="f2T">Onde você vai usar o Anotei Já?</h2>
+      <p class="mut mt-2 text-[15px]" id="f2D">O app abre no navegador certo para instalar no seu celular.</p>
+      <div id="plats"></div>
+      <div id="qrBox" hidden><div class="qr" id="qr"></div><p class="mut text-[14px] mt-3 text-center">Aponte a câmera do celular para o código. O app abre já liberado, sem precisar se cadastrar de novo.</p></div>
+    </div>
+  </div>
 </div>
-<div class="tour" id="tour" hidden role="dialog" aria-modal="true" aria-labelledby="tTit"><div class="tcard"><div class="ic" id="tIc"></div><h2 id="tTit"></h2><p id="tTxt"></p><div class="tdots" id="tDots"><i></i><i></i><i></i></div><div class="tnav"><button class="btn ghost" id="tPular">Pular</button><button class="btn em" id="tProx">Próximo</button></div></div></div>
-<div class="toast" id="toast"><span id="tMsg"></span><button id="tUndo">Desfazer</button></div>
-<script src="vendor/jsQR.js"></script>
-<script src="vendor/tesseract.min.js"></script>
-<script src="i18n.js"></script>
-<script src="codigos.js"></script>
-<script src="cupom.js"></script>
-<script src="cofre.js"></script>
-<script src="extrato.js"></script>
 <script src="config.js"></script>
-<script src="vendor/supabase.js"></script>
-<script src="sync.js"></script>
-<script src="vendor/xlsx.full.min.js" defer></script>
 <script>
 {
-const DEF_CATS=[
- {k:'mercado',n:'Mercado',c:'#00a86b'},{k:'contas',n:'Conta de consumo',c:'#8a5a2b'},{k:'combustivel',n:'Combustível',c:'#e53935'},
- {k:'cartao',n:'Cartão de crédito',c:'#455a64',subs:[]},{k:'bares',n:'Bares',c:'#ff8a3d'},{k:'vestuario',n:'Vestuário',c:'#c2185b'},
- {k:'assinaturas',n:'Assinaturas',c:'#6d5bd0'},{k:'presentes',n:'Presentes',c:'#ff5c8a'},{k:'investimentos',n:'Investimentos',c:'#1e88e5'},
- {k:'dolar',n:'Dólar',c:'#2e7d32'},{k:'euro',n:'Euro',c:'#f2b705'},{k:'extra',n:'Extra',c:'#8d8f8e'}];
-// Pacote do primeiro acesso: 9 grupos (8 categorias de gasto + Salário e Entradas) e Outros para o que não se encaixa.
-const NOVAS=[
- {k:'alimentacao',n:'Alimentação',c:'#ff7a45',kw:['restaurante','ifood','padaria','lanche','cafe','almoco','jantar','pizza','hamburguer']},
- {k:'mercado',n:'Mercado',c:'#00a884',kw:['supermercado','mercado','atacadao','assai','carrefour','pao de acucar','hortifruti','acougue']},
- {k:'transporte',n:'Transporte',c:'#0091c2',kw:['uber','99','posto','gasolina','etanol','combustivel','estacionamento','pedagio','metro','onibus']},
- {k:'saude',n:'Saúde',c:'#e5484d',kw:['farmacia','drogaria','droga raia','drogasil','medico','consulta','exame','dentista','academia']},
- {k:'contas',n:'Casa e Contas',c:'#8a5a2b',kw:['energia','luz','agua','gas','internet','aluguel','condominio','iptu','vivo','claro','tim','enel','comgas']},
- {k:'lazer',n:'Lazer e Assinaturas',c:'#7c5cff',kw:['cinema','netflix','spotify','amazon prime','ingresso','viagem','hotel','bar']},
- {k:'compras',n:'Compras e Vestuário',c:'#d6408f',kw:['loja','shopping','roupa','calcado','tenis','mercado livre','amazon','shopee']},
- {k:'cartao',n:'Cartão de Crédito',c:'#475569',subs:[],kw:['fatura','anuidade','cartao']},
- {k:'extra',n:'Outros',c:'#8d8f8e'}];
-const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'];
-// O leitor de cupom conhece categorias antigas; no pacote novo elas caem na categoria equivalente.
-const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
-const clone=o=>JSON.parse(JSON.stringify(o));
-let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.22-13';
-const T=window.I18N?I18N.T:(s=>s),LOC=window.I18N?I18N.loc:'pt-BR',nomeCat=(k,n)=>window.I18N?I18N.nomeCat(k,n):n;
-NOVAS.forEach(c=>c.n=nomeCat(c.k,c.n));DEF_CATS.forEach(c=>c.n=nomeCat(c.k,c.n));CATS=clone(NOVAS);
-const IN={k:'receita',n:nomeCat('receita','Salário e Entradas'),c:'#00a884'};
-const cat=k=>CATS.find(c=>c.k===k)||(k==='receita'?IN:CATS.find(c=>c.k==='extra'));
 const $=s=>document.querySelector(s);
-const brl=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
-const K_OCULTO='meucaixa.oculto',K_ULTBK='meucaixa.ultBackup',K_BKADIA='meucaixa.bkAdiar',K_TOUR='meucaixa.tour';
-const lsG=k=>{try{return localStorage.getItem(k)}catch(e){return null}},lsS=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-let OCULTO=lsG(K_OCULTO)==='1';
-const brlH=v=>OCULTO?'R$ ••••••':brl(v);
-const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-const num=s=>{if(typeof s==='number')return s;s=String(s||'').trim().replace(/[^\d,.-]/g,'');if(s.includes(','))s=s.replace(/\./g,'').replace(',','.');const n=parseFloat(s);return isNaN(n)?0:Math.round(n*100)/100};
-const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
-const ym=d=>d.slice(0,7);
-const uid=()=>'t'+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-const subNome=t=>{const c=CATS.find(x=>x.k===t.cat);const s=c&&c.subs&&c.subs.find(x=>x.k===t.sub);return s?s.n:''};
-const nk=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-const KWP={};NOVAS.forEach(c=>KWP[c.k]=new Set((c.kw||[]).map(nk)));
-// palavras que você acrescentou valem antes de tudo; as do pacote padrão só quando o leitor não reconhece o item
-const extraKW=()=>{const o={};CATS.forEach(c=>{const l=(c.kw||[]).filter(w=>!(PACOTE>=2&&KWP[c.k]&&KWP[c.k].has(nk(w))));if(l.length)o[c.k]=l});return o};
-const padraoKW=()=>{if(PACOTE<2)return null;const o={};CATS.forEach(c=>{const l=(c.kw||[]).filter(w=>KWP[c.k]&&KWP[c.k].has(nk(w)));if(l.length)o[c.k]=l});return o};
-const mapCat=k=>CATS.some(c=>c.k===k)?k:(ALIAS[k]&&CATS.some(c=>c.k===ALIAS[k])?ALIAS[k]:'extra');
-const temPalavra=(txt,lista)=>{const t=' '+nk(txt).replace(/[^a-z0-9$€&]+/g,' ')+' ';return (lista||[]).some(w=>{w=nk(w).replace(/[^a-z0-9$€&]+/g,' ').trim();return w&&t.includes(' '+w+' ')})};
-const sugerirCat=d=>mapCat(Cupom.categorizar(d,'',APR,extraKW(),padraoKW()));
-function garantirCats(o){if(o&&Array.isArray(o.cats)&&o.cats.length){CATS=o.cats;PACOTE=o.pacote||1}else{CATS=clone(NOVAS);PACOTE=2}
- ENTKW=o&&Array.isArray(o.entKw)?o.entKw:ENT_PADRAO.slice();
- if(PACOTE<2)for(const d of DEF_CATS)if(['combustivel','cartao'].includes(d.k)&&!CATS.some(c=>c.k===d.k)&&!(o&&o.semPadrao&&o.semPadrao.includes(d.k)))CATS.splice(Math.max(0,CATS.length-1),0,clone(d));
- if(!CATS.some(c=>c.k==='extra'))CATS.push(clone((PACOTE<2?DEF_CATS:NOVAS).find(c=>c.k==='extra')));
- CATS.forEach(c=>{c.n=nomeCat(c.k,c.n)})}
-let SEMPADRAO=[],ALERTAS=[],SYNC={},VER=0,SYNC_COMMIT=false;
+const chk='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" stroke-width="1.8"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>';
+document.querySelectorAll('[data-li]').forEach(el=>{el.innerHTML=el.textContent.split('|').map(t=>`<div class="li">${chk}<span>${t.trim()}</span></div>`).join('')});
 
-/* ---------- armazenamento criptografado (Preferences no app, localStorage no navegador) ---------- */
-const CAP=window.Capacitor&&window.Capacitor.Plugins||{};const NATIVO=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
-const Pref=NATIVO?CAP.Preferences:null,BIO=NATIVO?CAP.NativeBiometric:null;
-const K_COFRE='meucaixa.cofre',K_DADOS='meucaixa.dados',K_BIO='meucaixa.bio',K_DEK='meucaixa.dek',LEGADO=['meucaixa.tx','meucaixa.aprendido'];
-let TX=[],APR={},CHAVE=null,BRUTA=null,COFRE=null;
-async function ler(k){if(Pref){try{return (await Pref.get({key:k})).value}catch(e){return null}}try{return localStorage.getItem(k)}catch(e){return null}}
-async function escrever(k,v){if(Pref){await Pref.set({key:k,value:v})}else{try{localStorage.setItem(k,v)}catch(e){}}}
-async function apagarK(k){if(Pref){try{await Pref.remove({key:k})}catch(e){}}try{localStorage.removeItem(k)}catch(e){}}
-let fila=Promise.resolve();
-function persist(){if(!CHAVE)return;VER++;if(!SYNC_COMMIT)nuvemDepois();const k=CHAVE,o={v:4,tx:TX,aprendido:APR,cats:CATS,semPadrao:SEMPADRAO,alertas:ALERTAS,pacote:PACOTE,entKw:ENTKW,sync:SYNC};fila=fila.then(async()=>escrever(K_DADOS,await Cofre.cifrar(k,o))).catch(e=>toast('Erro ao salvar: '+e.message))}
-async function put(t){const i=TX.findIndex(x=>x.id===t.id);i>=0?TX[i]=t:TX.push(t);render();persist()}
-async function del(id){TX=TX.filter(x=>x.id!==id);render();persist()}
-async function carregarDados(){const d=await ler(K_DADOS);let o=null;if(d){o=await Cofre.decifrar(CHAVE,d);TX=o.tx||[];APR=o.aprendido||{};SEMPADRAO=o.semPadrao||[];ALERTAS=o.alertas||[];SYNC=o.sync||{}}else{TX=[];APR={};ALERTAS=[];SEMPADRAO=[];SYNC={}}garantirCats(o);renderSelects();render()}
-async function migrarLegado(){let mudou=false;for(const k of LEGADO){let v=null;if(Pref)try{v=(await Pref.get({key:k})).value}catch(e){}if(!v)try{v=localStorage.getItem(k)}catch(e){}
- if(v){try{const o=JSON.parse(v);if(k===LEGADO[0]&&Array.isArray(o)){TX=o;mudou=true}else if(k===LEGADO[1]){APR=o;mudou=true}}catch(e){}}await apagarK(k)}if(mudou){persist();render()}}
+const I={
+ tag:'<path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1.5"/>',
+ card:'<rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/>',
+ xls:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12l5 6M14 12l-5 6"/>',
+ eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+ coin:'<circle cx="12" cy="12" r="9"/><path d="M15 9.5c-.5-1-1.6-1.5-3-1.5-1.7 0-3 .8-3 2s1.3 1.7 3 2 3 .8 3 2-1.3 2-3 2c-1.4 0-2.5-.5-3-1.5M12 6v2M12 16v2"/>',
+ globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>',
+ sync:'<path d="M20 7a8 8 0 0 0-14-2L4 7M4 3v4h4M4 17a8 8 0 0 0 14 2l2-2M20 21v-4h-4"/>',
+ wifi:'<path d="M2 9a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1"/>',
+ lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
+ face:'<path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><path d="M9 10v1M15 10v1M12 10v3h-1M9 16c2 1.5 4 1.5 6 0"/>',
+ save:'<path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7V4M8 20v-6h8v6"/>',
+ clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>'
+};
+const svg=k=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${I[k]}</svg>`;
+const E=[
+ ['tag','Categorias do seu jeito','Crie, renomeie e escolha as palavras-chave de cada categoria.'],
+ ['card','Cartões em subpastas','Um lugar para cada cartão de crédito, com a fatura dentro.'],
+ ['coin','Parcelas e moedas','Lance compras parceladas e gastos em dólar ou euro.'],
+ ['xls','Exportar para Excel','Leve o extrato para uma planilha .xlsx quando quiser.'],
+ ['eye','Olhinho','Esconda os valores da tela quando estiver em público.'],
+ ['wifi','Funciona offline','A leitura do cupom roda no próprio celular, sem internet.'],
+ ['sync','Sempre atualizado','O app se atualiza sozinho, sem reinstalar nada.'],
+ ['globe','Português, espanhol e inglês','O app segue o idioma do celular, e você pode trocar.']];
+$('#extras').innerHTML=E.map(e=>`<div class="card"><span class="ic">${svg(e[0])}</span><h3 class="mt-4">${e[1]}</h3><p class="mut mt-2 text-[15px]">${e[2]}</p></div>`).join('');
 
-/* ---------- bloqueio: PIN + biometria ---------- */
-let modo='',buf='',pin1='',falhas=0,ate=0,saiu=0,naCamera=false,PRIMEIRO=false;
-const lk=$('#lock');
-$('#pad').innerHTML=[1,2,3,4,5,6,7,8,9].map(n=>`<button data-n="${n}">${n}</button>`).join('')+'<button class="sm" id="pBio" aria-label="Entrar com Face ID ou digital">Face ID / digital</button><button data-n="0">0</button><button class="sm" id="pDel" aria-label="Apagar dígito">Apagar</button>';
-document.querySelectorAll('#pad [data-n]').forEach(b=>b.onclick=()=>digito(b.dataset.n));
-$('#pDel').onclick=()=>{buf=buf.slice(0,-1);pontos()};
-document.addEventListener('keydown',e=>{if(lk.hidden||!$('#lkBox').hidden)return;if(/^\d$/.test(e.key))digito(e.key);else if(e.key==='Backspace'){buf=buf.slice(0,-1);pontos()}});
-const lkMsg=m=>$('#lkMsg').textContent=m;
-function pontos(){document.querySelectorAll('#dots i').forEach((d,i)=>d.classList.toggle('on',i<buf.length))}
-function erro(m){lkMsg(m);const d=$('#dots');d.classList.remove('erro');void d.offsetWidth;d.classList.add('erro');buf='';pontos()}
-function telaPin(m,link){$('#lkBox').hidden=true;$('#pad').hidden=false;$('#dots').hidden=false;buf='';pontos();lkMsg(m);$('#lkLink').hidden=!link;$('#lkLink').textContent=link||'';lk.hidden=false}
-function caixa(html){$('#pad').hidden=true;$('#dots').hidden=true;$('#lkBox').innerHTML=html;$('#lkBox').hidden=false}
-const K_WBIO='meucaixa.webbio';
-const wbio=()=>{try{return JSON.parse(localStorage.getItem(K_WBIO)||'null')}catch(e){return null}};
-const WA=!NATIVO&&!!window.PublicKeyCredential&&location.protocol==='https:';
-async function webBioDisponivel(){if(!WA)return false;try{return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()}catch(e){return false}}
-async function prfChave(out){return crypto.subtle.importKey('raw',out,{name:'AES-GCM'},false,['encrypt','decrypt'])}
-async function webBioGet(id,salt){const a=await navigator.credentials.get({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rpId:location.hostname,allowCredentials:[{type:'public-key',id:Cofre.unb64(id)}],userVerification:'required',timeout:60000,extensions:{prf:{eval:{first:Cofre.unb64(salt)}}}}});
- const r=a.getClientExtensionResults().prf;if(!r||!r.results||!r.results.first)throw new Error('sem-prf');return r.results.first}
-async function webBioLigar(){const salt=crypto.getRandomValues(new Uint8Array(32));
- const cred=await navigator.credentials.create({publicKey:{challenge:crypto.getRandomValues(new Uint8Array(32)),rp:{name:'Anotei Já',id:location.hostname},user:{id:crypto.getRandomValues(new Uint8Array(16)),name:'Anotei Já',displayName:'Anotei Já'},
-  pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'preferred'},timeout:60000,extensions:{prf:{eval:{first:salt}}}}});
- const ext=cred.getClientExtensionResults().prf;if(ext&&ext.enabled===false)throw new Error('sem-prf');
- const id=Cofre.b64(cred.rawId);let out=ext&&ext.results&&ext.results.first;if(!out)out=await webBioGet(id,Cofre.b64(salt));
- const iv=crypto.getRandomValues(new Uint8Array(12));const emb=await crypto.subtle.encrypt({name:'AES-GCM',iv},await prfChave(out),BRUTA);
- localStorage.setItem(K_WBIO,JSON.stringify({id,salt:Cofre.b64(salt),iv:Cofre.b64(iv),dek:Cofre.b64(emb)}))}
-async function webBioAbrir(){const w=wbio();const out=await webBioGet(w.id,w.salt);
- return new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv:Cofre.unb64(w.iv)},await prfChave(out),Cofre.unb64(w.dek)))}
-async function bioLigada(){if(!NATIVO)return !!wbio();return !!BIO&&(await ler(K_BIO))==='1'}
-async function bioDisponivel(){if(!NATIVO)return webBioDisponivel();if(!BIO)return false;try{return (await BIO.isAvailable({useFallback:false})).isAvailable}catch(e){return false}}
-async function atualizarBioBtn(){const on=await bioLigada();$('#pBio').disabled=!(modo==='abrir'&&on);const ok=await bioDisponivel();$('#secBio').hidden=!ok;$('#secBio').textContent=on?'Desligar Face ID / digital':'Entrar com Face ID / digital';$('#bioNota').textContent=ok?'':'Face ID / digital: este navegador não oferece. No iPhone, use o Safari (iOS 18 ou mais novo). No Android, use o Chrome.'}
-function digito(n){if(buf.length>=6||$('#pad').hidden)return;buf+=n;pontos();if(buf.length===6)setTimeout(processa,120)}
-async function processa(){const p=buf;
- if(modo==='criar'||modo==='novo'){if(Cofre.pinFraco(p))return erro('Esse PIN é fácil de adivinhar. Escolha outro.');pin1=p;modo=modo==='criar'?'confirmar':'novoConf';buf='';pontos();return lkMsg('Digite o PIN de novo para confirmar')}
- if(modo==='confirmar'){if(p!==pin1){modo='criar';return erro('Os PINs não conferem. Crie de novo.')}
-  lkMsg('Criando seu cofre…');PRIMEIRO=true;const r=await Cofre.criar(p);COFRE=r.cofre;CHAVE=r.chave;BRUTA=r.bruta;await escrever(K_COFRE,JSON.stringify(COFRE));await migrarLegado();persist();
-  if(await bioDisponivel())return perguntarBio();return liberar()}
- if(modo==='novoConf'){if(p!==pin1){modo='novo';return erro('Os PINs não conferem. Tente de novo.')}
-  COFRE=await Cofre.trocarPin(BRUTA,p);await escrever(K_COFRE,JSON.stringify(COFRE));lk.hidden=true;return toast('PIN trocado')}
- if(modo==='abrir'){if(Date.now()<ate)return erro(`Muitas tentativas. Espere ${Math.ceil((ate-Date.now())/1000)} segundos.`);
-  lkMsg('Abrindo…');try{const r=await Cofre.abrir(COFRE,p);CHAVE=r.chave;BRUTA=r.bruta;falhas=0;await carregarDados();liberar()}
-  catch(e){falhas++;if(falhas>=5)ate=Date.now()+30000*2**(falhas-5);erro(falhas>=5?'PIN incorreto. Aguarde '+30*2**(falhas-5)+' segundos.':'PIN incorreto. Tente de novo.')}}}
-function perguntarBio(){lkMsg('Quer abrir o app com Face ID ou digital da próxima vez?');$('#lkLink').hidden=true;
- caixa('<button class="btn" id="bSim">Sim, usar biometria</button><button class="btn ghost" id="bNao">Agora não</button>');
- $('#bSim').onclick=async()=>{await ligarBio();liberar()};$('#bNao').onclick=liberar}
-async function ligarBio(){if(!NATIVO){try{await webBioLigar();toast('Face ID / digital ligado')}catch(e){toast(String(e.message).includes('sem-prf')?'Este celular ainda não permite Face ID / digital em apps de navegador. Continue usando o PIN.':'Biometria não ativada')}atualizarBioBtn();return}try{await BIO.setData({key:K_DEK,value:Cofre.b64(BRUTA),accessControl:2,title:'Ativar biometria',negativeButtonText:'Cancelar'});await escrever(K_BIO,'1');toast('Biometria ligada')}catch(e){toast('Não foi possível ligar a biometria')}atualizarBioBtn()}
-async function desligarBio(){if(!NATIVO){localStorage.removeItem(K_WBIO);toast('Biometria desligada');atualizarBioBtn();return}try{await BIO.deleteData({key:K_DEK})}catch(e){}await escrever(K_BIO,'0');toast('Biometria desligada');atualizarBioBtn()}
-async function tentarBio(){if(!(await bioLigada()))return;if(!NATIVO){try{lkMsg('Confirme com Face ID ou digital…');BRUTA=await webBioAbrir();CHAVE=await Cofre.importar(BRUTA);await carregarDados();liberar()}catch(e){lkMsg(e&&e.name==='NotAllowedError'?'Toque em Biometria ou digite seu PIN':'Digite seu PIN')}return}try{const r=await BIO.getSecureData({key:K_DEK,reason:'Abrir o Anotei Já',title:'Anotei Já',subtitle:'Confirme que é você',negativeButtonText:'Usar PIN'});
- BRUTA=Cofre.unb64(r.value);CHAVE=await Cofre.importar(BRUTA);await carregarDados();liberar()}
- catch(e){if(String(e.code)==='21'){await escrever(K_BIO,'0');atualizarBioBtn();lkMsg('A biometria mudou neste celular. Entre com o PIN e ligue de novo em Segurança.')}else lkMsg('Digite seu PIN')}}
-$('#pBio').onclick=tentarBio;
-function liberar(){lk.hidden=true;$('#lkBox').hidden=true;modo='';buf='';pontos();render();atualizarBioBtn();if(PRIMEIRO&&!lsG(K_TOUR)){PRIMEIRO=false;abrirTour()}nuvemSync()}
-function bloquear(){fecharMenu();CHAVE=null;BRUTA=null;TX=[];APR={};ALERTAS=[];SYNC={};CATS=clone(NOVAS);render();modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
-$('#btnLock').onclick=bloquear;
-$('#lkLink').onclick=()=>{if(modo==='novo'||modo==='novoConf'){lk.hidden=true;modo='';return}
- lkMsg('Sem o PIN, ninguém consegue abrir os dados, nem nós. Você pode apagar tudo neste celular e começar de novo. Depois, se tiver um backup, é só restaurar.');$('#lkLink').hidden=true;
- caixa('<input id="rsTxt" placeholder="Digite APAGAR para confirmar" autocomplete="off"><button class="btn" id="rsOk">Apagar tudo e recomeçar</button><button class="btn ghost" id="rsNo">Voltar</button>');
- $('#rsNo').onclick=()=>telaPin('Digite seu PIN','Esqueci meu PIN');
- $('#rsOk').onclick=async()=>{if($('#rsTxt').value.trim().toUpperCase()!=='APAGAR')return;try{localStorage.removeItem(K_WBIO)}catch(e){}for(const k of [K_COFRE,K_DADOS,K_BIO])await apagarK(k);if(BIO)try{await BIO.deleteData({key:K_DEK})}catch(e){}
-  COFRE=null;modo='criar';telaPin('Crie um PIN de 6 dígitos para proteger seus dados')}};
-$('#secPin').onclick=()=>{modo='novo';telaPin('Digite o novo PIN de 6 dígitos','Cancelar')};
-$('#secBio').onclick=async()=>{(await bioLigada())?desligarBio():ligarBio()};
-document.addEventListener('visibilitychange',()=>{if(document.hidden){saiu=Date.now()}else if(CHAVE&&!naCamera&&Date.now()-saiu>60000)bloquear()});
-(async()=>{if(NATIVO&&CAP.PrivacyScreen)try{await CAP.PrivacyScreen.enable({android:{dimBackground:false,privacyModeOnActivityHidden:'splash'},ios:{blurEffect:'dark'}})}catch(e){}
- if(!window.crypto||!crypto.subtle){lkMsg('Este navegador não suporta criptografia. Abra pelo app.');$('#pad').hidden=true;return}
- const c=await ler(K_COFRE);if(c){COFRE=JSON.parse(c);modo='abrir';telaPin('Digite seu PIN','Esqueci meu PIN');atualizarBioBtn();tentarBio()}
- else{modo='criar';telaPin('Crie um PIN de 6 dígitos para proteger seus dados');atualizarBioBtn()}})();
+const S=[['lock','PIN e criptografia AES-256','A chave dos dados nasce do seu PIN de 6 dígitos.'],['face','Face ID ou digital','Entre com a biometria do celular, direto no link.'],['clock','Bloqueio automático','Tranca sozinho 1 minuto depois que você sai, e faz esperar após 5 erros.'],['save','Backup criptografado','Salve uma cópia quando quiser. O app lembra você de fazer.']];
+$('#sec').innerHTML=S.map(s=>`<div class="card" style="padding:20px"><span class="ic" style="color:#7fe8d2;background:rgba(0,200,150,.15)">${svg(s[0])}</span><h3 class="mt-3 text-white" style="font-size:17px">${s[1]}</h3><p class="mut mt-1 text-[15px]">${s[2]}</p></div>`).join('');
 
-/* ---------- navegação ---------- */
-function go(v){fecharMenu();document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
- document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.v===v));
- if(v==='inicio')requestAnimationFrame(drawPie);window.scrollTo(0,0)}
-document.querySelectorAll('[data-v],[data-go],[data-dv]').forEach(b=>b.onclick=()=>go(b.dataset.v||b.dataset.go||b.dataset.dv));
-function abrirMenu(){renderMenu();$('#drawer').classList.add('on');$('#scrim').hidden=false}
-function fecharMenu(){$('#drawer').classList.remove('on');$('#scrim').hidden=true}
-$('#btnMenu').onclick=abrirMenu;$('#dClose').onclick=fecharMenu;$('#scrim').onclick=fecharMenu;$('#dLock').onclick=()=>bloquear();
-$('#ver').textContent='Versão '+VERSAO+' · atualiza sozinho ao abrir';$('#verFim').textContent='Versão '+VERSAO;
-function renderMenu(){const pc=porCat(mes);$('#dMes').textContent='Categorias · '+mesNome(mes);
- $('#dCats').innerHTML=`<button class="ditem" data-mf="todas"><span class="dot" style="background:var(--ink)"></span><span>Extrato completo</span><small>${TX.length}</small></button>`+
-  CATS.map(c=>`<button class="ditem" data-mf="${c.k}"><span class="dot" style="background:${c.c}"></span><span>${esc(c.n)}</span><small>${brl(pc[c.k]||0)}</small></button>`+
-   (c.subs||[]).map(su=>{const v=TX.filter(t=>t.cat===c.k&&t.sub===su.k&&ym(t.data)===mes&&t.tipo!=='receita').reduce((a,t)=>a+t.valor,0);return`<button class="ditem sub" data-mf="${c.k}" data-ms="${su.k}"><span class="dot" style="background:${c.c};opacity:.55"></span><span>${esc(su.n)}</span><small>${brl(v)}</small></button>`}).join('')).join('');
- document.querySelectorAll('[data-mf]').forEach(b=>b.onclick=()=>{filtro=b.dataset.mf;subFiltro=b.dataset.ms||'';go('extrato');render()})}
+const ST={
+ ios:['Faça o cadastro e toque em <b>iPhone · Abrir no Safari</b>.','No app, toque em <b>Adicionar à Tela de Início</b> e siga a seta até o botão <b>Compartilhar</b>.','Escolha <b>Adicionar à Tela de Início</b> e depois <b>Adicionar</b>.','Abra o Anotei Já pelo ícone e crie seu PIN.'],
+ and:['Faça o cadastro e toque em <b>Android · Abrir no Chrome</b>.','No app, toque no botão <b>Instalar</b>.','Confirme em <b>Instalar</b>.','Abra o Anotei Já pelo ícone e crie seu PIN.']};
+const NT={ios:'Face ID funciona a partir do iOS 18.',and:'A digital funciona no Chrome.'};
+const rS=k=>{$('#steps').innerHTML=ST[k].map((s,i)=>`<div class="step"><span class="num">${i+1}</span><p class="pt-2.5">${s}</p></div>`).join('')+`<p class="mut text-[15px] mt-3 pt-4" style="border-top:1px solid var(--line)">${NT[k]}</p><a class="btn pri w-full mt-5" href="app.html" data-abrir>Fazer cadastro e instalar</a>`};
+$('#tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;$('#tabs').querySelectorAll('button').forEach(x=>x.setAttribute('aria-selected',x==b));rS(b.dataset.k)});
+rS('ios');
 
-/* ---------- início ---------- */
-let mes=ym(today());
-const shift=(m,n)=>{let [y,mm]=m.split('-').map(Number);mm+=n;while(mm<1){mm+=12;y--}while(mm>12){mm-=12;y++}return y+'-'+String(mm).padStart(2,'0')};
-const mesNome=m=>{const s=new Date(m+'-15T12:00').toLocaleDateString(LOC,{month:'long',year:'numeric'});return s[0].toUpperCase()+s.slice(1)};
-$('#mPrev').onclick=()=>{mes=shift(mes,-1);render()};$('#olho').onclick=()=>{OCULTO=!OCULTO;lsS(K_OCULTO,OCULTO?'1':'0');render()};$('#mNext').onclick=()=>{mes=shift(mes,1);render()};
-function porCat(m){const o={};TX.filter(t=>t.tipo!=='receita'&&ym(t.data)===m).forEach(t=>o[t.cat]=(o[t.cat]||0)+t.valor);return o}
-function drawPie(){const s=$('#pie'),W=s.clientWidth,H=s.clientHeight;if(!W)return;
- const pc=porCat(mes),tot=Object.values(pc).reduce((a,b)=>a+b,0);
- const r=Math.min(W*(W<420?.42:.3),H*.44),cx=W<420?W/2:r+10,cy=H/2,ir=r*.62;
- if(!tot){s.innerHTML=`<circle cx="${cx}" cy="${cy}" r="${(r+ir)/2}" fill="none" stroke="var(--line)" stroke-width="${r-ir}"/><text x="${cx}" y="${cy+5}" text-anchor="middle" fill="var(--mut)" font-size="14">Sem gastos</text>`;return}
- let a=-Math.PI/2,out='';const P=(ang,rr)=>[cx+rr*Math.cos(ang),cy+rr*Math.sin(ang)];
- const items=CATS.filter(c=>pc[c.k]).map(c=>({...c,v:pc[c.k]})).sort((x,y)=>y.v-x.v);
- items.forEach(c=>{const da=Math.max(c.v/tot*Math.PI*2-.0001,.0001),b=a+da,l=da>Math.PI?1:0;const [x1,y1]=P(a,r),[x2,y2]=P(b,r),[x3,y3]=P(b,ir),[x4,y4]=P(a,ir);
-  out+=`<path d="M${x1} ${y1}A${r} ${r} 0 ${l} 1 ${x2} ${y2}L${x3} ${y3}A${ir} ${ir} 0 ${l} 0 ${x4} ${y4}Z" fill="${c.c}" stroke="var(--card)" stroke-width="2"><title>${c.n}: ${brlH(c.v)}</title></path>`;a=b});
- out+=`<text x="${cx}" y="${cy-4}" text-anchor="middle" fill="var(--mut)" font-size="13">gasto</text><text x="${cx}" y="${cy+16}" text-anchor="middle" fill="var(--ink)" font-size="${r>80?17:14}" font-weight="800">${brlH(tot)}</text>`;
- if(W>=420){const lx=cx+r+24;items.slice(0,8).forEach((c,i)=>{const y=cy-(Math.min(items.length,8)-1)*13+i*26;out+=`<rect x="${lx}" y="${y-6}" width="12" height="12" rx="3" fill="${c.c}"/><text x="${lx+18}" y="${y+5}" fill="var(--ink)" font-size="14">${c.n} <tspan fill="var(--mut)">${Math.round(c.v/tot*100)}%</tspan></text>`})}
- s.innerHTML=out}
-new ResizeObserver(drawPie).observe($('#pie'));
+const Q=[
+ ['O Anotei Já é grátis mesmo?','Sim. É um projeto pessoal sem fins lucrativos, sem plano pago. Como funciona por link, publicado no GitHub Pages, não há custo de loja de aplicativos para repassar.'],
+ ['Preciso baixar na App Store ou no Google Play?','Não. Você abre o link no celular e adiciona à tela inicial. O ícone aparece junto com os seus outros apps e abre em tela cheia.'],
+ ['Por que preciso fazer cadastro?','Para liberar o link, pedimos nome completo, celular e e-mail. É rápido e não tem senha de site: no app você só cria o PIN de 6 dígitos. Seus lançamentos financeiros não fazem parte do cadastro e continuam só no seu celular.'],
+ ['O que acontece com meu nome, celular e e-mail?','Ficam guardados no banco de dados do projeto, que o site só consegue gravar, nunca ler. Servem apenas para contato sobre o Anotei Já e não são vendidos nem compartilhados. Para corrigir ou apagar seus dados, abra um pedido em github.com/Fetroiani/meu-financeiro.'],
+ ['Meus dados ficam seguros?','Seus lançamentos ficam criptografados com AES-256 no seu celular e não vão para servidores, a menos que você ligue a sincronização. A chave é protegida pelo seu PIN.'],
+ ['Como o app sabe a categoria de cada item?','Ele usa palavras-chave e o tipo de loja: num bar, tudo vai para alimentação fora de casa; no supermercado, cerveja conta como mercado. Você confere antes de salvar, e cada correção ensina o app.'],
+ ['O QR Code da nota já traz os produtos?','Não. O QR da NFC-e traz a chave da nota, o CNPJ e a data, mas não a lista de produtos. Para separar os itens, tire foto do cupom.'],
+ ['Funciona sem internet?','Sim. Depois de aberto uma vez, o app e a leitura do cupom funcionam offline.'],
+ ['Como não perder meus dados se trocar de celular?','Faça o backup em ☰ › Segurança e backup e guarde o arquivo, ou ative a sincronização. No iPhone, faça o backup antes de remover o ícone, porque remover o atalho apaga os dados.']];
+$('#faqs').innerHTML=Q.map((q,i)=>`<details${i?'':' open'}><summary>${q[0]}</summary><div>${q[1]}</div></details>`).join('');
+$('#faqs').addEventListener('toggle',e=>{if(e.target.open)$('#faqs').querySelectorAll('details[open]').forEach(d=>{if(d!=e.target)d.open=false})},true);
 
-/* ---------- extrato ---------- */
-let filtro='todas',subFiltro='';
-function renderChips(){$('#fchips').innerHTML=[{k:'todas',n:'Todas'},IN,...CATS].map(c=>`<button class="chip" data-f="${c.k}" aria-pressed="${filtro===c.k}">${esc(c.n)}${filtro===c.k&&subFiltro?' › '+esc(((c.subs||[]).find(x=>x.k===subFiltro)||{}).n||''):''}</button>`).join('');
- document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;subFiltro='';render()})}
-$('#busca').oninput=()=>render();
-function renderLista(){const q=$('#busca').value.toLowerCase();
- const l=TX.filter(t=>filtro==='todas'||(filtro==='receita'?t.tipo==='receita':t.cat===filtro&&t.tipo!=='receita'&&(!subFiltro||t.sub===subFiltro))).filter(t=>!q||(t.desc+' '+(t.loja||'')).toLowerCase().includes(q)).sort((a,b)=>b.data.localeCompare(a.data)||(b.ts||0)-(a.ts||0));
- const s=l.reduce((a,t)=>a+(t.tipo==='receita'?t.valor:-t.valor),0);
- $('#exCount').textContent=l.length+(l.length===1?' lançamento':' lançamentos');$('#exSum').textContent='Saldo: '+brl(s);
- $('#lista').innerHTML=l.length?l.map(t=>{const c=cat(t.tipo==='receita'?'receita':t.cat);const dd=t.data.split('-').reverse().join('/');
-  const its=t.itens?.length?t.itens.map(i=>i.d).filter(Boolean).join(', '):'';const extra=[dd,c.n+(subNome(t)?' › '+subNome(t):''),t.cartao&&t.cat!=='cartao'?'Cartão '+t.cartao:'',t.origem==='cupom'?'':t.loja,t.moeda?`${t.moeda} ${t.valorMoeda.toLocaleString('pt-BR',{minimumFractionDigits:2})}`:'',its.length>70?its.slice(0,68)+'…':its].filter(Boolean).map(esc).join(' · ');
-  return`<div class="row"><span class="dot" style="background:${c.c}"></span><span class="d">${esc(t.desc)}</span><span class="v ${t.tipo==='receita'?'in':''}">${t.tipo==='receita'?'+':'−'} ${brl(t.valor)}</span><small>${extra}</small><span class="act"><button class="icon" data-ed="${t.id}" aria-label="Editar" title="Editar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg></button><button class="icon" data-dup="${t.id}" aria-label="Duplicar com a data de hoje" title="Duplicar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h3"/></svg></button><button class="icon" data-del="${t.id}" aria-label="Apagar" title="Apagar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg></button></span></div>`}).join(''):(TX.length?`<div class="vazio"><b>Nada encontrado</b><p>Nenhum lançamento com esse filtro ou busca.</p></div>`:VAZIO('Seu extrato está vazio','Comece lançando um gasto, uma entrada ou lendo um cupom fiscal.'));
- document.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{const t=TX.find(x=>x.id===b.dataset.del);del(t.id);toast('Lançamento apagado',()=>put(t))});
- document.querySelectorAll('[data-ed]').forEach(b=>b.onclick=()=>editar(TX.find(x=>x.id===b.dataset.ed)));
- document.querySelectorAll('[data-dup]').forEach(b=>b.onclick=()=>{const o=TX.find(x=>x.id===b.dataset.dup);const t={...clone(o),id:uid(),ts:Date.now(),data:today()};delete t.parc;put(t);toast('Duplicado com a data de hoje',()=>del(t.id))})}
 
-/* ---------- render geral ---------- */
-const OLHO_ON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',OLHO_OFF='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18M10.6 5.1A10 10 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
-const VAZIO=(tit,txt)=>`<div class="vazio"><b>${tit}</b><p>${txt}</p><div><button class="btn em" data-acao="gasto">Fazer primeiro lançamento</button><button class="btn ghost" data-acao="cupom">📷 Ler cupom fiscal</button></div></div>`;
-function corMeta(p){return p>=1?'#e5484d':p>=.75?'#f5a524':'#00c896'}
-function render(){const doMes=TX.filter(t=>ym(t.data)===mes);
- const ent=doMes.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0),sai=doMes.filter(t=>t.tipo!=='receita').reduce((a,t)=>a+t.valor,0);
- const tot=TX.reduce((a,t)=>a+(t.tipo==='receita'?t.valor:-t.valor),0);
- // a pagar: vencimentos ainda não pagos do mês; a fatura do cartão já tem os gastos no extrato, por isso não sai de novo da previsão
- const pendMes=ALERTAS.filter(a=>!a.pago&&a.venc&&ym(a.venc)===mes),aPagar=pendMes.reduce((a,x)=>a+(x.valor||0),0),naoLanc=pendMes.filter(x=>!x.fatura).reduce((a,x)=>a+(x.valor||0),0);
- $('#mName').textContent=mesNome(mes);$('#saldo').textContent=brlH(ent-sai);$('#ent').textContent=brlH(ent);$('#sai').textContent=brlH(sai);
- $('#aPagar').textContent=brlH(aPagar);$('#sobra').textContent=brlH(ent-sai-naoLanc);
- $('#saldoTot').textContent='Saldo acumulado: '+brlH(tot);
- $('#olho').innerHTML=OCULTO?OLHO_OFF:OLHO_ON;$('#olho').setAttribute('aria-pressed',OCULTO);$('#olho').setAttribute('aria-label',OCULTO?'Mostrar valores':'Esconder valores');
- const pc=porCat(mes),max=Math.max(1,...Object.values(pc)),ant=porCat(shift(mes,-1));
- $('#cats').innerHTML=!sai?VAZIO('Nenhum gasto em '+(LOC==='en-US'?mesNome(mes):mesNome(mes).toLowerCase()),'Lance um gasto ou fotografe um cupom: o app separa cada item na categoria certa.'):CATS.map(c=>{const v=pc[c.k]||0,n=doMes.filter(t=>t.cat===c.k&&t.tipo!=='receita').length,d=v-(ant[c.k]||0);
-  const meta=c.meta>0?c.meta:0,pm=meta?v/meta:0;
-  return`<button class="cat" data-c="${c.k}"><span class="dot" style="background:${c.c}"></span><b>${esc(c.n)}</b><span class="v">${brlH(v)}</span><small>${n} lanç.${!OCULTO&&(ant[c.k]||v)?` · ${d>=0?'+':'−'}${brl(Math.abs(d))} vs. mês anterior`:''}</small><span class="meter"${meta?` role="meter" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pm*100)}"`:''}><i style="width:${Math.min(100,meta?pm*100:v/max*100)}%;background:${meta?corMeta(pm):c.c}"></i></span>${meta?`<span class="meta">${OCULTO?Math.round(pm*100)+'% da meta':`${brl(v)} de ${brl(meta)} (${Math.round(pm*100)}%)`}${pm>=1?' · meta estourada':pm>=.75?' · perto da meta':''}</span>`:''}</button>`}).join('');
- document.querySelectorAll('[data-c]').forEach(b=>b.onclick=()=>{filtro=b.dataset.c;subFiltro='';go('extrato');render()});
- const ms=[...Array(6)].map((_,i)=>shift(mes,i-5)),vals=ms.map(m=>porCat(m)),mx=Math.max(1,...vals.map(o=>Object.values(o).reduce((a,b)=>a+b,0)));
- const algum=vals.some(o=>Object.values(o).some(v=>v));
- $('#bars').innerHTML=!algum?VAZIO('Sem histórico ainda','Conforme você lança, aqui aparece quanto gastou em cada um dos últimos 6 meses.'):ms.map((m,i)=>{const o=vals[i],s=Object.values(o).reduce((a,b)=>a+b,0);return`<div class="bar"><span>${new Date(m+'-15T12:00').toLocaleDateString(LOC,{month:'short'}).replace('.','')}</span><span class="t">${CATS.filter(c=>o[c.k]).map(c=>`<i title="${c.n}: ${brlH(o[c.k])}" style="width:${o[c.k]/mx*100}%;background:${c.c}"></i>`).join('')}</span><span class="n">${brlH(s)}</span></div>`}).join('');
- bkLembrete();
- renderChips();renderLista();drawPie();renderAlertas();if($('#drawer').classList.contains('on'))renderMenu()}
-
-/* ---------- lançamento manual ---------- */
-let tipo='despesa',editId=null,catManual=false,tipoManual=false;const COT={dolar:['USD','US$'],euro:['EUR','€']},MOE={USD:'US$',EUR:'€'};
-$('#fParc').innerHTML=[...Array(24)].map((_,i)=>`<option value="${i+1}">${i+1}x${i?'':' (à vista)'}</option>`).join('');
-function opcoesCat(sel){return CATS.map(c=>`<option value="${c.k}" ${c.k===sel?'selected':''}>${esc(c.n)}</option>`).join('')}
-function renderSelects(){const v=$('#fCat').value;$('#fCat').innerHTML=opcoesCat(v||'mercado');subUI()}
-function subUI(sel){const c=CATS.find(x=>x.k===$('#fCat').value);const on=tipo==='despesa'&&c&&(c.subs&&c.subs.length||c.k==='cartao');$('#fSubL').hidden=!on;if(!on)return;
- $('#fSubT').textContent=c.k==='cartao'?'Qual cartão':'Subpasta';
- $('#fSub').innerHTML=(c.k==='cartao'?'':'<option value="">Nenhuma</option>')+(c.subs||[]).map(su=>`<option value="${su.k}" ${su.k===sel?'selected':''}>${esc(su.n)}</option>`).join('')+'<option value="+">+ Criar nova…</option>';
- if(c.k==='cartao'&&!(c.subs||[]).length)$('#fSub').value='+'}
-function novaSub(catK,nome){const c=CATS.find(x=>x.k===catK);if(!c||!nome)return null;c.subs=c.subs||[];const ex=c.subs.find(x=>x.n.toLowerCase()===nome.toLowerCase());if(ex)return ex.k;const k='s'+Date.now().toString(36);c.subs.push({k,n:nome});persist();return k}
-$('#fSub').onchange=()=>{if($('#fSub').value!=='+')return;const c=CATS.find(x=>x.k===$('#fCat').value);
- caixaTexto(c.k==='cartao'?'Nome do cartão (ex.: Nubank, Itaú Visa)':'Nome da subpasta',nome=>{const k=novaSub(c.k,nome);subUI(k||'')})}
-function caixaTexto(rot,ok){const d=document.createElement('div');d.className='cm';d.style.marginTop='8px';d.innerHTML=`<label>${esc(rot)}<input id="ctx"></label><div style="display:flex;gap:8px"><button type="button" class="btn em" id="ctxOk">Criar</button><button type="button" class="btn ghost" id="ctxNo">Cancelar</button></div>`;
- $('#fSubL').after(d);$('#ctx').focus();$('#ctxOk').onclick=()=>{const v=$('#ctx').value.trim();d.remove();ok(v)};$('#ctxNo').onclick=()=>{d.remove();ok('')}}
-renderSelects();
-document.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>setTipo(b.dataset.t));
-function setTipo(t){tipo=t;document.querySelectorAll('.seg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));$('#fCatL').hidden=t==='receita';$('#fParc').closest('label').hidden=t==='receita'||!!editId;parcInfo();moedaUI();subUI()}
-function moedaUI(){const m=$('#fMoe').value;$('#fMoeda').hidden=!m;if(m){$('#fMoedaL').firstChild.textContent='Valor em '+MOE[m];calcCot()}}
-function parcInfo(){const n=+$('#fParc').value||1,v=num($('#fVal').value);const on=n>1&&tipo==='despesa'&&!editId;$('#fParcInfo').hidden=!on;if(on)$('#fParcInfo').textContent=v?`${n} parcelas de ${brl(Math.floor(v*100/n)/100)}, uma por mês a partir da data escolhida. O valor acima é o total da compra.`:`Informe o valor total da compra; o app divide em ${n} meses.`}
-$('#fParc').onchange=parcInfo;$('#fMoe').onchange=moedaUI;
-function calcCot(){const r=num($('#fVal').value),f=num($('#fValM').value);$('#fCot').value=r&&f?'R$ '+(r/f).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:4}):'—'}
-$('#fCat').onchange=()=>{catManual=true;const m=COT[$('#fCat').value];if(m)$('#fMoe').value=m[0];moedaUI();subUI()};$('#fVal').oninput=()=>{calcCot();parcInfo()};
-document.querySelectorAll('.seg button').forEach(b=>b.addEventListener('click',()=>tipoManual=true));
-$('#fDesc').oninput=()=>{const d=$('#fDesc').value;if(editId||d.trim().length<3)return;
- if(!tipoManual&&tipo==='despesa'&&temPalavra(d,ENTKW)){setTipo('receita');return}
- if(tipo==='despesa'&&!catManual){const k=sugerirCat(d);if(k!=='extra'&&k!==$('#fCat').value){$('#fCat').value=k;const m=COT[k];if(m)$('#fMoe').value=m[0];moedaUI();subUI()}}};$('#fValM').oninput=calcCot;
-function limpar(){editId=null;catManual=false;tipoManual=false;$('#form').reset();$('#fData').value=today();$('#fTitle').textContent='Novo lançamento';$('#fCancel').hidden=true;setTipo('despesa')}
-function editar(t){limpar();editId=t.id;setTipo(t.tipo);$('#fDesc').value=t.desc;$('#fVal').value=t.valor.toFixed(2).replace('.',',');$('#fData').value=t.data;if(t.cat)$('#fCat').value=t.cat;subUI(t.sub);if(t.valorMoeda)$('#fValM').value=String(t.valorMoeda).replace('.',',');if(t.moeda)$('#fMoe').value=t.moeda;moedaUI();catManual=true;tipoManual=true;$('#fParc').closest('label').hidden=true;$('#fParcInfo').hidden=true;$('#fTitle').textContent='Editar lançamento';$('#fCancel').hidden=false;go('novo')}
-$('#fCancel').onclick=()=>{limpar();go('extrato')};
-$('#form').onsubmit=e=>{e.preventDefault();const v=num($('#fVal').value);if(v<=0){flash('Informe um valor maior que zero.');return}
- const old=TX.find(x=>x.id===editId)||{};const c=tipo==='receita'?null:$('#fCat').value;
- const desc=$('#fDesc').value.trim()||(tipo==='receita'?IN.n:cat(c).n);
- const t={...old,id:editId||uid(),ts:old.ts||Date.now(),tipo,desc,valor:v,data:$('#fData').value||today(),cat:c,origem:old.origem||'manual'};
- const sv=$('#fSubL').hidden?'':$('#fSub').value;if(sv&&sv!=='+')t.sub=sv;else delete t.sub;if(c==='cartao'&&t.sub)t.cartao=subNome(t);
- const moe=$('#fMoe').value;if(moe&&num($('#fValM').value)){t.moeda=moe;t.valorMoeda=num($('#fValM').value)}else{delete t.moeda;delete t.valorMoeda}
- const n=editId||tipo==='receita'?1:(+$('#fParc').value||1);const wasEdit=!!editId;
- if(n>1){// divide em parcelas mensais; centavos que sobram vão para a última
-  const base=Math.floor(v*100/n)/100,gid=uid(),ids=[];
-  for(let i=0;i<n;i++){const p={...clone(t),id:uid(),ts:Date.now()+i,desc:`${desc} (${i+1}/${n})`,valor:i<n-1?base:Math.round((v-base*(n-1))*100)/100,data:i?somaMes(t.data,i):t.data,parc:{g:gid,i:i+1,n,total:v}};
-   if(p.valorMoeda){p.valorMoeda=Math.round(p.valorMoeda/n*100)/100}TX.push(p);ids.push(p.id)}
-  persist();render();limpar();toast(`${n} parcelas de ${brl(base)} lançadas`,()=>{TX=TX.filter(x=>!ids.includes(x.id));persist();render()});return}
- put(t);limpar();if(wasEdit)go('extrato');toast(wasEdit?'Alterado':'Salvo: '+t.desc+' '+brl(v))};
-// atalhos da tela inicial e dos estados vazios
-function novoRapido(t){limpar();setTipo(t);tipoManual=true;go('novo');$('#fVal').focus()}
-document.addEventListener('click',e=>{const b=e.target.closest('[data-acao]');if(!b)return;const a=b.dataset.acao;if(a==='gasto')novoRapido('despesa');else if(a==='entrada')novoRapido('receita');else if(a==='cupom')go('cupom')});
-limpar();
-
-/* ---------- leitura do cupom (OCR no aparelho) ---------- */
-let foto=null,qr=null,rev=[],worker=null;
-const dataUrlBlob=u=>fetch(u).then(r=>r.blob());
-async function escolher(){
- if(CAP.Camera&&Pref){naCamera=true;try{const ph=await CAP.Camera.getPhoto({quality:90,resultType:'dataUrl',source:'PROMPT',width:2000,correctOrientation:true,promptLabelHeader:'Foto do cupom',promptLabelPhoto:'Escolher da galeria',promptLabelPicture:'Tirar foto',promptLabelCancel:'Cancelar'});usarFoto(await dataUrlBlob(ph.dataUrl))}catch(e){if(!/cancel/i.test(e&&e.message||''))cupomMsg('Não consegui abrir a câmera: '+esc(e.message||e),true)}finally{setTimeout(()=>naCamera=false,1500)}}
- else $('#foto').click()}
-$('#tirar').onclick=escolher;
-$('#foto').onchange=e=>{const f=e.target.files[0];if(f)usarFoto(f)};
-async function usarFoto(f){foto=f;$('#prev').src=URL.createObjectURL(f);$('#prev').hidden=false;$('#ler').disabled=false;$('#revisao').hidden=true;$('#ocrBox').hidden=true;cupomMsg('');qr=null;
- const raw=await lerCodigoImagem(f);if(!raw||foto!==f)return;const c=Codigos.interpretar(raw);
- if(c&&c.tipo==='nfce'){qr=raw;cupomMsg(`<span class="ln"><b>QR Code da nota lido.</b></span><span class="ln">Toque em Ler e separar itens para separar os produtos, ou lance só o total.</span><span class="acts"><button class="btn ghost" type="button" id="soTotal">Lançar só o total</button></span>`);$('#soTotal').onclick=()=>revisarCodigo(c,raw)}
- else if(c&&['conta','boleto','pix'].includes(c.tipo))revisarCodigo(c,raw)}
-function carregar(f){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=no;im.src=URL.createObjectURL(f)})}
-async function preparar(f,max,cinza){const im=await carregar(f);const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,c.width,c.height);
- if(cinza){const d=x.getImageData(0,0,c.width,c.height),p=d.data;let lo=255,hi=0;const g=new Uint8ClampedArray(p.length/4);
-  for(let i=0;i<g.length;i++){const v=.299*p[i*4]+.587*p[i*4+1]+.114*p[i*4+2];g[i]=v;if(v<lo)lo=v;if(v>hi)hi=v}
-  const r=Math.max(1,hi-lo);for(let i=0;i<g.length;i++){const v=(g[i]-lo)*255/r;p[i*4]=p[i*4+1]=p[i*4+2]=v}x.putImageData(d,0,0)}
- return c}
-/* ---------- QR Code e código de barras ---------- */
-let ZXR=null;
-function carregarZX(){if(window.ZXing)return Promise.resolve();return new Promise((ok,no)=>{const sc=document.createElement('script');sc.src='vendor/zxing.min.js';sc.onload=ok;sc.onerror=()=>no(new Error('leitor de códigos não carregou'));document.head.appendChild(sc)})}
-let ZXH=null;function leitorZX(){if(ZXR)return ZXR;const Z=ZXing,F=Z.BarcodeFormat;ZXH=new Map();ZXH.set(Z.DecodeHintType.POSSIBLE_FORMATS,[F.QR_CODE,F.ITF,F.CODE_128,F.EAN_13,F.EAN_8]);ZXH.set(Z.DecodeHintType.TRY_HARDER,true);ZXR=new Z.MultiFormatReader();return ZXR}
-function zxCanvas(c){try{const Z=ZXing;const rd=leitorZX();const r=rd.decode(new Z.BinaryBitmap(new Z.HybridBinarizer(new Z.HTMLCanvasElementLuminanceSource(c))),ZXH);return r&&r.getText()}catch(e){return null}finally{try{ZXR&&ZXR.reset()}catch(e){}}}
-let BD=null;async function detector(){if(BD!==null)return BD;BD=false;try{if('BarcodeDetector' in window){const sup=await BarcodeDetector.getSupportedFormats();const fs=['qr_code','itf','code_128','ean_13','ean_8'].filter(x=>sup.includes(x));if(fs.includes('qr_code')&&fs.includes('itf'))BD=new BarcodeDetector({formats:fs})}}catch(e){}return BD}
-const melhor=l=>{const v=l.filter(Boolean);return v.find(x=>{const c=Codigos.interpretar(x);return c&&['nfce','conta','boleto','pix'].includes(c.tipo)})||v[0]||null};
-async function lerCodigoImagem(f){const achados=[];try{const bd=await detector();if(bd){const r=await bd.detect(await createImageBitmap(f));r.forEach(x=>achados.push(x.rawValue))}}catch(e){}
- if(!melhor(achados))try{const q=await lerQR(f);if(q)achados.push(q)}catch(e){}
- if(!melhor(achados))try{await carregarZX();for(const mx of [1600,2400]){const c=await preparar(f,mx,false);const t=zxCanvas(c);if(t){achados.push(t);break}}}catch(e){}
- return melhor(achados)}
-// leitor ao vivo pela câmera
-let scStream=null,scVivo=false,scTimer=null;
-async function abrirScanner(){cupomMsg('');const ov=$('#scan'),v=$('#scVid');
- if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){cupomMsg(T('Este navegador não deixa usar a câmera ao vivo. Use Tirar foto: o app também lê o código pela foto.'),true);return}
- try{scStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false})}
- catch(e){cupomMsg(/NotAllowed|Permission/i.test(e&&e.name||'')?T('Sem permissão para usar a câmera. Libere a câmera para este site nas configurações do navegador, ou use Tirar foto.'):T('Não consegui abrir a câmera: ')+esc(e.message||e),true);return}
- v.srcObject=scStream;ov.hidden=false;scVivo=true;try{await v.play()}catch(e){}
- const tr=scStream.getVideoTracks()[0];let luz=false;try{const cp=tr.getCapabilities&&tr.getCapabilities();$('#scLuz').hidden=!(cp&&cp.torch);$('#scLuz').onclick=async()=>{luz=!luz;try{await tr.applyConstraints({advanced:[{torch:luz}]})}catch(e){}}}catch(e){$('#scLuz').hidden=true}
- const bd=await detector();if(!bd)try{await carregarZX()}catch(e){fecharScanner();cupomMsg(T('O leitor de códigos não carregou. Tente de novo com internet uma vez.'),true);return}
- const cv=document.createElement('canvas'),cx=cv.getContext('2d',{willReadFrequently:true});let n=0,q=0;
- const passo=async()=>{if(!scVivo)return;let raw=null;
-  try{if(v.readyState>=2&&v.videoWidth){if(bd){const r=await bd.detect(v);raw=melhor(r.map(x=>x.rawValue))}
-   else{const W=v.videoWidth,H=v.videoHeight;if(++q%2){const k=Math.min(1,1280/Math.max(W,H));cv.width=Math.round(W*k);cv.height=Math.round(H*k);cx.drawImage(v,0,0,cv.width,cv.height)}else{const cw=Math.round(W*.9),ch=Math.round(H*.6);cv.width=cw;cv.height=ch;cx.drawImage(v,(W-cw)/2,(H-ch)/2,cw,ch,0,0,cw,ch)}raw=zxCanvas(cv)}}}catch(e){}
-  if(raw){const c=Codigos.interpretar(raw);if(c&&(c.tipo!=='invalido'||++n>3)){fecharScanner();if(navigator.vibrate)try{navigator.vibrate(60)}catch(e){}revisarCodigo(c,raw);return}}
-  scTimer=setTimeout(passo,bd?120:180)};passo()}
-function fecharScanner(){scVivo=false;clearTimeout(scTimer);if(scStream)scStream.getTracks().forEach(t=>t.stop());scStream=null;$('#scVid').srcObject=null;$('#scan').hidden=true}
-$('#btnScan').onclick=abrirScanner;$('#scFechar').onclick=fecharScanner;
-$('#scDig').onclick=()=>{fecharScanner();$('#digBox').hidden=false;$('#digTxt').focus()};
-$('#btnDig').onclick=()=>{const b=$('#digBox');b.hidden=!b.hidden;if(!b.hidden)$('#digTxt').focus()};
-$('#digBox').onsubmit=ev=>{ev.preventDefault();const raw=$('#digTxt').value.trim();if(!raw)return;const c=Codigos.interpretar(raw);revisarCodigo(c,raw);if(c&&['nfce','conta','boleto','pix'].includes(c.tipo)){$('#digTxt').value='';$('#digBox').hidden=true}};
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&scVivo)fecharScanner()});
-const ln=t=>`<span class="ln">${t}</span>`;
-function revisarCodigo(c,raw){if(!c){cupomMsg(T('Não reconheci este código.'),true);return}
- const fd=d=>d?d.split('-').reverse().join('/'):'';
- if(c.tipo==='nfce'){qr=raw;const ck=APR['cnpj:'+c.cnpj],cn=ck&&CATS.some(x=>x.k===ck)?ck:'mercado',lj=APR['loja:'+c.cnpj]||'';const mm=`${c.ano}-${String(c.mes).padStart(2,'0')}`;
-  const data=c.data||(ym(today())===mm?today():mm+'-01');
-  revisar({loja:lj||'CNPJ '+c.cnpjFmt,data,total:c.valor,cnpj:c.cnpj,itens:[{descricao:c.nome,valor:c.valor,categoria:cn}],
-   msg:ln(`<b>${c.nome==='Nota fiscal'?'Nota fiscal lida pelo QR Code':'Cupom fiscal lido pelo QR Code'}</b>`)+ln('Emitente: CNPJ '+c.cnpjFmt+(c.uf?' ('+c.uf+')':''))+(c.valor?ln('Total '+brl(c.valor)):ln('Esta nota não traz o valor no QR Code: digite o total abaixo.'))+(lj?'':ln('Digite o nome da loja: nas próximas notas desse CNPJ o app já preenche.'))+ln('O QR Code não traz a lista de produtos. Para separar cada item por categoria, fotografe o cupom.')+(c.url?`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener">Abrir a nota no site da Sefaz</a></span>`:'')});return}
- if(c.tipo==='conta'||c.tipo==='boleto'){const nome=c.tipo==='boleto'?'Boleto '+c.bancoNome:'Conta de '+c.nome.toLowerCase();
-  revisar({conta:c.nome,nomeConta:nome,barras:c.barras,loja:c.tipo==='boleto'?c.bancoNome:c.nome,data:c.venc||today(),total:c.valor,itens:[{descricao:nome,valor:c.valor,categoria:'contas'}],
-   msg:ln('<b>Código de barras lido</b>')+ln(nome)+(c.valor?ln('Valor: '+brl(c.valor)):ln('O código não traz o valor: digite abaixo.'))+(c.venc?ln('Vencimento: '+fd(c.venc)):ln('Confira a data de vencimento no campo Data.'))+ln('Ao salvar, vira um alerta de vencimento. Quando pagar, toque em Paguei.')});return}
- if(c.tipo==='pix'){revisar({loja:c.recebedor||'Pix',data:today(),total:c.valor,itens:[{descricao:'Pix'+(c.recebedor?' '+c.recebedor:''),valor:c.valor,categoria:'extra'}],
-   msg:ln('<b>QR Code Pix lido</b>')+(c.recebedor?ln('Recebedor: '+esc(c.recebedor)):'')+(c.valor?ln('Valor: '+brl(c.valor)):ln('Este Pix não traz o valor: digite abaixo.'))+ln('Escolha a categoria e toque em Salvar no extrato.')});return}
- if(c.tipo==='produto'){cupomMsg(T('Esse é o código de barras de um produto, não de uma nota ou conta. Aponte para o QR Code do cupom ou para o código de barras do boleto.'),true);return}
- if(c.tipo==='invalido'){cupomMsg(T('O código parece de um boleto, mas os números não conferem. Leia de novo ou digite a linha digitável.'),true);return}
- if(c.tipo==='link'){cupomMsg(ln(T('Este QR Code não é de nota fiscal nem de Pix.'))+`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.url.slice(0,60))}</a></span>`,true);return}
- cupomMsg(T('Não reconheci este código.'),true)}
-async function lerQR(f){try{
- if('BarcodeDetector' in window){const bd=new BarcodeDetector({formats:['qr_code']});const r=await bd.detect(await createImageBitmap(f));if(r[0])return r[0].rawValue}
- if(window.jsQR){const c=await preparar(f,1200,false),x=c.getContext('2d');const r=jsQR(x.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r)return r.data}
-}catch(e){}return null}
-function cupomMsg(h,err){$('#cupomMsg').innerHTML=h?`<div class="msg ${err?'err':''}">${h}</div>`:''}
-let progresso=()=>{};
-async function ocr(f){
- if(!window.Tesseract)throw new Error('motor de leitura não carregou');
- if(!worker){const base=new URL('vendor/',location.href).href;
-  worker=await Tesseract.createWorker('por',1,{workerPath:base+'worker.min.js',corePath:base+'core',langPath:base+'lang',gzip:true,workerBlobURL:false,logger:m=>progresso(m)});
-  await worker.setParameters({tessedit_pageseg_mode:'6',preserve_interword_spaces:'1'})}
- const c=await preparar(f,2000,true);const {data}=await worker.recognize(c);return data.text}
-$('#ler').onclick=async()=>{if(!foto)return;const b=$('#ler');b.disabled=true;b.textContent='Lendo o cupom…';
- progresso=m=>{if(m.status==='recognizing text')b.textContent='Lendo o cupom… '+Math.round(m.progress*100)+'%';else if(/load|init/.test(m.status))b.textContent='Preparando a leitura…'};
- cupomMsg('Lendo os itens no próprio celular. Na primeira vez leva um pouco mais.');
- try{const texto=await ocr(foto);$('#ocrTxt').textContent=texto;$('#ocrBox').hidden=false;
-  const j=Cupom.interpretar(texto,APR,extraKW(),padraoKW());
-  if(!j.itens.length){cupomMsg('Não encontrei itens com valor nesta foto. Tente outra foto mais perto e com mais luz, ou preencha abaixo.',true);j.itens=[{descricao:'',valor:0,categoria:'mercado'}];revisar(j,true);return}
-  revisar(j)}
- catch(e){cupomMsg('Não consegui ler este cupom ('+esc(e.message||e)+'). Tente de novo ou lance à mão.',true)}
- finally{b.disabled=false;b.textContent='Ler e separar itens';progresso=()=>{}}};
-let ULTJ=null;
-function revisar(j,manual){ULTJ=manual?null:j;rev=(j.itens||[]).map(i=>({d:String(i.descricao||''),v:num(i.valor),c:mapCat(i.categoria)}));rev.forEach(i=>i.o=i.c);
- $('#rLoja').value=j.loja||'';$('#rData').value=/^\d{4}-\d\d-\d\d$/.test(j.data||'')?j.data:today();
- if(!manual&&j.msg){cupomMsg(j.msg);setTimeout(()=>{try{$('#cupomMsg').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){}},50)}else if(!manual){const s=rev.reduce((a,i)=>a+i.v,0);const dif=j.total&&Math.abs(s-j.total)>.05;const ch=Cupom.lerQR(qr);
-  cupomMsg(j.conta?`Identifiquei uma <b>conta de ${esc(j.conta.toLowerCase())}</b>${j.total?' de '+brl(num(j.total)):''}${j.data?', vencimento '+j.data.split('-').reverse().join('/'):''}. ${j.data&&dias(j.data)>=0?' Ao salvar, vira um <b>alerta de vencimento</b>; quando pagar, toque em Paguei.':' Já venceu: vai direto para o extrato e o próximo mês fica agendado.'} Confira o valor antes de salvar.`:`Encontrei ${rev.length} itens${j.total?' · total do cupom '+brl(num(j.total)):''}.${dif?' <b>A soma dos itens ('+brl(s)+') difere do total</b>: confira os valores, a foto pode ter cortado alguma linha.':''} Toque na categoria para trocar.${ch?'<br>QR da NFC-e lido. Chave: '+ch.replace(/(\d{4})/g,'$1 '):''}`)}
- $('#revisao').hidden=false;renderRev()}
-function renderRev(){$('#rItens').innerHTML=rev.map((i,n)=>`<div class="item"><input class="desc" data-i="${n}" data-k="d" value="${esc(i.d)}" placeholder="Item" aria-label="Descrição"><select data-i="${n}" data-k="c" aria-label="Categoria">${opcoesCat(i.c)}</select><input class="val" data-i="${n}" data-k="v" inputmode="decimal" value="${i.v.toFixed(2).replace('.',',')}" aria-label="Valor"></div>`).join('');
- document.querySelectorAll('#rItens [data-i]').forEach(el=>el.onchange=()=>{const i=rev[el.dataset.i];i[el.dataset.k]=el.dataset.k==='v'?num(el.value):el.value;resumoRev()});resumoRev()}
-function resumoRev(){const g={};rev.forEach(i=>g[i.c]=(g[i.c]||0)+i.v);$('#rTot').textContent='Total '+brl(rev.reduce((a,i)=>a+i.v,0));
- $('#rTotCats').textContent=Object.entries(g).map(([k,v])=>cat(k).n+' '+brl(v)).join(' · ')}
-$('#rAdd').onclick=()=>{rev.push({d:'',v:0,c:'extra',o:'extra'});renderRev()};
-$('#rSalvar').onclick=()=>{if(ULTJ&&ULTJ.conta){const v=Math.round(rev.reduce((a,i)=>a+i.v,0)*100)/100,venc=$('#rData').value;const nome=ULTJ.nomeConta||('Conta de '+ULTJ.conta.toLowerCase()+(($('#rLoja').value.trim()&&$('#rLoja').value.trim()!==ULTJ.conta)?' · '+$('#rLoja').value.trim():''));
-  if(venc&&dias(venc)>=0){criarAlertaAuto({nome,venc,valor:v,cat:'contas',rep:ULTJ.barras?(/^(Água|Luz|Telefone)/.test(ULTJ.conta)?'mensal':''):'mensal',pago:false,...(ULTJ.barras?{codigo:ULTJ.barras}:{})});ULTJ=null;rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');go('venc');render();return}
-  criarAlertaAuto({nome,venc,valor:v,cat:'contas',rep:'mensal',pago:true})}
- const g={};rev.filter(i=>i.v).forEach(i=>(g[i.c]=g[i.c]||[]).push({d:i.d,v:i.v}));const loja=$('#rLoja').value.trim()||'Cupom',data=$('#rData').value||today();
- const ks=Object.keys(g);if(!ks.length){flash('Nenhum item com valor.');return}
- if(ULTJ&&ULTJ.cnpj){const lj=$('#rLoja').value.trim();if(lj&&!/^CNPJ /.test(lj))APR['loja:'+ULTJ.cnpj]=lj;if(ks.length===1)APR['cnpj:'+ULTJ.cnpj]=ks[0]}
- rev.forEach(i=>{if(i.d&&i.c!==i.o)APR[Cupom.norm(i.d).trim()]=i.c});  ks.forEach(k=>put({id:uid(),ts:Date.now(),tipo:'despesa',desc:loja+' · '+cat(k).n,loja,valor:Math.round(g[k].reduce((a,i)=>a+i.v,0)*100)/100,data,cat:k,origem:'cupom',itens:g[k],...(qr?{qr:String(qr).slice(0,400)}:{})}));
- toast('Cupom salvo em '+ks.length+(ks.length>1?' categorias':' categoria'));rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');mes=ym(data);go('inicio');render()};
-
-/* ---------- backup ---------- */
-$('#bkCopy').onclick=async()=>{if(!CHAVE)return;const t=JSON.stringify({app:'meucaixa',v:2,cofre:COFRE,dados:await Cofre.cifrar(CHAVE,{tx:TX,aprendido:APR,cats:CATS,semPadrao:SEMPADRAO,alertas:ALERTAS,pacote:PACOTE,entKw:ENTKW})});$('#bkTxt').value=t;try{localStorage.setItem(K_ULTBK,String(Date.now()))}catch(e){}bkLembrete();try{await navigator.clipboard.writeText(t);toast('Backup criptografado copiado')}catch(e){$('#bkTxt').select();toast('Selecione o texto e copie')}};
-$('#bkLoad').onclick=async()=>{let o;try{const j=JSON.parse($('#bkTxt').value);
-  if(j.v===2){try{o=await Cofre.decifrar(CHAVE,j.dados)}catch(e){const p=$('#bkPin').value.trim();if(!p){toast('Informe o PIN usado quando o backup foi feito');return}
-   try{const r=await Cofre.abrir(j.cofre,p);o=await Cofre.decifrar(r.chave,j.dados)}catch(e){toast('PIN do backup incorreto');return}}}
-  else o={tx:j.tx,aprendido:j.aprendido};
-  if(!Array.isArray(o.tx))throw 0}catch(e){toast('Texto de backup inválido');return}
- const antes=TX,antesA=APR,antesC=CATS,antesL=ALERTAS,antesS=SEMPADRAO,antesP=PACOTE,antesE=ENTKW;TX=o.tx;APR=o.aprendido||APR;if(o.semPadrao)SEMPADRAO=o.semPadrao;if(Array.isArray(o.alertas))ALERTAS=o.alertas;if(o.cats)garantirCats(o);renderSelects();persist();render();$('#bkPin').value='';toast(TX.length+' lançamentos restaurados',()=>{TX=antes;APR=antesA;CATS=antesC;ALERTAS=antesL;SEMPADRAO=antesS;PACOTE=antesP;ENTKW=antesE;renderSelects();persist();render()})};
-
-/* ---------- personalizar categorias ---------- */
-const PAL=['#0091ea','#7cb342','#ff7043','#ab47bc','#26a69a','#ec407a','#5c6bc0','#ffa000','#8d6e63','#00acc1'];
-function renderEnt(){$('#cmEnt').innerHTML=`<div class="l1" style="grid-template-columns:auto 1fr"><span class="dot" style="background:${IN.c};width:16px;height:16px"></span><b>${IN.n}</b></div><input id="entKw" value="${esc(ENTKW.join(', '))}" placeholder="Palavras que indicam uma entrada (ex.: salário)" aria-label="Palavras-chave de entradas"><span class="note" style="margin:0">Ao digitar uma dessas palavras num lançamento, o app já marca como Entrada.</span>`;
- $('#entKw').onchange=()=>{ENTKW=$('#entKw').value.split(',').map(x=>x.trim()).filter(Boolean);persist()}}
-function renderCM(){renderEnt();$('#cmList').innerHTML=CATS.map((c,i)=>`<div class="cm" data-ci="${i}">
- <div class="l1"><input type="color" data-f="c" value="${c.c}" aria-label="Cor de ${esc(c.n)}"><input data-f="n" value="${esc(c.n)}" aria-label="Nome"><span style="display:flex;gap:2px"><button class="icon" data-up="${i}" aria-label="Subir">↑</button>${c.k==='extra'?'':`<button class="icon" data-rm="${i}">Apagar</button>`}</span></div>
- <input data-f="kw" value="${esc((c.kw||[]).join(', '))}" placeholder="Palavras-chave (ex.: drogaria, farmácia)" aria-label="Palavras-chave">
- <label style="font-weight:500">Meta mensal (R$, opcional)<input data-f="meta" inputmode="decimal" value="${c.meta>0?c.meta.toFixed(2).replace('.',','):''}" placeholder="Sem meta"></label>
- <div class="subs">${(c.subs||[]).map((su,j)=>`<span class="chip">${esc(su.n)}<button class="icon" style="min-width:28px;min-height:28px" data-rs="${i}:${j}" aria-label="Remover ${esc(su.n)}">×</button></span>`).join('')}<button class="chip" data-as="${i}">+ ${c.k==='cartao'?'Cartão':'Subpasta'}</button></div></div>`).join('');
- document.querySelectorAll('#cmList [data-f]').forEach(el=>el.onchange=()=>{const c=CATS[el.closest('[data-ci]').dataset.ci];const f=el.dataset.f;
-  if(f==='kw')c.kw=el.value.split(',').map(x=>x.trim()).filter(Boolean);else if(f==='meta'){const v=num(el.value);if(v>0)c.meta=v;else delete c.meta}else if(f==='n'){if(!el.value.trim())return renderCM();c.n=el.value.trim()}else c[f]=el.value;salvarCats()});
- document.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>{const i=+b.dataset.up;if(i<1)return;[CATS[i-1],CATS[i]]=[CATS[i],CATS[i-1]];salvarCats();renderCM()});
- document.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{const i=+b.dataset.rm,c=CATS[i];const afet=TX.filter(t=>t.cat===c.k);const antesT=clone(TX),antesC=clone(CATS),antesS=SEMPADRAO.slice();
-  afet.forEach(t=>{t.cat='extra';delete t.sub});CATS.splice(i,1);if(DEF_CATS.some(d=>d.k===c.k))SEMPADRAO.push(c.k);salvarCats();renderCM();
-  toast(`"${c.n}" apagada${afet.length?'; '+afet.length+' lançamento(s) foram para '+cat('extra').n:''}`,()=>{TX=antesT;CATS=antesC;SEMPADRAO=antesS;salvarCats();renderCM()})});
- document.querySelectorAll('[data-rs]').forEach(b=>b.onclick=()=>{const [i,j]=b.dataset.rs.split(':').map(Number);const c=CATS[i],su=c.subs[j];c.subs.splice(j,1);TX.forEach(t=>{if(t.cat===c.k&&t.sub===su.k)delete t.sub});salvarCats();renderCM();toast(`Subpasta "${su.n}" removida`)});
- document.querySelectorAll('[data-as]').forEach(b=>b.onclick=()=>{const c=CATS[+b.dataset.as];const inp=document.createElement('input');inp.placeholder=c.k==='cartao'?'Nome do cartão e Enter':'Nome da subpasta e Enter';inp.style.maxWidth='240px';b.replaceWith(inp);inp.focus();
-  const ok=()=>{const v=inp.value.trim();if(v)novaSub(c.k,v);salvarCats();renderCM()};inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();ok()}};inp.onblur=ok})}
-function salvarCats(){persist();renderSelects();render()}
-$('#cmNova').onsubmit=e=>{e.preventDefault();const n=$('#cnNome').value.trim();if(!n)return;CATS.splice(CATS.length-1,0,{k:'c'+Date.now().toString(36),n,c:$('#cnCor').value,kw:[],subs:[]});
- $('#cnNome').value='';$('#cnCor').value=PAL[CATS.length%PAL.length];salvarCats();renderCM();toast('Categoria "'+n+'" criada')};
-document.querySelector('[data-dv="cats"]').addEventListener('click',renderCM);
-
-/* ---------- enviar fatura ou documento ---------- */
-let FAT=[];
-$('#btnDoc').onclick=()=>$('#doc').click();
-$('#doc').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(f)await abrirDocumento(f)};
-const ext=n=>(String(n).toLowerCase().match(/\.([a-z0-9]+)$/)||[])[1]||'';
-let pdfjs=null;
-async function textoPDF(f){if(!pdfjs){pdfjs=await import(new URL('vendor/pdf/pdf.min.mjs',location.href).href);pdfjs.GlobalWorkerOptions.workerSrc=new URL('vendor/pdf/pdf.worker.min.mjs',location.href).href}
- const doc=await pdfjs.getDocument({data:new Uint8Array(await f.arrayBuffer()),isEvalSupported:false}).promise;let out='';
- for(let p=1;p<=Math.min(doc.numPages,30);p++){const pg=await doc.getPage(p);const tc=await pg.getTextContent();const linhas={};
-  tc.items.forEach(it=>{const y=Math.round(it.transform[5]/3);(linhas[y]=linhas[y]||[]).push(it)});
-  out+=Object.keys(linhas).sort((a,b)=>b-a).map(y=>linhas[y].sort((a,b)=>a.transform[4]-b.transform[4]).map(i=>i.str).join(' ')).join('\n')+'\n'}
- if(out.replace(/\s/g,'').length>40)return out;
- // PDF escaneado (só imagem): desenha as páginas e lê com OCR
- let t='';for(let p=1;p<=Math.min(doc.numPages,4);p++){const pg=await doc.getPage(p);const vp=pg.getViewport({scale:2});const c=document.createElement('canvas');c.width=vp.width;c.height=vp.height;
-  await pg.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;const b=await new Promise(r=>c.toBlob(r,'image/png'));t+=await ocr(b)+'\n'}return t}
-async function textoPlanilha(f){if(!window.XLSX)throw new Error('leitor de planilhas não carregou');const wb=XLSX.read(new Uint8Array(await f.arrayBuffer()),{type:'array',cellDates:true,dateNF:'dd/mm/yyyy'});
- return wb.SheetNames.map(n=>XLSX.utils.sheet_to_csv(wb.Sheets[n],{FS:';',dateNF:'dd/mm/yyyy'})).join('\n')}
-async function abrirDocumento(f){const x=ext(f.name);$('#fat').hidden=true;$('#revisao').hidden=true;
- if(/^image\//.test(f.type)||/^(jpe?g|png|heic|heif|webp|gif|bmp)$/.test(x)){await usarFoto(f);cupomMsg('Imagem carregada. Toque em <b>Ler e separar itens</b>.');return}
- cupomMsg('Lendo <b>'+esc(f.name)+'</b>…');
- try{let texto,r;
-  if(x==='pdf'||f.type==='application/pdf'){texto=await textoPDF(f)}
-  else if(/^(xlsx|xls|ods)$/.test(x)){texto=await textoPlanilha(f);r={tipo:'csv',itens:Extrato.csv(texto)}}
-  else texto=await f.text();
-  $('#ocrTxt').textContent=(texto||'').slice(0,20000);$('#ocrBox').hidden=false;
-  if(!r)r=Extrato.detectar(f.name,texto);
-  if(r.itens.length>=2){r.cab=Extrato.cabecalho(texto||'');return revisarFatura(r,f.name)}
-  const j=Cupom.interpretar(texto,APR,extraKW(),padraoKW());
-  if(j.itens.length){revisar(j);return}
-  cupomMsg('Não encontrei lançamentos neste arquivo. Veja abaixo o texto que o app conseguiu ler.',true)}
- catch(e){cupomMsg('Não consegui abrir este arquivo ('+esc(e.message||e)+').',true)}}
-function cartaoOpts(sel){const c=CATS.find(x=>x.k==='cartao');return '<option value="">Nenhum</option>'+(c&&c.subs||[]).map(su=>`<option value="${su.k}" ${su.k===sel?'selected':''}>${esc(su.n)}</option>`).join('')+(c?'<option value="+">+ Novo cartão…</option>':'')}
-let FATCAB=null;
-function revisarFatura(r,nome){FATCAB=r.cab||null;const banco=r.tipo==='ofx'||(r.tipo==='csv'&&r.itens.some(i=>i.valor<0)&&r.itens.filter(i=>i.valor<0).length>r.itens.length*.2&&!/fatura|cart/i.test(nome));
- $('#fatTipo').value=banco?'extrato':'fatura';const cc=CATS.find(x=>x.k==='cartao');$('#fatCartao').innerHTML=cartaoOpts(cc&&cc.subs&&cc.subs[0]&&cc.subs[0].k);
- FAT=r.itens.map(i=>{const credito=i.valor<0;const nd=Cupom.norm(i.descricao);const kwCat=d=>{let m=null,t=0;for(const o of [extraKW(),padraoKW()||{}])for(const k in o)for(const w of o[k])if(w.length>t&&temPalavra(d,[w])){m=k;t=w.length}return m};let c=/MERCADOPAGO|MERCADO PAGO|PAYPAL|\bPIX\b|TRANSF|\bTED\b|\bDOC\b/.test(nd)?null:/MERCADO ?LIVRE|AMAZON|SHOPEE|ALIEXPRESS|MAGALU|SHEIN/.test(nd)?kwCat(i.descricao):mapCat(Cupom.categorizar(i.descricao,i.descricao,APR,extraKW(),padraoKW()));if(c==='extra')c=null;return{...i,on:!credito||banco,c,o:c}});
- $('#fat').hidden=false;renderFat();cupomMsg(`Encontrei <b>${FAT.length} lançamentos</b> em ${esc(nome)}. Confira as categorias e toque em Salvar.`);$('#fat').scrollIntoView({behavior:'smooth'})}
-function renderFat(){const banco=$('#fatTipo').value==='extrato';const padrao=banco?'extra':'cartao';
- $('#fatTab').innerHTML=FAT.map((i,n)=>{const ent=banco&&i.valor<0;return`<tr class="${i.on?'':'off'}"><td><input type="checkbox" data-fo="${n}" ${i.on?'checked':''} aria-label="Salvar este lançamento"></td><td style="white-space:nowrap">${i.data.slice(8)}/${i.data.slice(5,7)}</td><td>${esc(i.descricao)}</td><td class="v">${ent?'+ ':''}${brl(Math.abs(i.valor))}</td><td>${ent?'<span class="note">Entrada</span>':`<select data-fc="${n}">${opcoesCat(i.c||padrao)}</select>`}</td></tr>`}).join('');
- document.querySelectorAll('[data-fo]').forEach(b=>b.onchange=()=>{FAT[b.dataset.fo].on=b.checked;renderFat()});
- document.querySelectorAll('[data-fc]').forEach(b=>b.onchange=()=>{FAT[b.dataset.fc].c=b.value});
- const sel=FAT.filter(i=>i.on);$('#fatQtd').textContent=sel.length+' de '+FAT.length+' selecionados';$('#fatTot').textContent='Gastos: '+brl(sel.filter(i=>!(banco&&i.valor<0)).reduce((a,i)=>a+Math.abs(i.valor),0))}
-$('#fatTipo').onchange=()=>{const banco=$('#fatTipo').value==='extrato';FAT.forEach(i=>{i.on=banco||i.valor>0});renderFat()};
-$('#fatCartao').onchange=()=>{if($('#fatCartao').value!=='+')return;
- const d=document.createElement('div');d.className='cm';d.innerHTML='<label>Nome do cartão<input id="ncNome" placeholder="Ex.: Nubank, Itaú Visa"></label><button class="btn em" id="ncOk">Criar cartão</button>';$('#fatCartao').closest('.two').after(d);$('#ncNome').focus();
- $('#ncOk').onclick=()=>{const k=novaSub('cartao',$('#ncNome').value.trim());d.remove();$('#fatCartao').innerHTML=cartaoOpts(k||'')}};
-$('#fatCancel').onclick=()=>{FAT=[];$('#fat').hidden=true;cupomMsg('')};
-$('#fatSalvar').onclick=()=>{const banco=$('#fatTipo').value==='extrato';const ck=$('#fatCartao').value&&$('#fatCartao').value!=='+'?$('#fatCartao').value:'';
- const cn=ck?subNome({cat:'cartao',sub:ck}):'';let n=0;const ultimo=[];
- FAT.filter(i=>i.on).forEach(i=>{const ent=banco&&i.valor<0;const c=ent?null:(i.c||(banco?'extra':'cartao'));
-  if(!ent&&i.o!==c&&c!=='cartao')APR[Cupom.norm(i.descricao).trim()]=c;
-  const t={id:uid(),ts:Date.now(),tipo:ent?'receita':'despesa',desc:i.descricao,valor:Math.abs(i.valor),data:i.data,cat:c,origem:banco?'extrato':'fatura'};
-  if(cn){t.cartao=cn;if(c==='cartao')t.sub=ck}TX.push(t);ultimo.push(t.id);n++});
- if(!banco&&FATCAB&&FATCAB.venc){const tot=FATCAB.total||Math.round(FAT.filter(i=>i.on).reduce((a,i)=>a+i.valor,0)*100)/100;criarAlertaAuto({nome:'Fatura do cartão'+(cn?' '+cn:''),venc:FATCAB.venc,valor:tot,cat:'cartao',sub:ck||'',rep:'mensal',pago:false,fatura:true})}
- persist();FAT=[];$('#fat').hidden=true;cupomMsg('');$('#ocrBox').hidden=true;render();go('extrato');
- toast(n+' lançamentos salvos',()=>{TX=TX.filter(t=>!ultimo.includes(t.id));persist();render()})};
-
-/* ---------- vencimentos e alertas ---------- */
-const hojeD=()=>new Date(today()+'T12:00');
-const dias=d=>Math.round((new Date(d+'T12:00')-hojeD())/864e5);
-const fmtD=d=>d.split('-').reverse().join('/');
-function somaMes(d,n,anual){const [y,m,dd]=d.split('-').map(Number);const t=new Date(y,m-1+(anual?12:n),1);const ult=new Date(t.getFullYear(),t.getMonth()+1,0).getDate();return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(Math.min(dd,ult)).padStart(2,'0')}`}
-function statusAl(a){if(a.pago)return['pago','Paga'];const n=dias(a.venc);if(n<0)return['atr',n===-1?'Venceu ontem':'Venceu há '+(-n)+' dias'];if(n===0)return['atr','Vence hoje'];if(n<=(a.avisar??3))return['perto',n===1?'Vence amanhã':'Vence em '+n+' dias'];return['ok','Em '+n+' dias']}
-// Alerta criado sozinho ao ler conta/fatura. Se a conta lida já foi lançada (pago), agenda o próximo mês.
-function criarAlertaAuto(o){if(!o.venc)return;const chave=Cupom.norm(o.nome);
- let a=o.codigo&&!o.rep?ALERTAS.find(x=>x.codigo===o.codigo&&!x.pago):ALERTAS.find(x=>Cupom.norm(x.nome)===chave&&!x.pago);
- if(o.pago){if(a&&a.venc.slice(0,7)===o.venc.slice(0,7)){a.pago=true;a.pagoEm=today()}
-  const prox=somaMes(o.venc,1);if(!ALERTAS.some(x=>Cupom.norm(x.nome)===chave&&x.venc===prox))ALERTAS.push({id:uid(),nome:o.nome,venc:prox,valor:o.valor,estimado:true,cat:o.cat,sub:o.sub||'',rep:o.rep,avisar:3,auto:true});
-  toast('Alerta criado: '+o.nome+' vence '+fmtD(prox)+' (valor estimado)')}
- else{if(a){a.venc=o.venc;a.valor=o.valor;a.estimado=false;if(o.codigo)a.codigo=o.codigo}else ALERTAS.push({id:uid(),nome:o.nome,venc:o.venc,valor:o.valor,cat:o.cat,sub:o.sub||'',rep:o.rep,avisar:3,auto:true,fatura:!!o.fatura,...(o.codigo?{codigo:o.codigo}:{})});
-  setTimeout(()=>toast('Alerta criado: '+o.nome+' vence '+fmtD(o.venc)),1200)}
- persist()}
-function pendentes(){return ALERTAS.filter(a=>!a.pago).sort((a,b)=>a.venc.localeCompare(b.venc))}
-function avisando(){return pendentes().filter(a=>dias(a.venc)<=(a.avisar??3))}
-function renderAlertas(){const av=avisando(),atr=av.filter(a=>dias(a.venc)<=0);
- const bn=$('#alBanner');if(av.length&&CHAVE){bn.hidden=false;bn.className='alerta'+(atr.length?' atr':'');
-  const a=av[0];bn.innerHTML=`<span><b>${esc(a.nome)}</b> · ${T(statusAl(a)[1]).toLowerCase()}${a.valor?' · '+brlH(a.valor):''}${av.length>1?`<br>e mais ${av.length-1} conta(s) para pagar`:''}</span><strong>Ver vencimentos ›</strong>`}else bn.hidden=true;
- $('#dVenc').textContent=av.length?av.length+' a pagar':(pendentes().length?pendentes().length+' agendados':'');
- try{if(navigator.setAppBadge){av.length?navigator.setAppBadge(av.length):navigator.clearAppBadge()}}catch(e){}
- if(!$('#v-venc').classList.contains('on'))return;
- const pend=pendentes(),pagos=ALERTAS.filter(a=>a.pago).sort((a,b)=>b.venc.localeCompare(a.venc)).slice(0,6);
- $('#alLista').innerHTML=(pend.length||pagos.length)?[...pend,...pagos].map(a=>{const [k,t]=statusAl(a);const c=cat(a.cat||'extra');const sn=a.sub?subNome({cat:a.cat,sub:a.sub}):'';
-  return`<div class="al"><span class="dot" style="background:${c.c}"></span><span class="d"><b>${esc(a.nome)}</b></span><span class="st ${k}">${t}</span>
-  <small>${fmtD(a.venc)} · ${a.valor?brl(a.valor)+(a.estimado?' (estimado)':''):'valor a definir'} · ${esc(c.n)}${sn?' › '+esc(sn):''}${a.rep==='mensal'?' · todo mês':a.rep==='anual'?' · todo ano':''}</small>
-  <span class="q">${a.pago?`<button class="btn ghost" data-ad="${a.id}">Apagar</button>`:`<button class="btn em" data-ap="${a.id}">Paguei</button>${a.codigo?`<button class="btn ghost" data-ac="${a.id}">Copiar código</button>`:''}<button class="btn ghost" data-ae="${a.id}">Editar</button><button class="btn ghost" data-ai="${a.id}">Calendário</button><button class="btn ghost" data-ad="${a.id}">Apagar</button>`}</span></div>`}).join(''):'<div class="empty">Nenhum vencimento ainda. Leia uma conta de consumo ou uma fatura, ou cadastre abaixo.</div>';
- document.querySelectorAll('[data-ap]').forEach(b=>b.onclick=()=>pagarAlerta(b.dataset.ap));
- document.querySelectorAll('[data-ae]').forEach(b=>b.onclick=()=>editarAlerta(b.dataset.ae));
- document.querySelectorAll('[data-ac]').forEach(b=>b.onclick=async()=>{const al=ALERTAS.find(x=>x.id===b.dataset.ac);if(!al)return;const t=Codigos.barrasParaLinha(al.codigo);try{await navigator.clipboard.writeText(t.replace(/\D/g,''));toast(T('Código copiado. Cole no app do banco para pagar.'))}catch(e){toast(t)}});
- document.querySelectorAll('[data-ai]').forEach(b=>b.onclick=()=>baixarICS([ALERTAS.find(a=>a.id===b.dataset.ai)]));
- document.querySelectorAll('[data-ad]').forEach(b=>b.onclick=()=>{const antes=clone(ALERTAS);ALERTAS=ALERTAS.filter(a=>a.id!==b.dataset.ad);persist();render();toast('Alerta apagado',()=>{ALERTAS=antes;persist();render()})})}
-function pagarAlerta(id){const a=ALERTAS.find(x=>x.id===id);if(!a)return;
- const caixa=document.createElement('div');caixa.className='cm';caixa.innerHTML=`<label>Valor pago (R$)<input id="pgV" inputmode="decimal" value="${a.valor?a.valor.toFixed(2).replace('.',','):''}"></label><label>Data do pagamento<input id="pgD" type="date" value="${today()}"></label><div style="display:flex;gap:8px"><button class="btn em" id="pgOk">Confirmar</button><button class="btn ghost" id="pgNo">Cancelar</button></div>`;
- document.querySelector(`[data-ap="${id}"]`).closest('.al').after(caixa);$('#pgV').focus();$('#pgNo').onclick=()=>caixa.remove();
- $('#pgOk').onclick=()=>{const v=num($('#pgV').value);const antesA=clone(ALERTAS),antesT=TX.length;
-  // a fatura do cartão já tem os gastos lançados um a um: marcar como paga não lança de novo
-  if(v>0&&!a.fatura)TX.push({id:uid(),ts:Date.now(),tipo:'despesa',desc:a.nome,valor:v,data:$('#pgD').value||today(),cat:a.cat||'extra',...(a.sub?{sub:a.sub}:{}),origem:'vencimento'});
-  a.pago=true;a.pagoEm=$('#pgD').value||today();if(v)a.valor=v;
-  if(a.rep){const prox=somaMes(a.venc,1,a.rep==='anual');{const n={...clone(a),id:uid(),venc:prox,pago:false,pagoEm:null,estimado:!!a.valor};delete n.codigo;ALERTAS.push(n)}}
-  caixa.remove();persist();render();toast(a.fatura?'Fatura marcada como paga':'Pago e lançado no extrato',()=>{ALERTAS=antesA;TX=TX.slice(0,antesT);persist();render()})}}
-let alEdit=null;
-function editarAlerta(id){const a=ALERTAS.find(x=>x.id===id);alEdit=id;$('#alNome').value=a.nome;$('#alData').value=a.venc;$('#alValor').value=a.valor?a.valor.toFixed(2).replace('.',','):'';$('#alCat').innerHTML=opcoesCat(a.cat||'contas');$('#alRep').value=a.rep||'';$('#alDias').value=String(a.avisar??3);$('#alFTit').textContent='Editar alerta';$('#alCancel').hidden=false;$('#alForm').scrollIntoView({behavior:'smooth'})}
-function limparAl(){alEdit=null;$('#alForm').reset();$('#alCat').innerHTML=opcoesCat('contas');$('#alData').value='';$('#alFTit').textContent='Novo alerta';$('#alCancel').hidden=true}
-$('#alCancel').onclick=limparAl;
-$('#alForm').onsubmit=e=>{e.preventDefault();const o={nome:$('#alNome').value.trim(),venc:$('#alData').value,valor:num($('#alValor').value)||0,cat:$('#alCat').value,rep:$('#alRep').value,avisar:+$('#alDias').value};
- if(alEdit){Object.assign(ALERTAS.find(x=>x.id===alEdit),o,{estimado:false})}else ALERTAS.push({id:uid(),...o});
- const ed=!!alEdit;limparAl();persist();render();toast(ed?'Alerta alterado':'Alerta criado: '+o.nome+' vence '+fmtD(o.venc))};
-document.querySelector('[data-dv="venc"]').addEventListener('click',()=>{limparAl();renderAlertas()});
-$('#alBanner').onclick=()=>{go('venc');limparAl();renderAlertas()};
-// Lembrete na agenda do celular (.ics), com aviso antes do vencimento
-function baixarICS(lista){lista=lista.filter(a=>a&&!a.pago);if(!lista.length){toast('Nenhum alerta pendente');return}
- const st=new Date().toISOString().replace(/[-:]/g,'').slice(0,15)+'Z';
- const ev=lista.map(a=>{const d=a.venc.replace(/-/g,'');const d2=somaMes(a.venc,0).replace(/-/g,'');const fim=new Date(a.venc+'T12:00');fim.setDate(fim.getDate()+1);const df=fim.toISOString().slice(0,10).replace(/-/g,'');
-  return['BEGIN:VEVENT','UID:'+a.id+'@meucaixa','DTSTAMP:'+st,'DTSTART;VALUE=DATE:'+d,'DTEND;VALUE=DATE:'+df,'SUMMARY:'+T('Vence:')+' '+a.nome.replace(/[,;]/g,' ')+(a.valor?' (R$ '+a.valor.toFixed(2).replace('.',',')+')':''),
-   T('DESCRIPTION:Lembrete do Anotei Já'),...(a.rep==='mensal'?['RRULE:FREQ=MONTHLY']:a.rep==='anual'?['RRULE:FREQ=YEARLY']:[]),
-   'BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+T(a.nome.replace(/[,;]/g,' ')+' vence hoje'),'TRIGGER;RELATED=START:PT9H','END:VALARM',
-   ...((a.avisar??3)>0?['BEGIN:VALARM','ACTION:DISPLAY','DESCRIPTION:'+T(a.nome.replace(/[,;]/g,' ')+' vence em '+(a.avisar??3)+' dia(s)'),'TRIGGER:-'+((a.avisar??3)>1?'P'+((a.avisar??3)-1)+'DT15H':'PT15H'),'END:VALARM']:[]),'END:VEVENT'].join('\r\n')});
- const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Anotei Já//PT-BR','CALSCALE:GREGORIAN',...ev,'END:VCALENDAR'].join('\r\n');
- const blob=new Blob([ics],{type:'text/calendar'});const nome=(lista.length>1?'vencimentos':Cupom.norm(lista[0].nome).replace(/[^A-Z0-9]+/g,'-').toLowerCase())+'.ics';
- const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},3000);toast('Abra o arquivo para adicionar à agenda')}
-$('#alIcsTodos').onclick=()=>baixarICS(pendentes());
-
-/* ---------- planilha Excel ---------- */
-$('#dXlsx').onclick=async()=>{if(!window.XLSX){toast('A planilha ainda está carregando, tente de novo');return}
- const linhas=TX.slice().sort((a,b)=>a.data.localeCompare(b.data)).map(t=>({[T('Data')]:new Date(t.data+'T12:00'),[T('Tipo')]:t.tipo==='receita'?T('Entrada'):T('Saída'),[T('Categoria')]:t.tipo==='receita'?T('Entrada'):cat(t.cat).n,[T('Subpasta')]:subNome(t),[T('Cartão')]:t.cartao||'',
-  [T('Descrição')]:t.desc,[T('Loja')]:t.loja||'',[T('Valor (R$)')]:t.tipo==='receita'?t.valor:-t.valor,[T('Moeda')]:t.moeda||'',[T('Valor na moeda')]:t.valorMoeda||'',[T('Itens')]:(t.itens||[]).map(i=>i.d+' '+String(i.v).replace('.',',')).join(' | ')}));
- const wb=XLSX.utils.book_new();const ws=XLSX.utils.json_to_sheet(linhas,{cellDates:true,dateNF:'dd/mm/yyyy'});ws['!cols']=[{wch:11},{wch:8},{wch:18},{wch:14},{wch:12},{wch:36},{wch:22},{wch:12},{wch:7},{wch:12},{wch:50}];
- XLSX.utils.book_append_sheet(wb,ws,T('Lançamentos'));
- const meses=[...new Set(TX.map(t=>ym(t.data)))].sort();const res=meses.map(m=>{const r={[T('Mês')]:m.slice(5)+'/'+m.slice(0,4)};const doM=TX.filter(t=>ym(t.data)===m);
-  r[T('Entradas')]=doM.filter(t=>t.tipo==='receita').reduce((a,t)=>a+t.valor,0);CATS.forEach(c=>r[c.n]=doM.filter(t=>t.tipo!=='receita'&&t.cat===c.k).reduce((a,t)=>a+t.valor,0));
-  r[T('Total de saídas')]=doM.filter(t=>t.tipo!=='receita').reduce((a,t)=>a+t.valor,0);r[T('Saldo')]=r[T('Entradas')]-r[T('Total de saídas')];for(const k in r)if(typeof r[k]==='number')r[k]=Math.round(r[k]*100)/100;return r});
- XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(res),T('Resumo por mês'));
- if(ALERTAS.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ALERTAS.slice().sort((a,b)=>a.venc.localeCompare(b.venc)).map(a=>({[T('Conta')]:a.nome,[T('Vencimento')]:new Date(a.venc+'T12:00'),[T('Valor (R$)')]:a.valor||'',[T('Situação')]:a.pago?T('Paga'):statusAl(a)[1],[T('Repetir')]:a.rep==='mensal'?T('Todo mês'):a.rep==='anual'?T('Todo ano'):T('Uma vez'),[T('Categoria')]:cat(a.cat||'extra').n}))),T('Vencimentos'));
- const nome='anotei-ja-'+today()+'.xlsx';const blob=new Blob([XLSX.write(wb,{bookType:'xlsx',type:'array'})],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
- const file=new File([blob],nome,{type:blob.type});
- if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/.test(navigator.userAgent)){try{await navigator.share({files:[file],title:'Anotei Já'});return}catch(e){if(e.name==='AbortError')return}}
- const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},2000);toast('Planilha baixada: '+nome)};
-
-/* ---------- atualização automática ---------- */
-if(!NATIVO&&'serviceWorker' in navigator&&location.protocol==='https:'){
- let recarregar=false;const tinha=!!navigator.serviceWorker.controller;
- navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!tinha)return;if(!CHAVE)location.reload();else{recarregar=true;toast('App atualizado. A nova versão abre quando você bloquear ou reabrir.')}});
- navigator.serviceWorker.register('sw.js').then(reg=>{reg.update();document.addEventListener('visibilitychange',()=>{if(!document.hidden)reg.update()})}).catch(()=>{});
- const bq=bloquear;$('#btnLock').onclick=$('#dLock').onclick=()=>{if(recarregar)location.reload();else bq()}}
-
-/* ---------- avisos ---------- */
-/* ---------- tour de boas-vindas ---------- */
-const TOUR=[
- ['🔒','Seus dados ficam só com você','Tudo é guardado neste aparelho, criptografado com AES-256 e protegido pelo seu PIN. Nada vai para a internet. Por isso, de vez em quando faça um backup em ☰ > Segurança e backup.'],
- ['🧾','Fotografe o cupom fiscal','O app lê cada item do cupom e separa na categoria certa: mercado, alimentação, saúde… Se você corrigir uma categoria, ele aprende para a próxima vez.'],
- ['📄','Importe faturas e extratos','Envie a fatura do cartão ou o extrato do banco em PDF, OFX, CSV ou Excel. Os lançamentos entram de uma vez, já separados, e o vencimento vira alerta.']];
-let tPos=0;
-function abrirTour(){tPos=0;mostrarTour();$('#tour').hidden=false;$('#tProx').focus()}
-function mostrarTour(){const [ic,t,x]=TOUR[tPos];$('#tIc').textContent=ic;$('#tTit').textContent=t;$('#tTxt').textContent=x;
- document.querySelectorAll('#tDots i').forEach((d,i)=>d.classList.toggle('on',i===tPos));$('#tProx').textContent=tPos<TOUR.length-1?'Próximo':'Começar'}
-function fecharTour(){$('#tour').hidden=true;lsS(K_TOUR,'1');go('inicio')}
-$('#tPular').onclick=fecharTour;$('#tProx').onclick=()=>{if(tPos<TOUR.length-1){tPos++;mostrarTour()}else fecharTour()};
-$('#dTour').onclick=()=>{fecharMenu();abrirTour()};
-/* ---------- dicas (?) ---------- */
-document.querySelectorAll('.ajuda').forEach(b=>b.onclick=()=>{const ids=b.getAttribute('aria-controls').split(' ');const abrir=b.getAttribute('aria-expanded')!=='true';
- ids.forEach(id=>{const el=document.getElementById(id);if(el)el.hidden=!abrir});b.setAttribute('aria-expanded',abrir)});
-/* ---------- lembrete de backup ---------- */
-function bkLembrete(){const ult=+lsG(K_ULTBK)||0,adia=+lsG(K_BKADIA)||0,agora=Date.now(),D=864e5;
- const precisa=CHAVE&&TX.length>0&&(ult?agora-ult>15*D:TX.length>=5)&&agora>adia;
- $('#bkBanner').hidden=!precisa;if(precisa)$('#bkBanner span').textContent=ult?`💾 Seu último backup foi há ${Math.floor((agora-ult)/D)} dias. Que tal salvar uma cópia nova?`:'💾 Você ainda não fez backup. Se o celular quebrar ou for trocado, é o backup que salva seus dados.'}
-$('#bkIr').onclick=()=>go('config');$('#bkAdiar').onclick=()=>{lsS(K_BKADIA,String(Date.now()+3*864e5));bkLembrete()};
-/* ---------- sincronização com o Supabase ---------- */
+/* ---------- cadastro antes de abrir o app ---------- */
 const CFG=window.ANOTEI_CONFIG||{};
-let SB=null,SESSAO=null,sincronizando=false,tNuvem=null,ultimoOk=0,erroNuvem='';
-try{if(CFG.supabaseUrl&&CFG.supabaseKey&&window.supabase&&window.Sync)SB=supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey,{auth:{storageKey:'anoteija.auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){SB=null}
-const voltaUrl=()=>location.href.split('#')[0].split('?')[0];
-function nvMsg(t,erro){const m=$('#nvMsg');m.hidden=!t;m.textContent=t||'';m.className='msg'+(erro?' err':'')}
-function traduz(e){const m=String(e&&(e.message||e.error_description)||e||'');
- if(/Invalid login credentials/i.test(m))return 'E-mail ou senha incorretos.';
- if(/Email not confirmed/i.test(m))return 'Confirme o seu e-mail pelo link que enviamos antes de entrar.';
- if(/already registered|already been registered/i.test(m))return 'Este e-mail já tem conta. Toque em Entrar.';
- if(/Password should be|at least/i.test(m))return 'A senha precisa ter pelo menos 8 caracteres.';
- if(/rate limit|too many/i.test(m))return 'Muitas tentativas. Espere alguns minutos e tente de novo.';
- if(/Failed to fetch|NetworkError|network/i.test(m))return 'Sem conexão com o servidor. Os dados continuam salvos neste aparelho.';
- return m||'Algo deu errado.'}
-function nuvemUI(){const on=!!(SB&&SESSAO);$('#nvOff').hidden=!SB||on||!$('#nvNova').hidden;$('#nvOn').hidden=!on;
- if(!SB){$('#nvNota').textContent='A sincronização entre aparelhos ainda não foi configurada neste app.';$('#sync').textContent='Protegido com PIN';return}
- if(on){$('#nvConta').textContent='Conectado como '+(SESSAO.user.email||'');
-  const st=sincronizando?'Sincronizando…':erroNuvem?erroNuvem:ultimoOk?'Sincronizado às '+new Date(ultimoOk).toLocaleTimeString(LOC,{hour:'2-digit',minute:'2-digit'}):'Aguardando a primeira sincronização';
-  $('#nvStatus').textContent=st;$('#sync').textContent=sincronizando?'⟳ Sincronizando':erroNuvem?'⚠ Não sincronizado':'☁ Sincronizado'}
- else $('#sync').textContent='Protegido com PIN'}
-function nuvemDepois(ms){if(!SB||!SESSAO)return;clearTimeout(tNuvem);tNuvem=setTimeout(nuvemSync,ms||4000)}
-async function nuvemSync(){if(!SB||!SESSAO||!CHAVE||sincronizando)return;if(!navigator.onLine){erroNuvem='Sem internet: sincroniza quando voltar.';nuvemUI();return}
- sincronizando=true;nuvemUI();const v0=VER;
- const e=clone({TX,CATS,ALERTAS,APR,ENTKW,SEMPADRAO,PACOTE,SYNC});
- try{const r=await Sync.sincronizar(SB,e,SESSAO.user.id);erroNuvem='';ultimoOk=Date.now();
-  if(VER!==v0){sincronizando=false;nuvemDepois(1500);return}       // você mexeu durante a sincronização: roda de novo
-  TX=e.TX;CATS=e.CATS;ALERTAS=e.ALERTAS;APR=e.APR;ENTKW=e.ENTKW;SEMPADRAO=e.SEMPADRAO;SYNC=e.SYNC;
-  if(!CATS.some(c=>c.k==='extra'))CATS.push(clone(NOVAS.find(c=>c.k==='extra')));
-  SYNC_COMMIT=true;persist();SYNC_COMMIT=false;if(r.recebeu){renderSelects();render()}}
- catch(err){erroNuvem=traduz(err)}
- finally{sincronizando=false;nuvemUI()}}
-if(SB){
- SB.auth.onAuthStateChange((ev,s)=>{SESSAO=s;if(ev==='PASSWORD_RECOVERY'){$('#nvNova').hidden=false;nvMsg('Crie a nova senha da sua conta.');go('config')}nuvemUI();if(s&&(ev==='SIGNED_IN'||ev==='INITIAL_SESSION'))nuvemDepois(500)});
- $('#nvForm').onsubmit=async ev=>{ev.preventDefault();nvMsg('');const email=$('#nvEmail').value.trim(),password=$('#nvSenha').value;if(!password){nvMsg('Digite a senha.',true);return}
-  const {error}=await SB.auth.signInWithPassword({email,password});if(error)nvMsg(traduz(error),true);else{$('#nvSenha').value='';nvMsg('');toast('Conectado. Sincronizando seus dados…')}};
- $('#nvCriar').onclick=async()=>{nvMsg('');const email=$('#nvEmail').value.trim(),password=$('#nvSenha').value;if(!/^\S+@\S+\.\S+$/.test(email)){nvMsg('Digite um e-mail válido.',true);return}if(password.length<8){nvMsg('A senha precisa ter pelo menos 8 caracteres.',true);return}
-  const {data,error}=await SB.auth.signUp({email,password,options:{emailRedirectTo:voltaUrl()}});if(error){nvMsg(traduz(error),true);return}
-  $('#nvSenha').value='';if(data.session)nvMsg('Conta criada. Sincronizando seus dados…');else nvMsg('Conta criada. Enviamos um link de confirmação para '+email+'. Abra o e-mail, toque no link e depois entre aqui com o e-mail e a senha.')};
- $('#nvEsqueci').onclick=async()=>{const email=$('#nvEmail').value.trim();if(!email){nvMsg('Digite o seu e-mail acima e toque de novo em Esqueci a senha.',true);return}
-  const {error}=await SB.auth.resetPasswordForEmail(email,{redirectTo:voltaUrl()});nvMsg(error?traduz(error):'Se houver conta com esse e-mail, enviamos um link para criar uma nova senha.',!!error)};
- $('#nvNovaForm').onsubmit=async ev=>{ev.preventDefault();const {error}=await SB.auth.updateUser({password:$('#nvNovaSenha').value});if(error){nvMsg(traduz(error),true);return}$('#nvNova').hidden=true;$('#nvNovaSenha').value='';nvMsg('Senha alterada.');nuvemUI()};
- $('#nvAgora').onclick=()=>nuvemSync();
- $('#nvSair').onclick=async()=>{await SB.auth.signOut();SESSAO=null;erroNuvem='';ultimoOk=0;nuvemUI();nvMsg('Você saiu da conta. Os dados continuam neste aparelho.')};
- window.addEventListener('online',()=>nuvemDepois(500));
- document.addEventListener('visibilitychange',()=>{if(!document.hidden)nuvemDepois(800)});
- setInterval(()=>{if(!document.hidden)nuvemSync()},60000);
-}
-nuvemUI();
-/* ---------- botão Atualizar app: busca a versão publicada no GitHub e recarrega ---------- */
-async function atualizarApp(btn){const bs=document.querySelectorAll('[data-atualizar]');bs.forEach(b=>{b.disabled=true;b.textContent='Procurando atualização…'});
- const fim=()=>bs.forEach(b=>{b.disabled=false;b.textContent='⟳ Atualizar app'});
- let nova=null;try{const h=await fetch('index.html?v='+Date.now(),{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.text()});nova=(h.match(/VERSAO='([^']+)'/)||[])[1]}catch(e){fim();toast('Sem internet agora. Tente de novo quando estiver conectado.');return}
- if(nova&&nova===VERSAO){fim();toast('Você já está na versão mais nova ('+VERSAO+').');return}
- bs.forEach(b=>b.textContent='Atualizando…');
- try{await fila}catch(e){}                                    // termina de salvar os dados antes de recarregar
- try{if('serviceWorker' in navigator){const reg=await navigator.serviceWorker.getRegistration();if(reg)await reg.update()}}catch(e){}
- try{if(window.caches)for(const k of await caches.keys())await caches.delete(k)}catch(e){}   // só arquivos do app; seus dados ficam
- location.reload()}
-document.querySelectorAll('[data-atualizar]').forEach(b=>b.onclick=()=>atualizarApp(b));
-document.querySelectorAll('[data-lang]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.lang===(window.I18N?I18N.lang:'pt')));b.onclick=()=>{if(window.I18N&&b.dataset.lang!==I18N.lang)I18N.setLang(b.dataset.lang)}});
-let tt;function toast(m,undo){$('#tMsg').textContent=m;$('#tUndo').hidden=!undo;$('#tUndo').onclick=()=>{undo&&undo();$('#toast').style.display='none'};$('#toast').style.display='flex';clearTimeout(tt);tt=setTimeout(()=>$('#toast').style.display='none',5000)}
-const flash=m=>toast(m);
-/* ---------- ajuda para criar o atalho na tela ---------- */
-{const ua=navigator.userAgent,ios=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),and=/Android/.test(ua);
- const inst=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
- const inApp=/FBAN|FBAV|Instagram|Line\/|WhatsApp|Claude|; wv\)|GSA\//.test(ua);
- const box=$('#inst');let evt=null;
- const show=h=>{box.innerHTML=h;box.hidden=false};
- if(!NATIVO&&!inst&&(ios||and)){
-  if(ios&&(inApp||/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)||!/Safari/.test(ua)))show('<span class=\"t\">Para criar o atalho, abra no Safari</span>Você abriu o link dentro de outro app. Toque nos ⋯ ou no ícone de bússola e escolha <b>Abrir no Safari</b>. Ou copie o link e cole no Safari.');
-  else if(ios)show('<span class=\"t\">Criar o atalho na tela</span>Toque no botão <b>Compartilhar</b> (quadrado com seta ↑, na barra de baixo ou no ⋯). Role a lista para baixo e toque em <b>Adicionar à Tela de Início</b>.');
-  else if(inApp)show('<span class=\"t\">Para instalar, abra no Chrome</span>Você abriu o link dentro de outro app. Toque nos ⋮ e escolha <b>Abrir no Chrome</b> (ou no navegador).');
-  else show('<span class=\"t\">Criar o atalho na tela</span>Toque nos ⋮ do Chrome, no canto de cima, e depois em <b>Adicionar à tela inicial</b> e <b>Instalar</b>.');
- }
- window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();evt=e;if(!NATIVO&&!inst){show('<span class=\"t\">Instale o Anotei Já no celular</span>O atalho abre em tela cheia, como um app.<button class="btn" id="instBtn">Instalar app</button>');
-  $('#instBtn').onclick=async()=>{evt.prompt();const r=await evt.userChoice;if(r.outcome==='accepted')box.hidden=true}}});
- window.addEventListener('appinstalled',()=>{box.hidden=true});}
+const PREVIA=!/github\.io$|^localhost$|^127\./.test(location.hostname);
+const ua=navigator.userAgent;
+const IOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const AND=/Android/.test(ua);
+const INAPP=/FBAN|FBAV|Instagram|Line\/|WhatsApp|; wv\)|GSA\//.test(ua);
+const SAFARI=IOS&&/Safari/.test(ua)&&!/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua)&&!INAPP;
+const CHROME=AND&&/Chrome\//.test(ua)&&!/SamsungBrowser|EdgA|OPR|Firefox|YaBrowser|MiuiBrowser/.test(ua)&&!INAPP;
+const PLAT=IOS?'ios':AND?'android':'computador';
+const ls={get:k=>{try{return localStorage.getItem(k)}catch(e){return null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+const cad=$('#cad'),f1=$('#f1'),f2=$('#f2');let ultimoFoco=null;
+const appUrl=id=>new URL('app.html?c='+id,location.href).href;
+const icA='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.6 9.48l1.84-3.18a.38.38 0 0 0-.66-.38l-1.86 3.22a11.4 11.4 0 0 0-9.84 0L5.22 5.92a.38.38 0 0 0-.66.38L6.4 9.48A10.8 10.8 0 0 0 1 18h22a10.8 10.8 0 0 0-5.4-8.52zM7 15.25a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5zm10 0a1.25 1.25 0 1 1 0-2.5 1.25 1.25 0 0 1 0 2.5z"/></svg>';
+const icI='<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.4 12.6c0-2.6 2.1-3.8 2.2-3.9-1.2-1.8-3.1-2-3.7-2-1.6-.2-3.1.9-3.9.9-.8 0-2-.9-3.4-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.4.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.7-1-2.7-4.1zM13.9 4.9c.7-.9 1.2-2 1.1-3.2-1 0-2.3.7-3 1.6-.7.8-1.3 2-1.1 3.1 1.1.1 2.3-.6 3-1.5z"/></svg>';
+const icC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>';
+function abrir(){ultimoFoco=document.activeElement;cad.hidden=false;document.body.style.overflow='hidden';
+ const id=ls.get('anoteija.cadastro');if(id)passo2(id);else{f1.hidden=false;f2.hidden=true;$('#previa').hidden=!PREVIA;setTimeout(()=>$('#fNome').focus(),50)}}
+function fechar(){cad.hidden=true;document.body.style.overflow='';if(location.hash==='#cadastro')history.replaceState(null,'',location.pathname+location.search);ultimoFoco&&ultimoFoco.focus&&ultimoFoco.focus()}
+document.addEventListener('click',e=>{const a=e.target.closest('[data-abrir]');if(a){e.preventDefault();abrir()}});
+$('#cadX').onclick=fechar;cad.addEventListener('click',e=>{if(e.target===cad)fechar()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!cad.hidden)fechar()});
+if(location.hash==='#cadastro')abrir();
 
-render();
+const soDig=v=>v.replace(/\D/g,'');
+$('#fCel').addEventListener('input',e=>{let d=soDig(e.target.value);if(d.startsWith('55')&&d.length>11)d=d.slice(2);d=d.slice(0,11);
+ e.target.value=d.length>10?`(${d.slice(0,2)}) ${d.slice(2,7)}-${d.slice(7)}`:d.length>6?`(${d.slice(0,2)}) ${d.slice(2,6)}-${d.slice(6)}`:d.length>2?`(${d.slice(0,2)}) ${d.slice(2)}`:d});
+const erro=(id,inp,m)=>{$(id).textContent=m;if(inp)inp.setAttribute('aria-invalid',m?'true':'false');return !m};
+function validar(){const n=$('#fNome').value.trim().replace(/\s+/g,' '),c=soDig($('#fCel').value),m=$('#fMail').value.trim();
+ const ok=[erro('#eNome',$('#fNome'),n.split(' ').filter(p=>p.length>0).length<2||n.length<5?'Escreva seu nome e sobrenome.':''),
+  erro('#eCel',$('#fCel'),!/^[1-9][0-9](9[0-9]{8}|[2-8][0-9]{7})$/.test(c)?'Informe um celular com DDD, como (11) 98765-4321.':''),
+  erro('#eMail',$('#fMail'),!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(m)?'Confira o e-mail, como maria@email.com.':''),
+  erro('#eOk',null,!$('#fOk').checked?'Marque a caixa para continuar.':'')];
+ if(ok.includes(false)){const p=[['#eNome','#fNome'],['#eCel','#fCel'],['#eMail','#fMail'],['#eOk','#fOk']].find(x=>$(x[0]).textContent);p&&$(p[1]).focus();return null}
+ return{nome:n,celular:c,email:m.toLowerCase()}}
+['#fNome','#fCel','#fMail'].forEach(i=>$(i).addEventListener('blur',()=>{if($(i).getAttribute('aria-invalid')==='true')validar()}));
+$('#fOk').addEventListener('change',e=>{if(e.target.checked)$('#eOk').textContent=''});
+const uuid=()=>crypto.randomUUID?crypto.randomUUID():'10000000-1000-4000-8000-100000000000'.replace(/[018]/g,c=>(c^crypto.getRandomValues(new Uint8Array(1))[0]&15>>c/4).toString(16));
+f1.addEventListener('submit',async e=>{e.preventDefault();$('#eEnv').textContent='';const d=validar();if(!d)return;
+ const b=$('#fBtn');b.disabled=true;b.innerHTML='<span class="spin"></span> Enviando…';const id=uuid();
+ try{
+  if(!PREVIA){
+   if(!CFG.supabaseUrl||!CFG.supabaseKey)throw new Error('config');
+   const r=await fetch(CFG.supabaseUrl.replace(/\/$/,'')+'/rest/v1/cadastros',{method:'POST',headers:{'apikey':CFG.supabaseKey,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({id,nome:d.nome,celular:d.celular,email:d.email,consentimento:true,plataforma:PLAT})});
+   if(!r.ok&&r.status!==409)throw new Error('http '+r.status)}
+  ls.set('anoteija.cadastro',id);passo2(id)
+ }catch(err){$('#eEnv').textContent=err.message==='config'?'O cadastro está em manutenção agora. Tente de novo em alguns minutos.':'Não deu para enviar. Confira a internet e tente de novo.'}
+ finally{b.disabled=false;b.textContent='Continuar'}});
+
+function passo2(id){f1.hidden=true;f2.hidden=false;$('#qrBox').hidden=true;const u=appUrl(id);
+ const and=CHROME?u:'intent://'+u.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url='+encodeURIComponent(u)+';end';
+ const ios=SAFARI||!IOS?u:'x-safari-'+u;
+ const op=[
+  {k:'android',h:AND?and:null,ic:icA,t:'Android · Abrir no Chrome',s:'Lá você toca em Instalar'},
+  {k:'ios',h:IOS?ios:null,ic:icI,t:'iPhone · Abrir no Safari',s:'Lá você toca em Adicionar à Tela de Início'},
+  {k:'computador',h:u,ic:icC,t:'Usar neste computador',s:'Abre o app aqui no navegador'}];
+ op.sort((a,b)=>(b.k===PLAT)-(a.k===PLAT));
+ $('#plats').innerHTML=op.filter(o=>!(o.k==='computador'&&PLAT!=='computador')).map(o=>(o.h?`<a class="plat${o.k===PLAT?' sug':''}" href="${o.h}">`:`<button type="button" class="plat" data-qr="${o.k}">`)+`${o.ic}<span>${o.t}<small>${o.h?o.s:'Mostra um código para abrir no celular'}</small></span>`+(o.h?'</a>':'</button>')).join('');
+ $('#plats').querySelectorAll('[data-qr]').forEach(bt=>bt.onclick=()=>mostrarQR(u,bt.dataset.qr));
+ setTimeout(()=>{const p=$('#plats .plat');p&&p.focus()},50)}
+let qrLib=null;
+function mostrarQR(u,k){const box=$('#qrBox'),q=$('#qr');box.hidden=false;
+ box.querySelector('p').textContent=(k==='ios'?'No iPhone, aponte a câmera para o código e abra no Safari. ':'No Android, aponte a câmera para o código e abra no Chrome. ')+'O app abre já liberado, sem novo cadastro.';
+ const draw=()=>{const g=qrcode(0,'M');g.addData(u);g.make();q.innerHTML=g.createSvgTag({cellSize:5,margin:2,scalable:true})};
+ if(window.qrcode)return draw();q.innerHTML='<p class="mut text-center text-sm" style="color:#04263a">Carregando…</p>';
+ if(!qrLib){qrLib=document.createElement('script');qrLib.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';qrLib.onerror=()=>{q.innerHTML='<p style="color:#04263a;font-size:14px;word-break:break-all">'+u+'</p>'};document.head.appendChild(qrLib)}
+ qrLib.addEventListener('load',draw)}
+const nav=$('#nav'),m=$('#mcta');
+const onS=()=>{const y=scrollY;nav.classList.toggle('sh',y>10);m.classList.toggle('on',y>600&&y<document.body.scrollHeight-innerHeight-500)};
+addEventListener('scroll',onS,{passive:true});onS();
 }
 </script>
 </body>

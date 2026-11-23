@@ -1,0 +1,4 @@
+/* Estilos da página inicial (www/index.html). Depois de mudar classes na página, rode: npm run site-css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
