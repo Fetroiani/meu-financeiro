@@ -54,3 +54,29 @@ do $$ begin
 end $$;
 reset role;
 select 'RLS ok';
+-- cadastros do site: visitante só grava, não lê nem apaga
+set role anon;
+insert into public.cadastros (id, nome, celular, email, consentimento, plataforma)
+  values ('33333333-3333-3333-3333-333333333333', 'Maria da Silva', '11987654321', 'maria@exemplo.com.br', true, 'android');
+do $$ begin
+  begin perform count(*) from public.cadastros; raise exception 'anon conseguiu ler cadastros';
+  exception when insufficient_privilege then null; end;
+  begin delete from public.cadastros; raise exception 'anon conseguiu apagar cadastros';
+  exception when insufficient_privilege then null; end;
+  begin insert into public.cadastros (nome, celular, email, consentimento) values ('Jo', '11987654321', 'x@y.com', true); raise exception 'aceitou nome curto';
+  exception when check_violation then null; end;
+  begin insert into public.cadastros (nome, celular, email, consentimento) values ('Maria', '123', 'x@y.com', true); raise exception 'aceitou celular invalido';
+  exception when check_violation then null; end;
+  begin insert into public.cadastros (nome, celular, email, consentimento) values ('Maria', '11987654321', 'sem-arroba', true); raise exception 'aceitou e-mail invalido';
+  exception when check_violation then null; end;
+  begin insert into public.cadastros (nome, celular, email, consentimento) values ('Maria', '11987654321', 'x@y.com', false); raise exception 'aceitou sem consentimento';
+  exception when check_violation or insufficient_privilege then null; end;
+end $$;
+set role authenticated;
+do $$ begin
+  begin perform count(*) from public.cadastros; raise exception 'usuario logado conseguiu ler cadastros';
+  exception when insufficient_privilege then null; end;
+end $$;
+reset role;
+do $$ begin if (select count(*) from public.cadastros) <> 1 then raise exception 'cadastro nao foi gravado'; end if; end $$;
+select 'cadastros ok';

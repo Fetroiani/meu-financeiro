@@ -16,6 +16,14 @@ O app funciona direto no navegador do celular, como um link. Para publicar de gr
 
 **Segurança:** ao abrir pela primeira vez, você cria um PIN de 6 dígitos. Os dados são criptografados com AES-256, usando uma chave protegida pelo PIN (PBKDF2, 310 mil iterações), e ficam só no seu celular. Nada vai para servidores. Depois de 5 erros de PIN, o app faz você esperar. Ele também se bloqueia sozinho 1 minuto depois que você sai dele. No app nativo dá para entrar com Face ID ou digital.
 
+## Cadastro antes de abrir o app
+
+A página inicial pede nome completo, celular e e-mail e grava na tabela `cadastros` do Supabase (migração `supabase/migrations/20261123000001_cadastros.sql`). O site só consegue **gravar**: ninguém lê, muda ou apaga cadastros pelo site. Para ver a lista, abra o painel do Supabase em **Table Editor > cadastros**.
+
+Para funcionar, preencha `supabaseUrl` e `supabaseKey` (a chave pública *anon*/*publishable*) em `www/config.js` e aplique a migração. Sem isso, o formulário avisa que o cadastro está em manutenção e não libera o app.
+
+Depois do cadastro, a pessoa escolhe **Android (abre no Chrome)** ou **iPhone (abre no Safari)**. No Chrome o app mostra o botão **Instalar**; no Safari, o botão **Adicionar à Tela de Início** com o passo a passo e uma seta até o botão Compartilhar. No computador, aparece um QR Code para abrir no celular já liberado.
+
 ## Como funciona
 
 - **Tudo no celular:** a leitura do cupom (OCR com Tesseract, em português) roda no aparelho e funciona sem internet. Os dados ficam só no celular. Para não perder nada, use **Extrato > Backup dos dados**.
@@ -27,7 +35,8 @@ O app funciona direto no navegador do celular, como um link. Para publicar de gr
 
 | Caminho | O que é |
 |---|---|
-| `www/index.html` | O app (telas, gráficos, lançamentos) |
+| `www/index.html` | Página inicial do link: apresenta o app e pede o cadastro (nome, celular, e-mail) antes de liberar o app. Estilos em `www/site/site.css` (`npm run site-css`) |
+| `www/app.html` | O app (telas, gráficos, lançamentos). Quem abre no navegador sem cadastro volta para a página inicial; o ícone instalado abre direto |
 | `www/cupom.js` | Lê o texto do cupom e define a categoria de cada item. Para adicionar palavras-chave, mexa aqui |
 | `scripts/copy-assets.js` | Copia o motor de OCR e o idioma português para `www/vendor` |
 | `scripts/test-parser.js` | Testes do leitor de cupom (`npm test`) |
