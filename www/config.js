@@ -3,5 +3,5 @@
    Nunca coloque aqui a service_role key, o token de acesso ou a senha do banco. */
 window.ANOTEI_CONFIG = {
   supabaseUrl: 'https://ffavayvjpvppkawhbxyv.supabase.co',
-  supabaseKey: ''
+  supabaseKey: 'sb_publishable_OIvenS8_f9y3RHEyqcwadA_Kj_iQwnf'
 };
