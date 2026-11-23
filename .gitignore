@@ -18,3 +18,6 @@ supabase/.env
 .dart_tool/
 .packages
 build/
+
+# Pacote de registro no INPI (zip do código-fonte, hash e marca): nunca vai para o GitHub
+inpi_pacote/

@@ -8,3 +8,5 @@
 *.key
 supabase/.temp/
 supabase/.env
+# Pacote de registro no INPI (gerado por scripts/gerar_pacote_inpi.py)
+inpi_pacote/*.zip
