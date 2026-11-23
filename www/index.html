@@ -394,7 +394,7 @@ $('#faqs').addEventListener('toggle',e=>{if(e.target.open)$('#faqs').querySelect
 
 /* ---------- cadastro antes de abrir o app ---------- */
 const CFG=window.ANOTEI_CONFIG||{};
-const PREVIA=!/github\.io$|^localhost$|^127\./.test(location.hostname);
+const PREVIA=/claude\.ai$|claudeusercontent\.com$|claude\.site$|^$/.test(location.hostname);
 const ua=navigator.userAgent;
 const IOS=/iPhone|iPad|iPod/.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const AND=/Android/.test(ua);
