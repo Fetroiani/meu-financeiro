@@ -80,3 +80,20 @@ end $$;
 reset role;
 do $$ begin if (select count(*) from public.cadastros) <> 1 then raise exception 'cadastro nao foi gravado'; end if; end $$;
 select 'cadastros ok';
+-- opiniões do site: visitante só grava
+set role anon;
+insert into public.opinioes (nota, mensagem) values (5, 'Gostei muito do app');
+insert into public.opinioes (nota, mensagem, nome, email) values (3, 'Poderia ter mais categorias', 'Ana', 'ana@exemplo.com');
+do $$ begin
+  begin perform count(*) from public.opinioes; raise exception 'anon conseguiu ler opinioes';
+  exception when insufficient_privilege then null; end;
+  begin delete from public.opinioes; raise exception 'anon conseguiu apagar opinioes';
+  exception when insufficient_privilege then null; end;
+  begin insert into public.opinioes (nota, mensagem) values (6, 'nota fora'); raise exception 'aceitou nota 6';
+  exception when check_violation then null; end;
+  begin insert into public.opinioes (nota, mensagem) values (4, 'a'); raise exception 'aceitou mensagem vazia';
+  exception when check_violation then null; end;
+end $$;
+reset role;
+do $$ begin if (select count(*) from public.opinioes) <> 2 then raise exception 'opinioes nao gravadas'; end if; end $$;
+select 'opinioes ok';
