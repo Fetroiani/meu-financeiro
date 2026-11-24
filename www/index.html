@@ -109,6 +109,18 @@ details>div{padding:0 0 20px;color:var(--mut);max-width:72ch}
 .qr{background:#fff;border-radius:16px;padding:12px;width:220px;margin:14px auto 0}.qr svg{width:100%;height:auto;display:block}
 .spin{width:18px;height:18px;border-radius:50%;border:2.5px solid currentColor;border-right-color:transparent;animation:gira .7s linear infinite}@keyframes gira{to{transform:rotate(360deg)}}
 .previa{font-size:13px;color:var(--mut);margin-top:12px;text-align:center}
+
+.fld textarea{width:100%;min-height:110px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);padding:12px 14px;font:16px/1.5 Inter,sans-serif;resize:vertical}
+.fld textarea:focus{outline:none;border-color:var(--acc);box-shadow:0 0 0 3px color-mix(in srgb,var(--acc) 25%,transparent)}
+.fld textarea[aria-invalid=true]{border-color:#d33b52}
+.opbtn{position:fixed;right:16px;bottom:16px;z-index:26;display:inline-flex;align-items:center;gap:8px;min-height:46px;padding:0 18px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:700 15px "Plus Jakarta Sans",Inter,sans-serif;box-shadow:0 12px 30px -12px rgba(4,38,58,.45);cursor:pointer;transition:bottom .25s}
+.opbtn svg{width:20px;height:20px;color:var(--acc)}
+@media(max-width:767px){.opbtn{bottom:16px}.opbtn.sobe{bottom:78px}.opbtn span{display:none}.opbtn{width:52px;height:52px;padding:0;justify-content:center}}
+.stars{display:flex;gap:6px;margin-top:6px}
+.stars input{position:absolute;opacity:0;width:1px;height:1px}
+.stars label{width:46px;height:46px;display:grid;place-items:center;border-radius:12px;cursor:pointer;color:var(--line);font-size:34px;line-height:1}
+.stars label:hover,.stars label.on{color:#f5b301}
+.stars input:focus-visible+label{outline:3px solid var(--acc);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -301,7 +313,7 @@ details>div{padding:0 0 20px;color:var(--mut);max-width:72ch}
   <div class="in flex flex-wrap gap-6 items-center justify-between text-[15px]">
     <div class="flex items-center gap-3"><img src="site/logo.webp" alt="" width="36" height="36" class="rounded-[10px]"><span class="jk font-extrabold text-white text-lg">Anotei Já</span><span>· app financeiro pessoal sem fins lucrativos</span></div>
     <nav class="flex flex-wrap gap-x-6 gap-y-2" aria-label="Rodapé">
-      <a href="#como" class="hover:text-white">Como funciona</a><a href="#seguranca" class="hover:text-white">Segurança</a><a href="#duvidas" class="hover:text-white">Dúvidas</a><a href="https://github.com/Fetroiani/meu-financeiro" class="hover:text-white">Código aberto no GitHub</a>
+      <a href="#como" class="hover:text-white">Como funciona</a><a href="#seguranca" class="hover:text-white">Segurança</a><a href="#duvidas" class="hover:text-white">Dúvidas</a><button type="button" class="hover:text-white underline" data-opiniao>Dê sua opinião</button><a href="https://github.com/Fetroiani/meu-financeiro" class="hover:text-white">Código aberto no GitHub</a>
     </nav>
   </div>
 </footer>
@@ -331,6 +343,31 @@ details>div{padding:0 0 20px;color:var(--mut);max-width:72ch}
       <p class="mut mt-2 text-[15px]" id="f2D">O app abre no navegador certo para instalar no seu celular.</p>
       <div id="plats"></div>
       <div id="qrBox" hidden><div class="qr" id="qr"></div><p class="mut text-[14px] mt-3 text-center">Aponte a câmera do celular para o código. O app abre já liberado, sem precisar se cadastrar de novo.</p></div>
+    </div>
+  </div>
+</div>
+
+<button class="opbtn" id="opBtn" type="button" aria-haspopup="dialog" aria-label="Dê sua opinião"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span>Dê sua opinião</span></button>
+<div class="modal" id="op" hidden>
+  <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="opT">
+    <button class="xbtn" id="opX" aria-label="Fechar">×</button>
+    <form id="o1" novalidate>
+      <h2 id="opT" style="font-size:26px">Dê sua opinião</h2>
+      <p class="mut mt-2 text-[15px]">O Anotei Já é feito sem fins lucrativos e melhora com o que você conta. Leva um minuto.</p>
+      <fieldset class="fld" style="border:0;padding:0;margin-top:16px"><legend style="font-weight:600;font-size:15px">Que nota você dá para o app?</legend>
+        <div class="stars" id="oStars"></div><p class="err" id="eNota"></p></fieldset>
+      <label class="fld"><span>O que você achou? O que podemos melhorar?</span><textarea id="oMsg" maxlength="1000" placeholder="Escreva aqui"></textarea><p class="err" id="eMsg"></p></label>
+      <label class="fld"><span>Nome <small class="mut" style="font-weight:500">(opcional)</small></span><input id="oNome" autocomplete="name" maxlength="120"></label>
+      <label class="fld"><span>E-mail, se quiser resposta <small class="mut" style="font-weight:500">(opcional)</small></span><input id="oMail" type="email" inputmode="email" autocomplete="email" maxlength="160"><p class="err" id="eOMail"></p></label>
+      <p class="err" id="eOEnv" role="alert"></p>
+      <button class="btn pri w-full mt-5" id="oBtn" type="submit">Enviar opinião</button>
+      <p class="previa" id="oPrevia" hidden>Prévia do site: aqui a opinião não é enviada.</p>
+    </form>
+    <div id="o2" hidden class="text-center">
+      <div class="num mx-auto" style="width:56px;height:56px;font-size:26px">✓</div>
+      <h2 class="mt-4" style="font-size:26px">Obrigado pela opinião!</h2>
+      <p class="mut mt-2">Ela chegou e vai ajudar a melhorar o Anotei Já.</p>
+      <button class="btn sec w-full mt-6" id="oFim" type="button">Fechar</button>
     </div>
   </div>
 </div>
@@ -460,8 +497,35 @@ function mostrarQR(u,k){const box=$('#qrBox'),q=$('#qr');box.hidden=false;
  if(window.qrcode)return draw();q.innerHTML='<p class="mut text-center text-sm" style="color:#04263a">Carregando…</p>';
  if(!qrLib){qrLib=document.createElement('script');qrLib.src='https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js';qrLib.onerror=()=>{q.innerHTML='<p style="color:#04263a;font-size:14px;word-break:break-all">'+u+'</p>'};document.head.appendChild(qrLib)}
  qrLib.addEventListener('load',draw)}
+
+/* ---------- dê sua opinião ---------- */
+const op=$('#op');let opFoco=null,nota=0;
+$('#oStars').innerHTML=[1,2,3,4,5].map(n=>`<input type="radio" name="nota" id="n${n}" value="${n}"><label for="n${n}" title="${n} de 5" aria-label="${n} de 5">★</label>`).join('');
+const pinta=v=>$('#oStars').querySelectorAll('label').forEach((l,i)=>l.classList.toggle('on',i<v));
+$('#oStars').addEventListener('change',e=>{nota=+e.target.value;pinta(nota);$('#eNota').textContent=''});
+function abrirOp(){opFoco=document.activeElement;op.hidden=false;document.body.style.overflow='hidden';$('#o1').hidden=false;$('#o2').hidden=true;$('#oPrevia').hidden=!PREVIA;setTimeout(()=>$('#oStars input').focus(),50)}
+function fecharOp(){op.hidden=true;document.body.style.overflow='';if(location.hash==='#opiniao')history.replaceState(null,'',location.pathname+location.search);opFoco&&opFoco.focus&&opFoco.focus()}
+$('#opBtn').onclick=abrirOp;document.addEventListener('click',e=>{if(e.target.closest('[data-opiniao]')){e.preventDefault();abrirOp()}});
+$('#opX').onclick=fecharOp;$('#oFim').onclick=fecharOp;op.addEventListener('click',e=>{if(e.target===op)fecharOp()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!op.hidden)fecharOp()});
+if(location.hash==='#opiniao')abrirOp();
+$('#oMsg').addEventListener('input',e=>{if(e.target.value.trim().length>=3)erro('#eMsg',e.target,'')});
+$('#o1').addEventListener('submit',async e=>{e.preventDefault();$('#eOEnv').textContent='';
+ const msg=$('#oMsg').value.trim(),nome=$('#oNome').value.trim().replace(/\s+/g,' '),mail=$('#oMail').value.trim().toLowerCase();
+ const ok=[erro('#eNota',null,nota?'':'Escolha de 1 a 5 estrelas.'),erro('#eMsg',$('#oMsg'),msg.length<3?'Conte em poucas palavras o que achou.':''),erro('#eOMail',$('#oMail'),mail&&!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(mail)?'Confira o e-mail ou deixe em branco.':'')];
+ if(ok.includes(false)){(!nota?$('#oStars input'):msg.length<3?$('#oMsg'):$('#oMail')).focus();return}
+ const b=$('#oBtn');b.disabled=true;b.innerHTML='<span class="spin"></span> Enviando…';
+ try{
+  if(!PREVIA){
+   if(!CFG.supabaseUrl||!CFG.supabaseKey)throw new Error('config');
+   const r=await fetch(CFG.supabaseUrl.replace(/\/$/,'')+'/rest/v1/opinioes',{method:'POST',headers:{'apikey':CFG.supabaseKey,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({nota,mensagem:msg,nome:nome||null,email:mail||null,pagina:'site'})});
+   if(!r.ok)throw new Error('http '+r.status)}
+  $('#o1').reset();nota=0;pinta(0);$('#o1').hidden=true;$('#o2').hidden=false;$('#oFim').focus()
+ }catch(err){$('#eOEnv').textContent='Não deu para enviar agora. Confira a internet e tente de novo.'}
+ finally{b.disabled=false;b.textContent='Enviar opinião'}});
 const nav=$('#nav'),m=$('#mcta');
-const onS=()=>{const y=scrollY;nav.classList.toggle('sh',y>10);m.classList.toggle('on',y>600&&y<document.body.scrollHeight-innerHeight-500)};
+const onS=()=>{const y=scrollY;nav.classList.toggle('sh',y>10);const on=y>600&&y<document.body.scrollHeight-innerHeight-500;m.classList.toggle('on',on);$('#opBtn').classList.toggle('sobe',on)};
 addEventListener('scroll',onS,{passive:true});onS();
 }
 </script>

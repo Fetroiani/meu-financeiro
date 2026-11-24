@@ -24,6 +24,10 @@ Para funcionar, preencha `supabaseUrl` e `supabaseKey` (a chave pública *anon*/
 
 Depois do cadastro, a pessoa escolhe **Android (abre no Chrome)** ou **iPhone (abre no Safari)**. No Chrome o app mostra o botão **Instalar**; no Safari, o botão **Adicionar à Tela de Início** com o passo a passo e uma seta até o botão Compartilhar. No computador, aparece um QR Code para abrir no celular já liberado.
 
+## Dê sua opinião
+
+O botão **Dê sua opinião** (canto de baixo da página inicial e rodapé) abre um formulário com nota de 1 a 5, comentário, e nome e e-mail opcionais. As respostas vão para a tabela `opinioes` do Supabase (migração `supabase/migrations/20261124000001_opinioes.sql`). O site só grava; para ler, abra **Table Editor > opinioes** no painel do Supabase.
+
 ## Como funciona
 
 - **Tudo no celular:** a leitura do cupom (OCR com Tesseract, em português) roda no aparelho e funciona sem internet. Os dados ficam só no celular. Para não perder nada, use **Extrato > Backup dos dados**.
