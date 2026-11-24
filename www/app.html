@@ -200,6 +200,12 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 .scTop{position:absolute;top:0;left:0;right:0;padding:max(18px,env(safe-area-inset-top)) 18px 12px;text-align:center;display:grid;gap:4px}.scTop b{font-size:18px}.scTop span{font-size:14px;opacity:.85}
 .scBot{position:absolute;bottom:0;left:0;right:0;padding:12px 16px max(18px,env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.scBot .btn.ghost{color:#fff;border-color:#fff;background:rgba(0,0,0,.35)}
 .msg span.ln{display:block;margin-top:4px}.msg span.ln:first-child{margin-top:0}.msg .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.stars{display:flex;gap:6px;margin-top:6px}.stars input{position:absolute;opacity:0;width:1px;height:1px}
+.stars label{width:46px;height:46px;display:grid;place-items:center;border-radius:12px;cursor:pointer;color:var(--line);font-size:34px;line-height:1}
+.stars label:hover,.stars label.on{color:#f5b301}.stars input:focus-visible+label{outline:3px solid var(--em);outline-offset:2px}
+.opfim{margin:30px 0 0;border:1px solid var(--line);border-radius:14px;padding:16px;background:var(--card);display:flex;gap:12px;align-items:center;flex-wrap:wrap}.opfim p{flex:1;min-width:190px;margin:0;font-size:15px}
+.f textarea{width:100%;min-height:110px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--card);color:var(--ink);font:16px/1.5 system-ui,-apple-system,sans-serif;resize:vertical}
+.gbtn{background:#fff!important;color:#1f1f1f!important;border-color:#dadce0!important}
 </style>
 </head>
 <body>
@@ -235,6 +241,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   <button class="ditem" data-dv="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>Segurança e backup</span><small></small></button>
   <button class="ditem" id="dLock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v9"/><path d="M6.3 7.5a8 8 0 1 0 11.4 0"/></svg><span>Bloquear agora</span><small></small></button>
   <button class="ditem" id="dTour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.5v.01"/></svg><span>Como usar o app</span><small></small></button>
+  <button class="ditem" data-dv="opiniao"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg><span>Dê sua opinião</span><small></small></button>
   <p class="ver" id="ver"></p>
   <h3>Idioma</h3>
   <div class="langs" translate="no"><button data-lang="pt">Português</button><button data-lang="es">Español</button><button data-lang="en">English</button></div>
@@ -270,6 +277,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   <div class="pinkband"><div class="rapido"><button class="btn" data-acao="gasto">+ Gasto</button><button class="btn ghost" data-acao="entrada">+ Entrada</button><button class="btn em" data-acao="cupom">📷 Ler cupom</button></div></div>
   <section class="blk"><h2>Categorias do mês</h2><div class="cats" id="cats"></div></section>
   <section class="blk"><h2>Últimos 6 meses</h2><div class="bars" id="bars"></div></section>
+  <div class="opfim"><p><b>Gostando do Anotei Já?</b><br><span class="note">Conte o que achou e o que podemos melhorar. Leva um minuto.</span></p><button class="btn ghost" data-go="opiniao">Dê sua opinião</button></div>
   <div class="atual"><span id="verFim"></span><button class="btn ghost" data-atualizar>⟳ Atualizar app</button></div>
 </div>
 
@@ -387,6 +395,23 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
     <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn em" type="submit">Salvar</button><button class="btn ghost" type="button" id="fCancel" hidden>Cancelar edição</button></div>
   </form>
 </div>
+<div class="view" id="v-opiniao">
+  <h2>Dê sua opinião</h2>
+  <form class="f" id="opForm" novalidate>
+    <p class="note">O Anotei Já é feito sem fins lucrativos e melhora com o que você conta. Sua opinião vai só para a equipe do app; seus dados financeiros não são enviados.</p>
+    <fieldset style="border:0;padding:0;margin:0"><legend style="font-weight:700">Que nota você dá para o app?</legend><div class="stars" id="opStars"></div></fieldset>
+    <label>O que você achou? O que podemos melhorar?<textarea id="opMsg" maxlength="1000" placeholder="Escreva aqui"></textarea></label>
+    <label>Nome (opcional)<input id="opNome" autocomplete="name" maxlength="120"></label>
+    <label>E-mail, se quiser resposta (opcional)<input id="opMail" type="email" inputmode="email" autocomplete="email" maxlength="160"></label>
+    <p class="msg err" id="opErro" role="alert" hidden></p>
+    <button class="btn em" type="submit" id="opEnviar">Enviar opinião</button>
+  </form>
+  <div id="opOk" hidden>
+    <p class="msg"><b>Obrigado pela opinião!</b> Ela chegou e vai ajudar a melhorar o Anotei Já.</p>
+    <div id="opGoogle" hidden style="margin-top:16px"><p class="note">Se puder, deixe também uma avaliação no Google. Ajuda outras pessoas a encontrar o app.</p><a class="btn gbtn" id="opGLink" target="_blank" rel="noopener">★ Avaliar no Google</a></div>
+    <button class="btn ghost" data-go="inicio" style="margin-top:16px">Voltar ao início</button>
+  </div>
+</div>
 </main>
 </div>
 <div class="tour" id="tour" hidden role="dialog" aria-modal="true" aria-labelledby="tTit"><div class="tcard"><div class="ic" id="tIc"></div><h2 id="tTit"></h2><p id="tTxt"></p><div class="tdots" id="tDots"><i></i><i></i><i></i></div><div class="tnav"><button class="btn ghost" id="tPular">Pular</button><button class="btn em" id="tProx">Próximo</button></div></div></div>
@@ -425,7 +450,7 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.23-14';
+const VERSAO='2026.11.24-1';
 const T=window.I18N?I18N.T:(s=>s),LOC=window.I18N?I18N.loc:'pt-BR',nomeCat=(k,n)=>window.I18N?I18N.nomeCat(k,n):n;
 NOVAS.forEach(c=>c.n=nomeCat(c.k,c.n));DEF_CATS.forEach(c=>c.n=nomeCat(c.k,c.n));CATS=clone(NOVAS);
 const IN={k:'receita',n:nomeCat('receita','Salário e Entradas'),c:'#00a884'};
@@ -968,6 +993,27 @@ function bkLembrete(){const ult=+lsG(K_ULTBK)||0,adia=+lsG(K_BKADIA)||0,agora=Da
 $('#bkIr').onclick=()=>go('config');$('#bkAdiar').onclick=()=>{lsS(K_BKADIA,String(Date.now()+3*864e5));bkLembrete()};
 /* ---------- sincronização com o Supabase ---------- */
 const CFG=window.ANOTEI_CONFIG||{};
+
+/* ---------- dê sua opinião ---------- */
+{let nota=0;const st=$('#opStars');
+ st.innerHTML=[1,2,3,4,5].map(n=>`<input type="radio" name="opNota" id="opN${n}" value="${n}"><label for="opN${n}" title="${n} de 5" aria-label="${n} de 5">★</label>`).join('');
+ const pinta=v=>st.querySelectorAll('label').forEach((l,i)=>l.classList.toggle('on',i<v));
+ st.addEventListener('change',e=>{nota=+e.target.value;pinta(nota)});
+ const gUrl=String(CFG.googleReviewUrl||'').trim(),gOk=/^https:\/\//.test(gUrl);
+ document.querySelectorAll('[data-go="opiniao"],[data-dv="opiniao"]').forEach(b=>b.addEventListener('click',()=>{$('#opForm').hidden=false;$('#opOk').hidden=true;$('#opErro').hidden=true}));
+ $('#opForm').addEventListener('submit',async e=>{e.preventDefault();const er=$('#opErro');er.hidden=true;
+  const msg=$('#opMsg').value.trim(),nome=$('#opNome').value.trim().replace(/\s+/g,' '),mail=$('#opMail').value.trim().toLowerCase();
+  const falha=!nota?'Escolha de 1 a 5 estrelas.':msg.length<3?'Conte em poucas palavras o que achou.':mail&&!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(mail)?'Confira o e-mail ou deixe em branco.':'';
+  if(falha){er.textContent=T(falha);er.hidden=false;return}
+  const b=$('#opEnviar');b.disabled=true;b.textContent=T('Enviando…');
+  try{if(!CFG.supabaseUrl||!CFG.supabaseKey)throw new Error('config');
+   const r=await fetch(CFG.supabaseUrl.replace(/\/$/,'')+'/rest/v1/opinioes',{method:'POST',headers:{'apikey':CFG.supabaseKey,'Content-Type':'application/json','Prefer':'return=minimal'},
+    body:JSON.stringify({nota,mensagem:msg,nome:nome||null,email:mail||null,pagina:'app'})});
+   if(!r.ok)throw new Error('http '+r.status);
+   $('#opForm').reset();nota=0;pinta(0);$('#opForm').hidden=true;$('#opOk').hidden=false;
+   $('#opGoogle').hidden=!gOk;if(gOk)$('#opGLink').href=gUrl;window.scrollTo(0,0)}
+  catch(err){er.textContent=T('Não deu para enviar agora. Confira a internet e tente de novo.');er.hidden=false}
+  finally{b.disabled=false;b.textContent=T('Enviar opinião')}})}
 let SB=null,SESSAO=null,sincronizando=false,tNuvem=null,ultimoOk=0,erroNuvem='';
 try{if(CFG.supabaseUrl&&CFG.supabaseKey&&window.supabase&&window.Sync)SB=supabase.createClient(CFG.supabaseUrl,CFG.supabaseKey,{auth:{storageKey:'anoteija.auth',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}})}catch(e){SB=null}
 const voltaUrl=()=>location.href.split('#')[0].split('?')[0];

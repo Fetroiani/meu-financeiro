@@ -367,6 +367,7 @@ details>div{padding:0 0 20px;color:var(--mut);max-width:72ch}
       <div class="num mx-auto" style="width:56px;height:56px;font-size:26px">✓</div>
       <h2 class="mt-4" style="font-size:26px">Obrigado pela opinião!</h2>
       <p class="mut mt-2">Ela chegou e vai ajudar a melhorar o Anotei Já.</p>
+      <div id="oGoogle" hidden class="mt-5"><p class="mut text-[15px]">Se puder, deixe também uma avaliação no Google. Ajuda outras pessoas a encontrar o app.</p><a class="btn sec w-full mt-3" id="oGLink" target="_blank" rel="noopener">★ Avaliar no Google</a></div>
       <button class="btn sec w-full mt-6" id="oFim" type="button">Fechar</button>
     </div>
   </div>
@@ -521,7 +522,7 @@ $('#o1').addEventListener('submit',async e=>{e.preventDefault();$('#eOEnv').text
    const r=await fetch(CFG.supabaseUrl.replace(/\/$/,'')+'/rest/v1/opinioes',{method:'POST',headers:{'apikey':CFG.supabaseKey,'Content-Type':'application/json','Prefer':'return=minimal'},
     body:JSON.stringify({nota,mensagem:msg,nome:nome||null,email:mail||null,pagina:'site'})});
    if(!r.ok)throw new Error('http '+r.status)}
-  $('#o1').reset();nota=0;pinta(0);$('#o1').hidden=true;$('#o2').hidden=false;$('#oFim').focus()
+  $('#o1').reset();nota=0;pinta(0);$('#o1').hidden=true;$('#o2').hidden=false;{const g=String(CFG.googleReviewUrl||'').trim(),ok=/^https:\/\//.test(g);$('#oGoogle').hidden=!ok;if(ok)$('#oGLink').href=g}$('#oFim').focus()
  }catch(err){$('#eOEnv').textContent='Não deu para enviar agora. Confira a internet e tente de novo.'}
  finally{b.disabled=false;b.textContent='Enviar opinião'}});
 const nav=$('#nav'),m=$('#mcta');
