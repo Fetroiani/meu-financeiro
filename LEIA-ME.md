@@ -28,6 +28,18 @@ Depois do cadastro, a pessoa escolhe **Android (abre no Chrome)** ou **iPhone (a
 
 O botão **Dê sua opinião** (canto de baixo da página inicial e rodapé) abre um formulário com nota de 1 a 5, comentário, e nome e e-mail opcionais. As respostas vão para a tabela `opinioes` do Supabase (migração `supabase/migrations/20261124000001_opinioes.sql`). O site só grava; para ler, abra **Table Editor > opinioes** no painel do Supabase.
 
+O app tem o mesmo formulário no fim da tela **Início** e no menu ☰ (**Dê sua opinião**). Ele grava na mesma tabela; a coluna `pagina` diz de onde veio (`site` ou `app`).
+
+### Avaliações no Google
+
+Depois de enviar a opinião, o site e o app mostram o botão **Avaliar no Google**, que abre a página de avaliação do Perfil da Empresa no Google. O botão só aparece quando o link estiver preenchido em `www/config.js`, no campo `googleReviewUrl`:
+
+1. Crie o perfil em <https://www.google.com/business/> (pode ser um negócio sem endereço físico, só com área de atendimento ou site).
+2. No perfil, toque em **Pedir avaliações** e copie o link (algo como `https://g.page/r/XXXX/review`).
+3. Cole o link em `googleReviewUrl` e publique.
+
+O botão aparece para todas as notas, não só para as altas: o Google proíbe pedir avaliação só para quem gostou. As opiniões do formulário não vão para o Google automaticamente; cada pessoa precisa publicar a dela lá.
+
 ## Como funciona
 
 - **Tudo no celular:** a leitura do cupom (OCR com Tesseract, em português) roda no aparelho e funciona sem internet. Os dados ficam só no celular. Para não perder nada, use **Extrato > Backup dos dados**.
