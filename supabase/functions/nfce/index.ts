@@ -141,6 +141,28 @@ export function notaEstruturada(html: string, endereco = '') {
   };
 }
 
+// Texto copiado da página da Sefaz (selecionar tudo > copiar no celular) vira um HTML simples que lerNota entende.
+// Serve para os estados que recusam a consulta feita pelo servidor: o próprio aparelho abre a página e cola o texto no app.
+const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+export function textoParaHtml(t: string): string {
+  const linhas = String(t || '').replace(/\r/g, '').split('\n').map(l => l.replace(/[\t ]+/g, ' ').trim()).filter(Boolean);
+  const ehItem = (l: string) => /\(\s*C[oó]d(?:igo)?\.?\s*:?/i.test(l);
+  const fim = (l: string) => /^(Qtd\.?\s*total|Qtde\s*total\s*de\s*[ií]tens\s*:\s*\d+\s*$|Valor\s*a\s*pagar|Valor\s*total\s*R\$\s*:?\s*R?\$?\s*[\d.,]+\s*$|Forma\s*de\s*pagamento|Descontos?\s*R\$|Informa[cç][aã]o\s*dos\s*Tributos)/i.test(l);
+  const rows: string[] = [];
+  let atual: string[] | null = null;
+  for (const l of linhas) {
+    if (ehItem(l)) { if (atual) rows.push(atual.join(' ')); atual = [l]; continue; }
+    if (atual && fim(l)) { rows.push(atual.join(' ')); atual = null; continue; }
+    if (atual) atual.push(l);
+  }
+  if (atual) rows.push(atual.join(' '));
+  let loja = '';
+  const iC = linhas.findIndex(l => /\bCNPJ\b/i.test(l));
+  if (iC >= 0) { const antes = linhas[iC].split(/\bCNPJ\b/i)[0].trim(); loja = antes.length >= 3 ? antes : (iC > 0 && !/DOCUMENTO AUXILIAR|NOTA FISCAL/i.test(linhas[iC - 1]) ? linhas[iC - 1] : ''); }
+  return (loja ? `<h4>${escHtml(loja)}</h4>` : '') + '<table>' + rows.map(r => `<tr><td>${escHtml(r)}</td></tr>`).join('') + '</table><div>' + escHtml(linhas.filter(l => !ehItem(l)).join('\n')) + '</div>';
+}
+export function notaDoTexto(t: string, endereco = '') { return notaEstruturada(textoParaHtml(t), endereco); }
+
 // Só endereços de consulta da Sefaz.
 export function enderecoPermitido(u: string): URL | null {
   let url: URL;
@@ -157,29 +179,54 @@ function decodificar(buf: ArrayBuffer, tipo: string): string {
   try { return new TextDecoder((cs || 'utf-8').toLowerCase()).decode(buf); } catch { return new TextDecoder('utf-8').decode(buf); }
 }
 
-async function buscar(url: URL): Promise<string> {
-  let atual = url;
-  for (let i = 0; i < 5; i++) {   // segue redirecionamentos, mas só para endereços .gov.br
-    const r = await fetch(atual, {
-      redirect: 'manual',
-      signal: AbortSignal.timeout(20000),
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0 Mobile Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml',
-        'Accept-Language': 'pt-BR,pt;q=0.9',
-      },
-    });
-    if (r.status >= 300 && r.status < 400) {
-      const prox = enderecoPermitido(new URL(r.headers.get('location') || '', atual).href);
-      if (!prox) throw new Error('redirecionamento recusado');
-      atual = prox; continue;
+const CABECALHOS = {
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+  'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+  'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
+  'Upgrade-Insecure-Requests': '1',
+  'Sec-Fetch-Dest': 'document',
+  'Sec-Fetch-Mode': 'navigate',
+  'Sec-Fetch-Site': 'none',
+  'Sec-Fetch-User': '?1',
+};
+export type Pagina = { html: string; status: number; tentativas: number };
+
+// Busca a página. Alguns portais da Sefaz respondem a primeira visita só com um cookie de proteção:
+// guardamos os cookies e tentamos de novo (até 3 vezes) quando a página vem sem a tabela de itens.
+async function buscar(url: URL): Promise<Pagina> {
+  const potes = new Map<string, string>();
+  let ultima: Pagina = { html: '', status: 0, tentativas: 0 };
+  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+    let atual = url;
+    for (let i = 0; i < 6; i++) {   // segue redirecionamentos, mas só para endereços .gov.br
+      const cookie = [...potes].map(([k, v]) => `${k}=${v}`).join('; ');
+      const r = await fetch(atual, { redirect: 'manual', signal: AbortSignal.timeout(15000), headers: { ...CABECALHOS, ...(cookie ? { Cookie: cookie } : {}) } });
+      // deno-lint-ignore no-explicit-any
+      const sc: string[] = (r.headers as any).getSetCookie ? (r.headers as any).getSetCookie() : [];
+      for (const c of sc) { const m = c.match(/^\s*([^=;\s]+)=([^;]*)/); if (m) potes.set(m[1], m[2]); }
+      if (r.status >= 300 && r.status < 400) {
+        await r.body?.cancel();
+        const prox = enderecoPermitido(new URL(r.headers.get('location') || '', atual).href);
+        if (!prox) throw new Error('redirecionamento recusado');
+        atual = prox; continue;
+      }
+      const buf = await r.arrayBuffer();
+      if (buf.byteLength > 3_000_000) throw new Error('página grande demais');
+      ultima = { html: decodificar(buf, r.headers.get('content-type') || ''), status: r.status, tentativas: tentativa };
+      break;
     }
-    if (!r.ok) throw new Error('Sefaz respondeu ' + r.status);
-    const buf = await r.arrayBuffer();
-    if (buf.byteLength > 3_000_000) throw new Error('página grande demais');
-    return decodificar(buf, r.headers.get('content-type') || '');
+    if (ultima.status === 200 && /tabResult|\(\s*C[oó]digo/i.test(ultima.html)) return ultima;
+    if (!potes.size && ultima.status === 200) break;   // sem cookie novo, outra tentativa daria o mesmo
+    await new Promise(ok => setTimeout(ok, 400 * tentativa));
   }
-  throw new Error('redirecionamentos demais');
+  return ultima;
+}
+
+// Resumo do que a Sefaz devolveu, para entender quando os itens não vêm (sem dados pessoais: só o começo do texto visível).
+export function diagnostico(p: Pagina) {
+  const titulo = texto((p.html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '');
+  const corpo = texto(p.html.replace(/<head[\s\S]*?<\/head>/i, '')).slice(0, 300);
+  return { status: p.status, tentativas: p.tentativas, tamanho: p.html.length, titulo, trecho: corpo, tabela: /tabResult/.test(p.html), script_protecao: /TSPD|ie9rgb4|_z\.Iol|bobcmn/i.test(p.html) };
 }
 
 function resposta(obj: unknown, status = 200): Response {
@@ -197,8 +244,9 @@ if (D && D.serve) {
     const url = enderecoPermitido(String(corpo.url || '').trim().slice(0, 1500));
     if (!url) return resposta({ erro: 'Este endereço não é de consulta de nota fiscal da Sefaz.' }, 400);
     try {
-      const nota = notaEstruturada(await buscar(url), url.href);
-      if (!nota.itens.length) return resposta({ erro: 'A Sefaz não mostrou os produtos desta nota.', ...nota }, 422);
+      const pagina = await buscar(url);
+      const nota = notaEstruturada(pagina.html, url.href);
+      if (!nota.itens.length) return resposta({ erro: 'A Sefaz não mostrou os produtos desta nota.', ...nota, diagnostico: diagnostico(pagina) }, 422);
       return resposta(nota);
     } catch (e) {
       return resposta({ erro: 'Não consegui abrir a nota no site da Sefaz (' + ((e as Error).message || e) + ').' }, 502);

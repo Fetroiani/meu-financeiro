@@ -2,7 +2,7 @@
 // Rodar: node --experimental-strip-types scripts/test-nfce.js
 const assert = require('assert');
 (async () => {
-  const { lerNota, notaEstruturada, enderecoPermitido } = await import('../supabase/functions/nfce/index.ts');
+  const { lerNota, notaEstruturada, notaDoTexto, enderecoPermitido } = await import('../supabase/functions/nfce/index.ts');
 
   // Modelo nacional (SP, RS, PR, BA, GO, RJ e outros)
   const sp = `<html><head><meta charset="utf-8"></head><body>
@@ -93,6 +93,15 @@ const assert = require('assert');
     ['1050', 'Whopper', 1, 'UN', 26.9, 26.9], ['20000', 'Casquinha Baunilha', 1, 'UN', 3, 3]]);
   assert.deepStrictEqual(e4.totais, { subtotal: 119.6, descontos: 0, valor_final: 119.6, forma_pagamento: 'Cartão de Crédito' });
   assert.deepStrictEqual(e4.observacoes, []);
+
+
+  // Texto copiado da página (Selecionar tudo > Copiar no celular), para estados que recusam a consulta pelo servidor
+  const copiado = require('fs').readFileSync(require('path').join(__dirname, 'fixtures/nfce-sp-copiado.txt'), 'utf8');
+  const e5 = notaDoTexto(copiado, 'https://www.nfce.fazenda.sp.gov.br/NFCeConsultaPublica/Paginas/ConsultaQRCode.aspx?p=35261113574594114019650010014203301263286493|2|1|1|6C2F');
+  assert.deepStrictEqual(e5, e4);
+  const parte = notaDoTexto(copiado.split('\n').slice(7, 23).join('\n'));   // só a lista de produtos selecionada
+  assert.strictEqual(parte.itens.length, 5); assert.strictEqual(parte.totais.valor_final, 119.6);
+  assert.strictEqual(notaDoTexto('texto qualquer sem nota').itens.length, 0);
 
   // Só endereços .gov.br
   assert.ok(enderecoPermitido('https://www.nfce.fazenda.sp.gov.br/NFCeConsultaPublica/Paginas/ConsultaQRCode.aspx?p=1|2|1|1|ABC'));

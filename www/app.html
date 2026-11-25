@@ -417,6 +417,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
 <div class="tour" id="tour" hidden role="dialog" aria-modal="true" aria-labelledby="tTit"><div class="tcard"><div class="ic" id="tIc"></div><h2 id="tTit"></h2><p id="tTxt"></p><div class="tdots" id="tDots"><i></i><i></i><i></i></div><div class="tnav"><button class="btn ghost" id="tPular">Pular</button><button class="btn em" id="tProx">Próximo</button></div></div></div>
 <div class="toast" id="toast"><span id="tMsg"></span><button id="tUndo">Desfazer</button></div>
 <script src="vendor/jsQR.js"></script>
+<script src="vendor/nota-sefaz.js"></script>
 <script src="vendor/tesseract.min.js"></script>
 <script src="i18n.js"></script>
 <script src="codigos.js"></script>
@@ -450,7 +451,7 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.24-3';
+const VERSAO='2026.11.24-4';
 const T=window.I18N?I18N.T:(s=>s),LOC=window.I18N?I18N.loc:'pt-BR',nomeCat=(k,n)=>window.I18N?I18N.nomeCat(k,n):n;
 NOVAS.forEach(c=>c.n=nomeCat(c.k,c.n));DEF_CATS.forEach(c=>c.n=nomeCat(c.k,c.n));CATS=clone(NOVAS);
 const IN={k:'receita',n:nomeCat('receita','Salário e Entradas'),c:'#00a884'};
@@ -774,8 +775,23 @@ async function itensDaSefaz(c){const cfg=window.ANOTEI_CONFIG||{};if(!c.url||!cf
 let notaBusca=0;
 async function abrirNota(c,raw,senao,valido){const eu=++notaBusca;qr=raw;
  if(c.url)cupomMsg(ln('<b>QR Code da nota lido.</b>')+ln('Buscando os produtos no site da Sefaz…'));
- const n=await itensDaSefaz(c);if(eu!==notaBusca||(valido&&!valido()))return;
- if(!n){senao();return}
+ const n=SEFAZ_BLOQUEIA.includes(c.uf)?null:await itensDaSefaz(c);if(eu!==notaBusca||(valido&&!valido()))return;
+ if(!n){if(c.url&&window.NotaSefaz)pedirTexto(c,raw);else senao();return}
+ mostrarNota(c,raw,n)}
+// Estados cuja Sefaz recusa a consulta feita por servidor: o próprio celular abre a nota e a pessoa cola o texto.
+const SEFAZ_BLOQUEIA=['SP'];
+function pedirTexto(c,raw){
+ cupomMsg(ln('<b>QR Code da nota lido.</b>')+ln('Para separar os produtos, pegue a lista no site da Sefaz:')+ln('1. Toque em <b>Abrir a nota</b>.')+ln('2. Na página da Sefaz, toque e segure no texto, escolha <b>Selecionar tudo</b> e depois <b>Copiar</b>.')+ln('3. Volte para o app e toque em <b>Colar a nota</b>.')
+  +`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">Abrir a nota</a><button class="btn em" type="button" id="nColar">Colar a nota</button><button class="btn ghost" type="button" id="nTotal">Lançar só o total</button></span>`
+  +`<span class="ln" id="nErr" hidden></span><textarea id="nTxt" rows="4" hidden style="width:100%;margin-top:8px" placeholder="Cole aqui o texto da página da nota"></textarea>`);
+ const usar=t=>{const n=NotaSefaz.notaDoTexto(String(t||'').slice(0,200000),c.url);if(n.itens.length){mostrarNota(c,raw,n);return true}return false};
+ const erro=m=>{const e=$('#nErr');if(!e)return;e.hidden=false;e.textContent=m};
+ $('#nColar').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch(e){}
+  if(t&&usar(t))return;const ta=$('#nTxt');ta.hidden=false;ta.focus();
+  erro(t?'Não achei produtos no que foi copiado. Na página da Sefaz, use Selecionar tudo e Copiar, depois cole no campo abaixo.':'Toque e segure no campo abaixo e escolha Colar.')};
+ $('#nTxt').oninput=ev=>{const t=ev.target.value;if(t.length>20&&!usar(t))erro('Ainda não achei produtos nesse texto. Copie a página inteira da nota.')};
+ $('#nTotal').onclick=()=>notaSoTotal(c,raw)}
+function mostrarNota(c,raw,n){qr=raw;
  const em=n.emitente||{},doc=n.documento||{},tot=n.totais||{};
  const loja=String(em.nome||'').trim()||APR['loja:'+c.cnpj]||'CNPJ '+c.cnpjFmt;
  const itens=n.itens.map(i=>({descricao:String(i.descricao||'').slice(0,80),valor:Math.round((+i.valor_total||0)*100)/100,categoria:Cupom.categorizar(String(i.descricao||''),loja,APR,extraKW(),padraoKW())}));
