@@ -141,6 +141,28 @@ export function notaEstruturada(html: string, endereco = '') {
   };
 }
 
+// Texto copiado da página da Sefaz (selecionar tudo > copiar no celular) vira um HTML simples que lerNota entende.
+// Serve para os estados que recusam a consulta feita pelo servidor: o próprio aparelho abre a página e cola o texto no app.
+const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+export function textoParaHtml(t: string): string {
+  const linhas = String(t || '').replace(/\r/g, '').split('\n').map(l => l.replace(/[\t ]+/g, ' ').trim()).filter(Boolean);
+  const ehItem = (l: string) => /\(\s*C[oó]d(?:igo)?\.?\s*:?/i.test(l);
+  const fim = (l: string) => /^(Qtd\.?\s*total|Qtde\s*total\s*de\s*[ií]tens\s*:\s*\d+\s*$|Valor\s*a\s*pagar|Valor\s*total\s*R\$\s*:?\s*R?\$?\s*[\d.,]+\s*$|Forma\s*de\s*pagamento|Descontos?\s*R\$|Informa[cç][aã]o\s*dos\s*Tributos)/i.test(l);
+  const rows: string[] = [];
+  let atual: string[] | null = null;
+  for (const l of linhas) {
+    if (ehItem(l)) { if (atual) rows.push(atual.join(' ')); atual = [l]; continue; }
+    if (atual && fim(l)) { rows.push(atual.join(' ')); atual = null; continue; }
+    if (atual) atual.push(l);
+  }
+  if (atual) rows.push(atual.join(' '));
+  let loja = '';
+  const iC = linhas.findIndex(l => /\bCNPJ\b/i.test(l));
+  if (iC >= 0) { const antes = linhas[iC].split(/\bCNPJ\b/i)[0].trim(); loja = antes.length >= 3 ? antes : (iC > 0 && !/DOCUMENTO AUXILIAR|NOTA FISCAL/i.test(linhas[iC - 1]) ? linhas[iC - 1] : ''); }
+  return (loja ? `<h4>${escHtml(loja)}</h4>` : '') + '<table>' + rows.map(r => `<tr><td>${escHtml(r)}</td></tr>`).join('') + '</table><div>' + escHtml(linhas.filter(l => !ehItem(l)).join('\n')) + '</div>';
+}
+export function notaDoTexto(t: string, endereco = '') { return notaEstruturada(textoParaHtml(t), endereco); }
+
 // Só endereços de consulta da Sefaz.
 export function enderecoPermitido(u: string): URL | null {
   let url: URL;

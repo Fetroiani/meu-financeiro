@@ -1,0 +1,45 @@
+Consulta Resumida NFC-e
+DOCUMENTO AUXILIAR DA NOTA FISCAL DE CONSUMIDOR ELETRÔNICA
+
+
+BK BRASIL OPERACAO E ASSESSORIA A RESTAURANTES S.A.
+CNPJ: 13.574.594/1140-19
+AVENIDA SALIM FARAH MALUF , 4750 , FUNDOS COM A RUA JABOTICABAL N 809 , TATUAPE , Sao Paulo , SP
+Whopper BBQ Bacon (Código: 7100100 )
+Qtde.:1   UN: UN   Vl. Unit.:   40,9 	Vl. Total
+40,90
+Whopper (Código: 1050 )
+Qtde.:1   UN: UN   Vl. Unit.:   26,9 	Vl. Total
+26,90
+Chicken Duplo (Código: 7100095 )
+Qtde.:1   UN: UN   Vl. Unit.:   21,9 	Vl. Total
+21,90
+Whopper (Código: 1050 )
+Qtde.:1   UN: UN   Vl. Unit.:   26,9 	Vl. Total
+26,90
+Casquinha Baunilha (Código: 20000 )
+Qtde.:1   UN: UN   Vl. Unit.:   3 	Vl. Total
+3,00
+Qtd. total de itens:5
+Valor a pagar R$:119,60
+Forma de pagamento:Valor pago R$:
+Cartão de Crédito119,60
+TrocoNaN
+Informação dos Tributos Totais Incidentes (Lei Federal 12.741/2012) R$
+15,85
+Informações gerais da Nota
+EMISSÃO NORMAL
+
+Número: 1420330 Série: 1 Emissão: 21/11/2026 18:40:11 - Via Consumidor
+
+Protocolo de Autorização: 13526008043316970 21/11/2026 18:40:22
+
+Ambiente de Produção - Versão XML: 4.00 - Versão XSLT: 2.05
+Chave de acesso
+Consulte pela Chave de Acesso em https://www.nfce.fazenda.sp.gov.br/consulta
+
+Chave de acesso:
+3526 1113 5745 9411 4019 6500 1001 4203 3012 6328 6493
+Consumidor
+Consumidor não identificado
+Data/Hora: 24/11/2026 22:37
