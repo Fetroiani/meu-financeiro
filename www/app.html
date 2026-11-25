@@ -451,7 +451,7 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.24-4';
+const VERSAO='2026.11.24-5';
 const T=window.I18N?I18N.T:(s=>s),LOC=window.I18N?I18N.loc:'pt-BR',nomeCat=(k,n)=>window.I18N?I18N.nomeCat(k,n):n;
 NOVAS.forEach(c=>c.n=nomeCat(c.k,c.n));DEF_CATS.forEach(c=>c.n=nomeCat(c.k,c.n));CATS=clone(NOVAS);
 const IN={k:'receita',n:nomeCat('receita','Salário e Entradas'),c:'#00a884'};
@@ -763,10 +763,12 @@ function revisarCodigo(c,raw){if(!c){cupomMsg(T('Não reconheci este código.'),
  if(c.tipo==='invalido'){cupomMsg(T('O código parece de um boleto, mas os números não conferem. Leia de novo ou digite a linha digitável.'),true);return}
  if(c.tipo==='link'){cupomMsg(ln(T('Este QR Code não é de nota fiscal nem de Pix.'))+`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.url.slice(0,60))}</a></span>`,true);return}
  cupomMsg(T('Não reconheci este código.'),true)}
-function notaSoTotal(c,raw,falhou){qr=raw;const ck=APR['cnpj:'+c.cnpj],cn=ck&&CATS.some(x=>x.k===ck)?ck:'mercado',lj=APR['loja:'+c.cnpj]||'';const mm=`${c.ano}-${String(c.mes).padStart(2,'0')}`;
-  const data=c.data||(ym(today())===mm?today():mm+'-01');
-  revisar({loja:lj||'CNPJ '+c.cnpjFmt,data,total:c.valor,cnpj:c.cnpj,itens:[{descricao:c.nome,valor:c.valor,categoria:cn}],
-   msg:ln(`<b>${c.nome==='Nota fiscal'?'Nota fiscal lida pelo QR Code':'Cupom fiscal lido pelo QR Code'}</b>`)+ln('Emitente: CNPJ '+c.cnpjFmt+(c.uf?' ('+c.uf+')':''))+(c.valor?ln('Total '+brl(c.valor)):ln('Esta nota não traz o valor no QR Code: digite o total abaixo.'))+(lj?'':ln('Digite o nome da loja: nas próximas notas desse CNPJ o app já preenche.'))+(falhou&&c.url?ln('Não consegui buscar os produtos no site da Sefaz agora. Para separar cada item por categoria, fotografe o cupom ou leia o QR Code de novo mais tarde.'):ln('O QR Code não traz a lista de produtos. Para separar cada item por categoria, fotografe o cupom.'))+(c.url?`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener">Abrir a nota no site da Sefaz</a></span>`:'')});}
+function notaSoTotal(c,raw,falhou,info){qr=raw;info=info||{};const ck=APR['cnpj:'+c.cnpj],lj=info.loja||APR['loja:'+c.cnpj]||'';const mm=`${c.ano}-${String(c.mes).padStart(2,'0')}`;
+  const sug=lj?mapCat(Cupom.categorizar(lj,lj,APR,extraKW(),padraoKW())):'';const cn=ck&&CATS.some(x=>x.k===ck)?ck:(sug&&sug!=='extra'?sug:'mercado');
+  const valor=+info.total||c.valor||0,data=info.data||c.data||(ym(today())===mm?today():mm+'-01');
+  revisar({loja:lj||'CNPJ '+c.cnpjFmt,data,total:valor,cnpj:c.cnpj,itens:[{descricao:c.nome,valor,categoria:cn}],
+   msg:(valor?'':ln('<b>Digite o total do cupom no campo de valor destacado abaixo.</b>')+ln('O QR Code deste cupom não traz o valor.'))+ln(`<b>${c.nome==='Nota fiscal'?'Nota fiscal lida pelo QR Code':'Cupom fiscal lido pelo QR Code'}</b>`)+ln('Emitente: CNPJ '+c.cnpjFmt+(c.uf?' ('+c.uf+')':''))+(valor?ln('Total '+brl(valor)+(info.total?' (lido da nota da Sefaz)':'')):'')+(lj?'':ln('Digite o nome da loja: nas próximas notas desse CNPJ o app já preenche.'))+(info.total?'':(falhou&&c.url?ln('Não consegui buscar os produtos no site da Sefaz agora. Para separar cada item por categoria, fotografe o cupom ou leia o QR Code de novo mais tarde.'):ln('O QR Code não traz a lista de produtos. Para separar cada item por categoria, fotografe o cupom.'))+(c.url?`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener">Abrir a nota no site da Sefaz</a></span>`:''))});
+  if(!valor)setTimeout(()=>{const v=document.querySelector('#rItens .val');if(!v)return;v.style.outline='3px solid #f59e0b';v.style.outlineOffset='2px';v.value='';try{v.scrollIntoView({block:'center'})}catch(e){}v.focus();v.addEventListener('input',()=>{v.style.outline=''},{once:true})},120)}
 /* QR da NFC-e: busca a lista de produtos na página da Sefaz (pela função nfce do Supabase, porque o site da Sefaz não deixa o celular ler direto) */
 async function itensDaSefaz(c){const cfg=window.ANOTEI_CONFIG||{};if(!c.url||!cfg.supabaseUrl||!cfg.supabaseKey||navigator.onLine===false)return null;
  try{const ct=new AbortController(),tm=setTimeout(()=>ct.abort(),30000);
@@ -790,7 +792,10 @@ function pedirTexto(c,raw){
   if(t&&usar(t))return;const ta=$('#nTxt');ta.hidden=false;ta.focus();
   erro(t?'Não achei produtos no que foi copiado. Na página da Sefaz, use Selecionar tudo e Copiar, depois cole no campo abaixo.':'Toque e segure no campo abaixo e escolha Colar.')};
  $('#nTxt').oninput=ev=>{const t=ev.target.value;if(t.length>20&&!usar(t))erro('Ainda não achei produtos nesse texto. Copie a página inteira da nota.')};
- $('#nTotal').onclick=()=>notaSoTotal(c,raw)}
+ $('#nTotal').onclick=async()=>{let t='';try{t=await navigator.clipboard.readText()}catch(e){}   // se a nota já foi copiada, usa loja, total e data dela
+  let n=null;try{n=t?NotaSefaz.notaDoTexto(String(t).slice(0,200000),c.url):null}catch(e){}
+  const dt=n&&String(n.documento.data_emissao||'').slice(0,10);
+  notaSoTotal(c,raw,false,n&&n.totais.valor_final?{loja:n.emitente.nome||'',total:n.totais.valor_final,data:/^\d{4}-\d\d-\d\d$/.test(dt)?dt:''}:null)}}
 function mostrarNota(c,raw,n){qr=raw;
  const em=n.emitente||{},doc=n.documento||{},tot=n.totais||{};
  const loja=String(em.nome||'').trim()||APR['loja:'+c.cnpj]||'CNPJ '+c.cnpjFmt;

@@ -202,6 +202,8 @@ const D={
 'Não achei produtos no que foi copiado. Na página da Sefaz, use Selecionar tudo e Copiar, depois cole no campo abaixo.':['No encontré productos en lo copiado. En la página de la Sefaz, usa Seleccionar todo y Copiar, y pega en el campo de abajo.','No products found in what was copied. On the Sefaz page, use Select all and Copy, then paste in the field below.'],
 'Toque e segure no campo abaixo e escolha Colar.':['Mantén pulsado el campo de abajo y elige Pegar.','Press and hold the field below and choose Paste.'],
 'Ainda não achei produtos nesse texto. Copie a página inteira da nota.':['Aún no encontré productos en ese texto. Copia la página entera de la factura.','No products found in that text yet. Copy the whole receipt page.'],
+'Digite o total do cupom no campo de valor destacado abaixo.':['Escribe el total del ticket en el campo de importe resaltado abajo.','Type the receipt total in the highlighted amount field below.'],
+'O QR Code deste cupom não traz o valor.':['El código QR de este ticket no trae el importe.','This receipt\'s QR code doesn\'t include the amount.'],
 'QR Code da nota lido.':['Código QR de la factura leído.','Invoice QR code read.'],
 'Toque em Ler e separar itens para separar os produtos, ou lance só o total.':['Toca Leer y separar ítems para separar los productos, o registra solo el total.','Tap Read and split items to split the products, or add just the total.'],
 'Lançar só o total':['Registrar solo el total','Add just the total'],
@@ -253,7 +255,7 @@ const R=[
 [/^(.+) vence hoje$/,'$1 vence hoy','$1 is due today'],[/^(.+) vence em (\d+) dia\(s\)$/,'$1 vence en $2 día(s)','$1 is due in $2 day(s)'],
 [/^Lendo o cupom… (\d+)%$/,'Leyendo el ticket… $1%','Reading the receipt… $1%'],
 [/^(\d+) a pagar$/,'$1 a pagar','$1 due'],[/^(\d+) selecionados$/,'$1 seleccionados','$1 selected'],[/^(\d+) agendados$/,'$1 programados','$1 scheduled'],
-[/^Pagamento: (.+)$/,'Pago: $1','Payment: $1'],[/^(\d+) produtos · total (.*)$/,'$1 productos · total $2','$1 products · total $2'],[/^Encontrei (\d+) itens(.*)$/,'Encontré $1 ítems$2','Found $1 items$2'],[/^Encontrei$/,'Encontré','Found'],
+[/^Total (R\$ [\d.,]+) \(lido da nota da Sefaz\)$/,'Total $1 (leído de la factura de la Sefaz)','Total $1 (read from the Sefaz receipt)'],[/^Pagamento: (.+)$/,'Pago: $1','Payment: $1'],[/^(\d+) produtos · total (.*)$/,'$1 productos · total $2','$1 products · total $2'],[/^Encontrei (\d+) itens(.*)$/,'Encontré $1 ítems$2','Found $1 items$2'],[/^Encontrei$/,'Encontré','Found'],
 [/^em (.+)\. Confira as categorias e toque em Salvar\.$/,'en $1. Revisa las categorías y toca Guardar.','in $1. Check the categories and tap Save.'],
 [/^Identifiquei uma$/,'Identifiqué una','I found a'],[/^conta de (.+)$/,'factura de $1','$1 bill'],
 [/^e mais (\d+) conta\(s\) para pagar$/,'y $1 cuenta(s) más por pagar','and $1 more bill(s) to pay']
