@@ -450,7 +450,7 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.24-2';
+const VERSAO='2026.11.24-3';
 const T=window.I18N?I18N.T:(s=>s),LOC=window.I18N?I18N.loc:'pt-BR',nomeCat=(k,n)=>window.I18N?I18N.nomeCat(k,n):n;
 NOVAS.forEach(c=>c.n=nomeCat(c.k,c.n));DEF_CATS.forEach(c=>c.n=nomeCat(c.k,c.n));CATS=clone(NOVAS);
 const IN={k:'receita',n:nomeCat('receita','Salário e Entradas'),c:'#00a884'};
@@ -715,7 +715,19 @@ const melhor=l=>{const v=l.filter(Boolean);return v.find(x=>{const c=Codigos.int
 async function lerCodigoImagem(f){const achados=[];try{const bd=await detector();if(bd){const r=await bd.detect(await createImageBitmap(f));r.forEach(x=>achados.push(x.rawValue))}}catch(e){}
  if(!melhor(achados))try{const q=await lerQR(f);if(q)achados.push(q)}catch(e){}
  if(!melhor(achados))try{await carregarZX();for(const mx of [1600,2400]){const c=await preparar(f,mx,false);const t=zxCanvas(c);if(t){achados.push(t);break}}}catch(e){}
+ if(!melhor(achados))try{const t=await qrPequeno(f);if(t)achados.push(t)}catch(e){}
  return melhor(achados)}
+// QR pequeno ou borrado (print de tela, foto de longe): amplia, põe margem branca e testa alguns limiares de preto e branco
+async function qrPequeno(f){const im=await carregar(f);const lado=Math.max(im.width,im.height);if(lado>=1200)return null;
+ const k=Math.max(2,Math.ceil(800/lado)),m=Math.round(lado*k*.08),c=document.createElement('canvas');c.width=im.width*k+2*m;c.height=im.height*k+2*m;const x=c.getContext('2d',{willReadFrequently:true});
+ x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(im,m,m,im.width*k,im.height*k);
+ const orig=x.getImageData(0,0,c.width,c.height),p=orig.data,g=new Uint8ClampedArray(p.length/4);let lo=255,hi=0;
+ for(let i=0;i<g.length;i++){const v=.299*p[i*4]+.587*p[i*4+1]+.114*p[i*4+2];g[i]=v;if(v<lo)lo=v;if(v>hi)hi=v}
+ for(const lim of [.4,.5,.33,.6]){const corte=lo+(hi-lo)*lim,d=x.createImageData(c.width,c.height),q=d.data;
+  for(let i=0;i<g.length;i++){const v=g[i]>corte?255:0;q[i*4]=q[i*4+1]=q[i*4+2]=v;q[i*4+3]=255}x.putImageData(d,0,0);
+  if(window.jsQR){const r=jsQR(q,c.width,c.height,{inversionAttempts:'dontInvert'});if(r&&r.data)return r.data}
+  const t=zxCanvas(c);if(t)return t}
+ return null}
 // leitor ao vivo pela câmera
 let scStream=null,scVivo=false,scTimer=null;
 async function abrirScanner(){cupomMsg('');const ov=$('#scan'),v=$('#scVid');

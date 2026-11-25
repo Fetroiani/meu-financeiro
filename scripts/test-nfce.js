@@ -82,6 +82,18 @@ const assert = require('assert');
   assert.strictEqual(e3.documento.chave_acesso, '35261112345678000190650010001234561123456780');
   assert.ok(/CAPTCHA/.test(e3.observacoes[0]));
 
+
+  // Página real da Sefaz SP (cupom de lanchonete, 5 itens, cartão de crédito)
+  const real = require('fs').readFileSync(require('path').join(__dirname, 'fixtures/nfce-sp.html'), 'utf8');
+  const e4 = notaEstruturada(real, 'https://www.nfce.fazenda.sp.gov.br/NFCeConsultaPublica/Paginas/ConsultaQRCode.aspx?p=35261113574594114019650010014203301263286493|2|1|1|6C2F');
+  assert.deepStrictEqual(e4.emitente, { nome: 'BK BRASIL OPERACAO E ASSESSORIA A RESTAURANTES S.A.', cnpj: '13574594114019', uf: 'SP' });
+  assert.deepStrictEqual(e4.documento, { chave_acesso: '35261113574594114019650010014203301263286493', numero: '1420330', data_emissao: '2026-11-21T18:40:11' });
+  assert.deepStrictEqual(e4.itens.map(i => [i.codigo, i.descricao, i.quantidade, i.unidade, i.valor_unitario, i.valor_total]), [
+    ['7100100', 'Whopper BBQ Bacon', 1, 'UN', 40.9, 40.9], ['1050', 'Whopper', 1, 'UN', 26.9, 26.9], ['7100095', 'Chicken Duplo', 1, 'UN', 21.9, 21.9],
+    ['1050', 'Whopper', 1, 'UN', 26.9, 26.9], ['20000', 'Casquinha Baunilha', 1, 'UN', 3, 3]]);
+  assert.deepStrictEqual(e4.totais, { subtotal: 119.6, descontos: 0, valor_final: 119.6, forma_pagamento: 'Cartão de Crédito' });
+  assert.deepStrictEqual(e4.observacoes, []);
+
   // Só endereços .gov.br
   assert.ok(enderecoPermitido('https://www.nfce.fazenda.sp.gov.br/NFCeConsultaPublica/Paginas/ConsultaQRCode.aspx?p=1|2|1|1|ABC'));
   assert.ok(enderecoPermitido('http://portalsped.fazenda.mg.gov.br/portalnfce/sistema/qrcode.xhtml?p=1'));
