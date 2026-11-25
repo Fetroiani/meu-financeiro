@@ -1,2 +1,6 @@
 # Configuração mínima para o Supabase CLI (supabase link / db push).
 project_id = "anotei-ja"
+
+# Função que lê os produtos da nota fiscal no site da Sefaz (o app chama com a chave publishable)
+[functions.nfce]
+verify_jwt = false
