@@ -61,7 +61,7 @@ export function lerNota(html: string): Nota {
     const descricao = m[1].replace(/^\d{1,3}\s*[-.)]\s*/, '').trim();
     const qtd = quantidade((t.match(/Qtde?\.?(?:\s*total\s*de\s*[ií]tens)?\s*:?\s*([\d.,]+)/i) || [])[1]);
     const un = ((t.match(/\bUN\s*:\s*([A-Za-z0-9]+)/) || [])[1] || '').toUpperCase();
-    const unitario = dinheiro((t.match(new RegExp('Vl\\.?\\s*Unit\\.?\\s*:?\\s*(?:R\\$)?\\s*' + VAL, 'i')) || [])[1]);
+    const unitario = dinheiro((t.match(/Vl\.?\s*Unit\.?\s*:?\s*(?:R\$)?\s*(\d{1,3}(?:\.\d{3})*(?:,\d{1,4})?|\d+(?:\.\d{1,4})?)/i) || [])[1]);   // a Sefaz SP mostra "40,9" e "3"
     let valor = dinheiro((t.match(new RegExp('(?:Vl\\.?\\s*Total|Valor\\s*total(?:\\s*R\\$)?)\\s*:?\\s*(?:R\\$)?\\s*' + VAL, 'i')) || [])[1]);
     if (!valor) { const vs = t.match(new RegExp(VAL, 'g')); if (vs) valor = dinheiro(vs[vs.length - 1]); }
     if (!valor && unitario) valor = Math.round(unitario * qtd * 100) / 100;
@@ -88,7 +88,7 @@ export function lerNota(html: string): Nota {
   const numero = (tudo.match(/N[uú]mero\s*:?\s*(\d{1,9})\b/i) || [])[1] || '';
   const chave = ((tudo.match(/Chave\s*de\s*acesso\s*:?\s*((?:\d\s*){44})/i) || [])[1] || '').replace(/\D/g, '');
   // Formas de pagamento: rótulos "tx" do modelo nacional; senão, nomes conhecidos depois de "Forma de pagamento".
-  let pagamento: string[] = [...html.matchAll(/<label[^>]*class=["'][^"']*\btx\b[^"']*["'][^>]*>([\s\S]*?)<\/label>/gi)].map(x => texto(x[1])).filter(Boolean);
+  let pagamento: string[] = [...html.matchAll(/<label[^>]*class=["'][^"']*\btx\b[^"']*["'][^>]*>([\s\S]*?)<\/label>/gi)].map(x => texto(x[1])).filter(x => x && !/^troco\b/i.test(x));
   if (!pagamento.length) {
     const i = tudo.search(/Forma\s*de\s*pagamento/i);
     if (i >= 0) pagamento = [...tudo.slice(i, i + 400).matchAll(/(Dinheiro|Cart[aã]o\s*de\s*Cr[eé]dito|Cart[aã]o\s*de\s*D[eé]bito|PIX|Vale\s*Alimenta[cç][aã]o|Vale\s*Refei[cç][aã]o|Vale\s*Presente|Vale\s*Combust[ií]vel|Boleto|Cr[eé]dito\s*Loja|Transfer[eê]ncia|Outros)/gi)].map(x => x[1]);
