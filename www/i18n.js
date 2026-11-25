@@ -204,6 +204,7 @@ const D={
 'Ainda não achei produtos nesse texto. Copie a página inteira da nota.':['Aún no encontré productos en ese texto. Copia la página entera de la factura.','No products found in that text yet. Copy the whole receipt page.'],
 'Digite o total do cupom no campo de valor destacado abaixo.':['Escribe el total del ticket en el campo de importe resaltado abajo.','Type the receipt total in the highlighted amount field below.'],
 'O QR Code deste cupom não traz o valor.':['El código QR de este ticket no trae el importe.','This receipt\'s QR code doesn\'t include the amount.'],
+'Título (opcional)':['Título (opcional)','Title (optional)'],'Ex.: Almoço com a família':['Ej.: Almuerzo con la familia','E.g.: Family lunch'],
 'QR Code da nota lido.':['Código QR de la factura leído.','Invoice QR code read.'],
 'Toque em Ler e separar itens para separar os produtos, ou lance só o total.':['Toca Leer y separar ítems para separar los productos, o registra solo el total.','Tap Read and split items to split the products, or add just the total.'],
 'Lançar só o total':['Registrar solo el total','Add just the total'],

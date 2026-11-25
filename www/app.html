@@ -374,6 +374,7 @@ pre.ocr{white-space:pre-wrap;font-size:12px;max-height:220px;overflow:auto;backg
   </div>
   <div id="revisao" hidden>
     <h2 style="margin-top:20px">Confira antes de salvar</h2>
+    <label style="display:block;margin-top:10px">Título (opcional)<input id="rTit" maxlength="80" placeholder="Ex.: Almoço com a família" autocomplete="off"></label>
     <div class="two" style="margin-top:10px"><label>Loja<input id="rLoja"></label><label>Data<input id="rData" type="date"></label></div>
     <div class="items" id="rItens"></div>
     <div class="sum"><span id="rTotCats"></span><span id="rTot"></span></div>
@@ -451,7 +452,7 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.24-5';
+const VERSAO='2026.11.24-6';
 const T=window.I18N?I18N.T:(s=>s),LOC=window.I18N?I18N.loc:'pt-BR',nomeCat=(k,n)=>window.I18N?I18N.nomeCat(k,n):n;
 NOVAS.forEach(c=>c.n=nomeCat(c.k,c.n));DEF_CATS.forEach(c=>c.n=nomeCat(c.k,c.n));CATS=clone(NOVAS);
 const IN={k:'receita',n:nomeCat('receita','Salário e Entradas'),c:'#00a884'};
@@ -828,7 +829,7 @@ $('#ler').onclick=async()=>{if(!foto)return;const b=$('#ler');b.disabled=true;b.
  finally{b.disabled=false;b.textContent='Ler e separar itens';progresso=()=>{}}};
 let ULTJ=null;
 function revisar(j,manual){ULTJ=manual?null:j;rev=(j.itens||[]).map(i=>({d:String(i.descricao||''),v:num(i.valor),c:mapCat(i.categoria)}));rev.forEach(i=>i.o=i.c);
- $('#rLoja').value=j.loja||'';$('#rData').value=/^\d{4}-\d\d-\d\d$/.test(j.data||'')?j.data:today();
+ $('#rTit').value=j.titulo||'';$('#rLoja').value=j.loja||'';$('#rData').value=/^\d{4}-\d\d-\d\d$/.test(j.data||'')?j.data:today();
  if(!manual&&j.msg){cupomMsg(j.msg);setTimeout(()=>{try{$('#cupomMsg').scrollIntoView({behavior:'smooth',block:'start'})}catch(e){}},50)}else if(!manual){const s=rev.reduce((a,i)=>a+i.v,0);const dif=j.total&&Math.abs(s-j.total)>.05;const ch=Cupom.lerQR(qr);
   cupomMsg(j.conta?`Identifiquei uma <b>conta de ${esc(j.conta.toLowerCase())}</b>${j.total?' de '+brl(num(j.total)):''}${j.data?', vencimento '+j.data.split('-').reverse().join('/'):''}. ${j.data&&dias(j.data)>=0?' Ao salvar, vira um <b>alerta de vencimento</b>; quando pagar, toque em Paguei.':' Já venceu: vai direto para o extrato e o próximo mês fica agendado.'} Confira o valor antes de salvar.`:`Encontrei ${rev.length} itens${j.total?' · total do cupom '+brl(num(j.total)):''}.${dif?' <b>A soma dos itens ('+brl(s)+') difere do total</b>: confira os valores, a foto pode ter cortado alguma linha.':''} Toque na categoria para trocar.${ch?'<br>QR da NFC-e lido. Chave: '+ch.replace(/(\d{4})/g,'$1 '):''}`)}
  $('#revisao').hidden=false;renderRev()}
@@ -837,13 +838,13 @@ function renderRev(){$('#rItens').innerHTML=rev.map((i,n)=>`<div class="item"><i
 function resumoRev(){const g={};rev.forEach(i=>g[i.c]=(g[i.c]||0)+i.v);$('#rTot').textContent='Total '+brl(rev.reduce((a,i)=>a+i.v,0));
  $('#rTotCats').textContent=Object.entries(g).map(([k,v])=>cat(k).n+' '+brl(v)).join(' · ')}
 $('#rAdd').onclick=()=>{rev.push({d:'',v:0,c:'extra',o:'extra'});renderRev()};
-$('#rSalvar').onclick=()=>{if(ULTJ&&ULTJ.conta){const v=Math.round(rev.reduce((a,i)=>a+i.v,0)*100)/100,venc=$('#rData').value;const nome=ULTJ.nomeConta||('Conta de '+ULTJ.conta.toLowerCase()+(($('#rLoja').value.trim()&&$('#rLoja').value.trim()!==ULTJ.conta)?' · '+$('#rLoja').value.trim():''));
+$('#rSalvar').onclick=()=>{if(ULTJ&&ULTJ.conta){const v=Math.round(rev.reduce((a,i)=>a+i.v,0)*100)/100,venc=$('#rData').value;const nome=$('#rTit').value.trim()||ULTJ.nomeConta||('Conta de '+ULTJ.conta.toLowerCase()+(($('#rLoja').value.trim()&&$('#rLoja').value.trim()!==ULTJ.conta)?' · '+$('#rLoja').value.trim():''));
   if(venc&&dias(venc)>=0){criarAlertaAuto({nome,venc,valor:v,cat:'contas',rep:ULTJ.barras?(/^(Água|Luz|Telefone)/.test(ULTJ.conta)?'mensal':''):'mensal',pago:false,...(ULTJ.barras?{codigo:ULTJ.barras}:{})});ULTJ=null;rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');go('venc');render();return}
   criarAlertaAuto({nome,venc,valor:v,cat:'contas',rep:'mensal',pago:true})}
  const g={};rev.filter(i=>i.v).forEach(i=>(g[i.c]=g[i.c]||[]).push({d:i.d,v:i.v}));const loja=$('#rLoja').value.trim()||'Cupom',data=$('#rData').value||today();
  const ks=Object.keys(g);if(!ks.length){flash('Nenhum item com valor.');return}
  if(ULTJ&&ULTJ.cnpj){const lj=$('#rLoja').value.trim();if(lj&&!/^CNPJ /.test(lj))APR['loja:'+ULTJ.cnpj]=lj;if(ks.length===1)APR['cnpj:'+ULTJ.cnpj]=ks[0]}
- rev.forEach(i=>{if(i.d&&i.c!==i.o)APR[Cupom.norm(i.d).trim()]=i.c});  ks.forEach(k=>put({id:uid(),ts:Date.now(),tipo:'despesa',desc:loja+' · '+cat(k).n,loja,valor:Math.round(g[k].reduce((a,i)=>a+i.v,0)*100)/100,data,cat:k,origem:'cupom',itens:g[k],...(qr?{qr:String(qr).slice(0,400)}:{})}));
+ rev.forEach(i=>{if(i.d&&i.c!==i.o)APR[Cupom.norm(i.d).trim()]=i.c});  const tit=$('#rTit').value.trim();ks.forEach(k=>put({id:uid(),ts:Date.now(),tipo:'despesa',desc:tit?(ks.length>1?tit+' · '+cat(k).n:tit):loja+' · '+cat(k).n,loja,...(tit?{titulo:tit}:{}),valor:Math.round(g[k].reduce((a,i)=>a+i.v,0)*100)/100,data,cat:k,origem:'cupom',itens:g[k],...(qr?{qr:String(qr).slice(0,400)}:{})}));
  toast('Cupom salvo em '+ks.length+(ks.length>1?' categorias':' categoria'));rev=[];foto=null;qr=null;$('#revisao').hidden=true;$('#prev').hidden=true;$('#ler').disabled=true;$('#foto').value='';$('#ocrBox').hidden=true;cupomMsg('');mes=ym(data);go('inicio');render()};
 
 /* ---------- backup ---------- */
