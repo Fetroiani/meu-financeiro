@@ -244,7 +244,7 @@ const R=[
 [/^(.+) vence hoje$/,'$1 vence hoy','$1 is due today'],[/^(.+) vence em (\d+) dia\(s\)$/,'$1 vence en $2 día(s)','$1 is due in $2 day(s)'],
 [/^Lendo o cupom… (\d+)%$/,'Leyendo el ticket… $1%','Reading the receipt… $1%'],
 [/^(\d+) a pagar$/,'$1 a pagar','$1 due'],[/^(\d+) selecionados$/,'$1 seleccionados','$1 selected'],[/^(\d+) agendados$/,'$1 programados','$1 scheduled'],
-[/^(\d+) produtos · total (.*)$/,'$1 productos · total $2','$1 products · total $2'],[/^Encontrei (\d+) itens(.*)$/,'Encontré $1 ítems$2','Found $1 items$2'],[/^Encontrei$/,'Encontré','Found'],
+[/^Pagamento: (.+)$/,'Pago: $1','Payment: $1'],[/^(\d+) produtos · total (.*)$/,'$1 productos · total $2','$1 products · total $2'],[/^Encontrei (\d+) itens(.*)$/,'Encontré $1 ítems$2','Found $1 items$2'],[/^Encontrei$/,'Encontré','Found'],
 [/^em (.+)\. Confira as categorias e toque em Salvar\.$/,'en $1. Revisa las categorías y toca Guardar.','in $1. Check the categories and tap Save.'],
 [/^Identifiquei uma$/,'Identifiqué una','I found a'],[/^conta de (.+)$/,'factura de $1','$1 bill'],
 [/^e mais (\d+) conta\(s\) para pagar$/,'y $1 cuenta(s) más por pagar','and $1 more bill(s) to pay']

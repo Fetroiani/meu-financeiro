@@ -49,7 +49,7 @@ function quantidade(s: string | undefined): number {
 const VAL = '(\\d{1,3}(?:\\.\\d{3})*,\\d{2}|\\d+\\.\\d{2})';
 
 export type Item = { descricao: string; codigo: string; qtd: number; un: string; unitario: number; valor: number };
-export type Nota = { loja: string; cnpj: string; data: string | null; total: number; desconto: number; itens: Item[] };
+export type Nota = { loja: string; cnpj: string; data: string | null; hora: string; numero: string; chave: string; total: number; bruto: number; desconto: number; acrescimo: number; pagamento: string[]; bloqueio: boolean; itens: Item[] };
 
 export function lerNota(html: string): Nota {
   const itens: Item[] = [];
@@ -76,14 +76,69 @@ export function lerNota(html: string): Nota {
   if (!loja) { const h = html.match(/<h4[^>]*>([\s\S]*?)<\/h4>/i); if (h) loja = texto(h[1]); }
   if (!loja) { const r = tudo.match(/(?:Raz[aã]o Social|Nome \/ Raz[aã]o Social)\s*:?\s*(.+?)\s+(?:CNPJ|Nome Fantasia|Inscri)/i); if (r) loja = r[1]; }
   const cnpj = ((tudo.match(/CNPJ\s*:?\s*(\d{2}\.?\d{3}\.?\d{3}\/?\d{4}-?\d{2})/i) || [])[1] || '').replace(/\D/g, '');
-  let data: string | null = null;
-  const e = tudo.match(/Emiss[aã]o\s*:?\s*(\d{2})\/(\d{2})\/(\d{4})/i) || tudo.match(/\b(\d{2})\/(\d{2})\/(\d{4})\s+\d{2}:\d{2}/);
-  if (e) data = `${e[3]}-${e[2]}-${e[1]}`;
+  let data: string | null = null, hora = '';
+  const e = tudo.match(/Emiss[aã]o\s*:?\s*(\d{2})\/(\d{2})\/(\d{4})(?:\s+(\d{2}:\d{2}(?::\d{2})?))?/i) || tudo.match(/\b(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}:\d{2}(?::\d{2})?)/);
+  if (e) { data = `${e[3]}-${e[2]}-${e[1]}`; hora = e[4] ? (e[4].length === 5 ? e[4] + ':00' : e[4]) : ''; }
   const pega = (re: string) => dinheiro((tudo.match(new RegExp(re + '\\s*:?\\s*(?:R\\$)?\\s*' + VAL, 'i')) || [])[1]);
   const desconto = pega('Descontos?\\s*R\\$');
+  const acrescimo = pega('(?:Acr[eé]scimos?|Outras\\s*despesas|Frete)\\s*R\\$');
   const ultimo = (re: string) => { const v = [...tudo.matchAll(new RegExp(re + '\\s*:?\\s*(?:R\\$)?\\s*' + VAL, 'gi'))]; return v.length ? dinheiro(v[v.length - 1][1]) : 0; };
   const total = pega('Valor\\s*a\\s*pagar\\s*R\\$') || pega('Valor\\s*pago\\s*R\\$') || ultimo('Valor\\s*total\\s*(?:da\\s*nota|R\\$)');
-  return { loja: loja.replace(/\s{2,}/g, ' ').trim().slice(0, 120), cnpj, data, total, desconto, itens: itens.slice(0, 400) };
+  const bruto = /tabResult|txtTopo/.test(html) ? pega('Valor\\s*total\\s*R\\$') : 0;   // no modelo nacional é o valor bruto dos itens
+  const numero = (tudo.match(/N[uú]mero\s*:?\s*(\d{1,9})\b/i) || [])[1] || '';
+  const chave = ((tudo.match(/Chave\s*de\s*acesso\s*:?\s*((?:\d\s*){44})/i) || [])[1] || '').replace(/\D/g, '');
+  // Formas de pagamento: rótulos "tx" do modelo nacional; senão, nomes conhecidos depois de "Forma de pagamento".
+  let pagamento: string[] = [...html.matchAll(/<label[^>]*class=["'][^"']*\btx\b[^"']*["'][^>]*>([\s\S]*?)<\/label>/gi)].map(x => texto(x[1])).filter(Boolean);
+  if (!pagamento.length) {
+    const i = tudo.search(/Forma\s*de\s*pagamento/i);
+    if (i >= 0) pagamento = [...tudo.slice(i, i + 400).matchAll(/(Dinheiro|Cart[aã]o\s*de\s*Cr[eé]dito|Cart[aã]o\s*de\s*D[eé]bito|PIX|Vale\s*Alimenta[cç][aã]o|Vale\s*Refei[cç][aã]o|Vale\s*Presente|Vale\s*Combust[ií]vel|Boleto|Cr[eé]dito\s*Loja|Transfer[eê]ncia|Outros)/gi)].map(x => x[1]);
+  }
+  pagamento = [...new Set(pagamento)];
+  const bloqueio = /captcha|recaptcha|acesso\s*negado|muitas\s*requisi|tente\s*novamente\s*mais\s*tarde/i.test(tudo);
+  return { loja: loja.replace(/\s{2,}/g, ' ').trim().slice(0, 120), cnpj, data, hora, numero, chave, total, bruto, desconto, acrescimo, pagamento, bloqueio, itens: itens.slice(0, 400) };
+}
+
+const UFS: Record<string, string> = { 11: 'RO', 12: 'AC', 13: 'AM', 14: 'RR', 15: 'PA', 16: 'AP', 17: 'TO', 21: 'MA', 22: 'PI', 23: 'CE', 24: 'RN', 25: 'PB', 26: 'PE', 27: 'AL', 28: 'SE', 29: 'BA', 31: 'MG', 32: 'ES', 33: 'RJ', 35: 'SP', 41: 'PR', 42: 'SC', 43: 'RS', 50: 'MS', 51: 'MT', 52: 'GO', 53: 'DF' };
+const r2 = (n: number) => Math.round(n * 100) / 100;
+const br = (n: number) => 'R$ ' + n.toFixed(2).replace('.', ',');
+
+// Resposta no formato combinado (emitente, documento, itens, totais, observacoes). Nada é inventado:
+// o que a página não mostra fica null e o motivo vai em observacoes.
+export function notaEstruturada(html: string, endereco = '') {
+  const n = lerNota(html);
+  const daUrl = (decodeURIComponent((endereco.match(/[?&]p=([^&#]+)/i) || [])[1] || '').match(/^\d{44}/) || [])[0]
+    || (endereco.match(/chNFe=(\d{44})/i) || [])[1] || '';
+  const chave = n.chave.length === 44 ? n.chave : daUrl;
+  const uf = chave ? UFS[chave.slice(0, 2)] || null : ((endereco.match(/\.([a-z]{2})\.gov\.br/i) || [])[1] || '').toUpperCase() || null;
+  const numero = n.numero ? String(+n.numero) : chave ? String(+chave.slice(25, 34)) : null;
+  const cnpj = n.cnpj || (chave ? chave.slice(6, 20) : '');
+  const somaItens = r2(n.itens.reduce((a, i) => a + i.valor, 0));
+  const subtotal = n.bruto || somaItens;
+  const observacoes: string[] = [];
+  if (!n.itens.length) {
+    observacoes.push(n.bloqueio
+      ? 'A Sefaz pediu verificação (CAPTCHA) ou bloqueou a consulta automática: os itens não vieram. Próximo passo: abrir o link da nota no navegador e fotografar o cupom ou colar o texto da página.'
+      : 'A página da Sefaz não trouxe a tabela de itens. Próximo passo: abrir o link da nota no navegador e fotografar o cupom ou colar o texto da página.');
+  } else {
+    if (!n.total) observacoes.push('A página não mostrou o valor a pagar; valor_final ficou igual à soma dos itens.');
+    const final = n.total || somaItens;
+    const esperado = r2(subtotal - n.desconto + n.acrescimo);
+    if (Math.abs(somaItens - final) > 0.009) {
+      const dif = r2(somaItens - final);
+      const motivo = n.desconto && Math.abs(esperado - final) <= 0.01 && Math.abs(subtotal - somaItens) <= 0.01 ? 'explicada pelo desconto da nota'
+        : n.acrescimo && Math.abs(esperado - final) <= 0.01 ? 'explicada por acréscimo/frete' : 'sem explicação na página; confira a nota';
+      observacoes.push(`A soma dos itens (${br(somaItens)}) difere do valor final (${br(final)}) em ${br(Math.abs(dif))}: ${motivo}.`);
+    }
+    if (n.acrescimo) observacoes.push(`Acréscimos/frete na nota: ${br(n.acrescimo)}.`);
+  }
+  if (!n.data) observacoes.push('A data de emissão não apareceu na página.');
+  return {
+    emitente: { nome: n.loja || null, cnpj: cnpj || null, uf },
+    documento: { chave_acesso: chave || null, numero, data_emissao: n.data ? (n.hora ? `${n.data}T${n.hora}` : n.data) : null },
+    itens: n.itens.map(i => ({ codigo: i.codigo || null, descricao: i.descricao.replace(/\s{2,}/g, ' '), quantidade: i.qtd, unidade: i.un || '', valor_unitario: i.unitario || r2(i.valor / (i.qtd || 1)), valor_total: i.valor })),
+    totais: { subtotal, descontos: n.desconto, valor_final: n.itens.length ? (n.total || somaItens) : n.total, forma_pagamento: n.pagamento.length ? n.pagamento.join(', ') : null },
+    observacoes,
+  };
 }
 
 // Só endereços de consulta da Sefaz.
@@ -142,7 +197,7 @@ if (D && D.serve) {
     const url = enderecoPermitido(String(corpo.url || '').trim().slice(0, 1500));
     if (!url) return resposta({ erro: 'Este endereço não é de consulta de nota fiscal da Sefaz.' }, 400);
     try {
-      const nota = lerNota(await buscar(url));
+      const nota = notaEstruturada(await buscar(url), url.href);
       if (!nota.itens.length) return resposta({ erro: 'A Sefaz não mostrou os produtos desta nota.', ...nota }, 422);
       return resposta(nota);
     } catch (e) {

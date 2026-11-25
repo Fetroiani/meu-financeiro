@@ -2,7 +2,7 @@
 // Rodar: node --experimental-strip-types scripts/test-nfce.js
 const assert = require('assert');
 (async () => {
-  const { lerNota, enderecoPermitido } = await import('../supabase/functions/nfce/index.ts');
+  const { lerNota, notaEstruturada, enderecoPermitido } = await import('../supabase/functions/nfce/index.ts');
 
   // Modelo nacional (SP, RS, PR, BA, GO, RJ e outros)
   const sp = `<html><head><meta charset="utf-8"></head><body>
@@ -58,6 +58,29 @@ const assert = require('assert');
 
   // Página sem produtos (erro, captcha)
   assert.strictEqual(lerNota('<html><body>Captcha inválido</body></html>').itens.length, 0);
+
+
+  // Formato combinado (emitente, documento, itens, totais, observacoes)
+  const URL_SP = 'https://www.nfce.fazenda.sp.gov.br/NFCeConsultaPublica/Paginas/ConsultaQRCode.aspx?p=35261112345678000190650010001234561123456780|2|1|1|ABC';
+  const e1 = notaEstruturada(sp, URL_SP);
+  assert.deepStrictEqual(e1.emitente, { nome: 'SUPERMERCADO BOA COMPRA LTDA', cnpj: '12345678000190', uf: 'SP' });
+  assert.deepStrictEqual(e1.documento, { chave_acesso: '35261112345678000190650010001234561123456780', numero: '123456', data_emissao: '2026-11-24T18:30:12' });
+  assert.deepStrictEqual(e1.itens[1], { codigo: '2001', descricao: 'BANANA PRATA KG', quantidade: 1.235, unidade: 'KG', valor_unitario: 6.49, valor_total: 8.02 });
+  assert.deepStrictEqual(e1.totais, { subtotal: 63.46, descontos: 2, valor_final: 61.46, forma_pagamento: 'Cartão de Débito' });
+  assert.strictEqual(e1.observacoes.length, 1);
+  assert.ok(/difere do valor final \(R\$ 61,46\) em R\$ 2,00: explicada pelo desconto/.test(e1.observacoes[0]), e1.observacoes[0]);
+  assert.ok(JSON.stringify(Object.keys(e1)) === JSON.stringify(['emitente', 'documento', 'itens', 'totais', 'observacoes']));
+
+  const e2 = notaEstruturada(mg, 'https://portalsped.fazenda.mg.gov.br/portalnfce/sistema/qrcode.xhtml?p=31261111222333000144650020000098761000000017|2|1|1|X');
+  assert.strictEqual(e2.emitente.uf, 'MG'); assert.strictEqual(e2.documento.numero, '9876');
+  assert.strictEqual(e2.totais.valor_final, 21.93); assert.strictEqual(e2.totais.subtotal, 21.93); assert.deepStrictEqual(e2.observacoes, []);
+  assert.strictEqual(e2.itens[0].valor_unitario, 19.9);
+
+  // Bloqueio: nada inventado
+  const e3 = notaEstruturada('<html><body><div class="g-recaptcha"></div>Confirme que você não é um robô (captcha)</body></html>', URL_SP);
+  assert.deepStrictEqual(e3.itens, []); assert.strictEqual(e3.totais.valor_final, 0); assert.strictEqual(e3.emitente.nome, null);
+  assert.strictEqual(e3.documento.chave_acesso, '35261112345678000190650010001234561123456780');
+  assert.ok(/CAPTCHA/.test(e3.observacoes[0]));
 
   // Só endereços .gov.br
   assert.ok(enderecoPermitido('https://www.nfce.fazenda.sp.gov.br/NFCeConsultaPublica/Paginas/ConsultaQRCode.aspx?p=1|2|1|1|ABC'));

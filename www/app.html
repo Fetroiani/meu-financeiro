@@ -764,12 +764,14 @@ async function abrirNota(c,raw,senao,valido){const eu=++notaBusca;qr=raw;
  if(c.url)cupomMsg(ln('<b>QR Code da nota lido.</b>')+ln('Buscando os produtos no site da Sefaz…'));
  const n=await itensDaSefaz(c);if(eu!==notaBusca||(valido&&!valido()))return;
  if(!n){senao();return}
- const loja=String(n.loja||'').trim()||APR['loja:'+c.cnpj]||'CNPJ '+c.cnpjFmt;
- const itens=n.itens.map(i=>({descricao:String(i.descricao||'').slice(0,80),valor:Math.round((+i.valor||0)*100)/100,categoria:Cupom.categorizar(String(i.descricao||''),loja,APR,extraKW(),padraoKW())}));
- const soma=itens.reduce((a,i)=>a+i.valor,0),total=+n.total||Math.round(soma*100)/100,desc=Math.round((soma-total)*100)/100;
+ const em=n.emitente||{},doc=n.documento||{},tot=n.totais||{};
+ const loja=String(em.nome||'').trim()||APR['loja:'+c.cnpj]||'CNPJ '+c.cnpjFmt;
+ const itens=n.itens.map(i=>({descricao:String(i.descricao||'').slice(0,80),valor:Math.round((+i.valor_total||0)*100)/100,categoria:Cupom.categorizar(String(i.descricao||''),loja,APR,extraKW(),padraoKW())}));
+ const soma=itens.reduce((a,i)=>a+i.valor,0),total=+tot.valor_final||Math.round(soma*100)/100,desc=Math.round((soma-total)*100)/100;
  if(desc>0.009&&desc<soma){const g={};itens.forEach(i=>g[i.categoria]=(g[i.categoria]||0)+i.valor);itens.push({descricao:'Desconto',valor:-desc,categoria:Object.keys(g).sort((a,b)=>g[b]-g[a])[0]})}
- revisar({loja,data:n.data||c.data||today(),total,cnpj:c.cnpj,itens,
-  msg:ln('<b>Produtos lidos no site da Sefaz</b>')+ln(esc(loja))+ln(`${n.itens.length} produtos · total ${brl(total)}`)+ln('Confira as categorias e toque em Salvar no extrato. Cada categoria vira um lançamento com a lista de produtos.')})}
+ const dt=String(doc.data_emissao||'').slice(0,10);
+ revisar({loja,data:/^\d{4}-\d\d-\d\d$/.test(dt)?dt:(c.data||today()),total,cnpj:c.cnpj,itens,
+  msg:ln('<b>Produtos lidos no site da Sefaz</b>')+ln(esc(loja))+ln(`${n.itens.length} produtos · total ${brl(total)}`)+(tot.forma_pagamento?ln('Pagamento: '+esc(tot.forma_pagamento)):'')+(n.observacoes||[]).filter(o=>!/explicada pelo desconto/.test(o)).map(o=>ln('⚠ '+esc(o))).join('')+ln('Confira as categorias e toque em Salvar no extrato. Cada categoria vira um lançamento com a lista de produtos.')})}
 async function lerQR(f){try{
  if('BarcodeDetector' in window){const bd=new BarcodeDetector({formats:['qr_code']});const r=await bd.detect(await createImageBitmap(f));if(r[0])return r[0].rawValue}
  if(window.jsQR){const c=await preparar(f,1200,false),x=c.getContext('2d');const r=jsQR(x.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r)return r.data}
