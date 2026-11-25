@@ -450,7 +450,7 @@ const ENT_PADRAO=['salario','pix recebido','reembolso','rendimento','dividendos'
 const ALIAS={bares:'alimentacao',combustivel:'transporte',vestuario:'compras',presentes:'compras',assinaturas:'lazer'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 let CATS=clone(NOVAS),PACOTE=2,ENTKW=ENT_PADRAO.slice();
-const VERSAO='2026.11.24-1';
+const VERSAO='2026.11.24-2';
 const T=window.I18N?I18N.T:(s=>s),LOC=window.I18N?I18N.loc:'pt-BR',nomeCat=(k,n)=>window.I18N?I18N.nomeCat(k,n):n;
 NOVAS.forEach(c=>c.n=nomeCat(c.k,c.n));DEF_CATS.forEach(c=>c.n=nomeCat(c.k,c.n));CATS=clone(NOVAS);
 const IN={k:'receita',n:nomeCat('receita','Salário e Entradas'),c:'#00a884'};
@@ -697,7 +697,7 @@ $('#tirar').onclick=escolher;
 $('#foto').onchange=e=>{const f=e.target.files[0];if(f)usarFoto(f)};
 async function usarFoto(f){foto=f;$('#prev').src=URL.createObjectURL(f);$('#prev').hidden=false;$('#ler').disabled=false;$('#revisao').hidden=true;$('#ocrBox').hidden=true;cupomMsg('');qr=null;
  const raw=await lerCodigoImagem(f);if(!raw||foto!==f)return;const c=Codigos.interpretar(raw);
- if(c&&c.tipo==='nfce'){qr=raw;cupomMsg(`<span class="ln"><b>QR Code da nota lido.</b></span><span class="ln">Toque em Ler e separar itens para separar os produtos, ou lance só o total.</span><span class="acts"><button class="btn ghost" type="button" id="soTotal">Lançar só o total</button></span>`);$('#soTotal').onclick=()=>revisarCodigo(c,raw)}
+ if(c&&c.tipo==='nfce'){qr=raw;abrirNota(c,raw,()=>{cupomMsg(`<span class="ln"><b>QR Code da nota lido.</b></span><span class="ln">Toque em Ler e separar itens para separar os produtos, ou lance só o total.</span><span class="acts"><button class="btn ghost" type="button" id="soTotal">Lançar só o total</button></span>`);$('#soTotal').onclick=()=>notaSoTotal(c,raw)},()=>foto===f)}
  else if(c&&['conta','boleto','pix'].includes(c.tipo))revisarCodigo(c,raw)}
 function carregar(f){return new Promise((ok,no)=>{const im=new Image();im.onload=()=>ok(im);im.onerror=no;im.src=URL.createObjectURL(f)})}
 async function preparar(f,max,cinza){const im=await carregar(f);const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(im,0,0,c.width,c.height);
@@ -740,10 +740,7 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden&&scVivo)fec
 const ln=t=>`<span class="ln">${t}</span>`;
 function revisarCodigo(c,raw){if(!c){cupomMsg(T('Não reconheci este código.'),true);return}
  const fd=d=>d?d.split('-').reverse().join('/'):'';
- if(c.tipo==='nfce'){qr=raw;const ck=APR['cnpj:'+c.cnpj],cn=ck&&CATS.some(x=>x.k===ck)?ck:'mercado',lj=APR['loja:'+c.cnpj]||'';const mm=`${c.ano}-${String(c.mes).padStart(2,'0')}`;
-  const data=c.data||(ym(today())===mm?today():mm+'-01');
-  revisar({loja:lj||'CNPJ '+c.cnpjFmt,data,total:c.valor,cnpj:c.cnpj,itens:[{descricao:c.nome,valor:c.valor,categoria:cn}],
-   msg:ln(`<b>${c.nome==='Nota fiscal'?'Nota fiscal lida pelo QR Code':'Cupom fiscal lido pelo QR Code'}</b>`)+ln('Emitente: CNPJ '+c.cnpjFmt+(c.uf?' ('+c.uf+')':''))+(c.valor?ln('Total '+brl(c.valor)):ln('Esta nota não traz o valor no QR Code: digite o total abaixo.'))+(lj?'':ln('Digite o nome da loja: nas próximas notas desse CNPJ o app já preenche.'))+ln('O QR Code não traz a lista de produtos. Para separar cada item por categoria, fotografe o cupom.')+(c.url?`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener">Abrir a nota no site da Sefaz</a></span>`:'')});return}
+ if(c.tipo==='nfce'){abrirNota(c,raw,()=>notaSoTotal(c,raw,true));return}
  if(c.tipo==='conta'||c.tipo==='boleto'){const nome=c.tipo==='boleto'?'Boleto '+c.bancoNome:'Conta de '+c.nome.toLowerCase();
   revisar({conta:c.nome,nomeConta:nome,barras:c.barras,loja:c.tipo==='boleto'?c.bancoNome:c.nome,data:c.venc||today(),total:c.valor,itens:[{descricao:nome,valor:c.valor,categoria:'contas'}],
    msg:ln('<b>Código de barras lido</b>')+ln(nome)+(c.valor?ln('Valor: '+brl(c.valor)):ln('O código não traz o valor: digite abaixo.'))+(c.venc?ln('Vencimento: '+fd(c.venc)):ln('Confira a data de vencimento no campo Data.'))+ln('Ao salvar, vira um alerta de vencimento. Quando pagar, toque em Paguei.')});return}
@@ -753,6 +750,26 @@ function revisarCodigo(c,raw){if(!c){cupomMsg(T('Não reconheci este código.'),
  if(c.tipo==='invalido'){cupomMsg(T('O código parece de um boleto, mas os números não conferem. Leia de novo ou digite a linha digitável.'),true);return}
  if(c.tipo==='link'){cupomMsg(ln(T('Este QR Code não é de nota fiscal nem de Pix.'))+`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener noreferrer">${esc(c.url.slice(0,60))}</a></span>`,true);return}
  cupomMsg(T('Não reconheci este código.'),true)}
+function notaSoTotal(c,raw,falhou){qr=raw;const ck=APR['cnpj:'+c.cnpj],cn=ck&&CATS.some(x=>x.k===ck)?ck:'mercado',lj=APR['loja:'+c.cnpj]||'';const mm=`${c.ano}-${String(c.mes).padStart(2,'0')}`;
+  const data=c.data||(ym(today())===mm?today():mm+'-01');
+  revisar({loja:lj||'CNPJ '+c.cnpjFmt,data,total:c.valor,cnpj:c.cnpj,itens:[{descricao:c.nome,valor:c.valor,categoria:cn}],
+   msg:ln(`<b>${c.nome==='Nota fiscal'?'Nota fiscal lida pelo QR Code':'Cupom fiscal lido pelo QR Code'}</b>`)+ln('Emitente: CNPJ '+c.cnpjFmt+(c.uf?' ('+c.uf+')':''))+(c.valor?ln('Total '+brl(c.valor)):ln('Esta nota não traz o valor no QR Code: digite o total abaixo.'))+(lj?'':ln('Digite o nome da loja: nas próximas notas desse CNPJ o app já preenche.'))+(falhou&&c.url?ln('Não consegui buscar os produtos no site da Sefaz agora. Para separar cada item por categoria, fotografe o cupom ou leia o QR Code de novo mais tarde.'):ln('O QR Code não traz a lista de produtos. Para separar cada item por categoria, fotografe o cupom.'))+(c.url?`<span class="acts"><a class="btn ghost" href="${esc(c.url)}" target="_blank" rel="noopener">Abrir a nota no site da Sefaz</a></span>`:'')});}
+/* QR da NFC-e: busca a lista de produtos na página da Sefaz (pela função nfce do Supabase, porque o site da Sefaz não deixa o celular ler direto) */
+async function itensDaSefaz(c){const cfg=window.ANOTEI_CONFIG||{};if(!c.url||!cfg.supabaseUrl||!cfg.supabaseKey||navigator.onLine===false)return null;
+ try{const ct=new AbortController(),tm=setTimeout(()=>ct.abort(),30000);
+  const r=await fetch(cfg.supabaseUrl.replace(/\/$/,'')+'/functions/v1/nfce',{method:'POST',headers:{'Content-Type':'application/json',apikey:cfg.supabaseKey,'x-region':'sa-east-1'},body:JSON.stringify({url:c.url}),signal:ct.signal});clearTimeout(tm);
+  const j=await r.json().catch(()=>null);return r.ok&&j&&Array.isArray(j.itens)&&j.itens.length?j:null}catch(e){return null}}
+let notaBusca=0;
+async function abrirNota(c,raw,senao,valido){const eu=++notaBusca;qr=raw;
+ if(c.url)cupomMsg(ln('<b>QR Code da nota lido.</b>')+ln('Buscando os produtos no site da Sefaz…'));
+ const n=await itensDaSefaz(c);if(eu!==notaBusca||(valido&&!valido()))return;
+ if(!n){senao();return}
+ const loja=String(n.loja||'').trim()||APR['loja:'+c.cnpj]||'CNPJ '+c.cnpjFmt;
+ const itens=n.itens.map(i=>({descricao:String(i.descricao||'').slice(0,80),valor:Math.round((+i.valor||0)*100)/100,categoria:Cupom.categorizar(String(i.descricao||''),loja,APR,extraKW(),padraoKW())}));
+ const soma=itens.reduce((a,i)=>a+i.valor,0),total=+n.total||Math.round(soma*100)/100,desc=Math.round((soma-total)*100)/100;
+ if(desc>0.009&&desc<soma){const g={};itens.forEach(i=>g[i.categoria]=(g[i.categoria]||0)+i.valor);itens.push({descricao:'Desconto',valor:-desc,categoria:Object.keys(g).sort((a,b)=>g[b]-g[a])[0]})}
+ revisar({loja,data:n.data||c.data||today(),total,cnpj:c.cnpj,itens,
+  msg:ln('<b>Produtos lidos no site da Sefaz</b>')+ln(esc(loja))+ln(`${n.itens.length} produtos · total ${brl(total)}`)+ln('Confira as categorias e toque em Salvar no extrato. Cada categoria vira um lançamento com a lista de produtos.')})}
 async function lerQR(f){try{
  if('BarcodeDetector' in window){const bd=new BarcodeDetector({formats:['qr_code']});const r=await bd.detect(await createImageBitmap(f));if(r[0])return r[0].rawValue}
  if(window.jsQR){const c=await preparar(f,1200,false),x=c.getContext('2d');const r=jsQR(x.getImageData(0,0,c.width,c.height).data,c.width,c.height);if(r)return r.data}
